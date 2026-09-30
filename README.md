@@ -499,111 +499,163 @@ Esto evita interpretar un dato antiguo como si fuera una medición actual.
 
 ---
 
-# 🧪 14. Simulación IoT con Wokwi
+# 🧪 14. Simulación IoT con Wokwi y Flujo de Comunicación
 
-> **Propuesta en evaluación por el equipo.**
+El proyecto utiliza **Wokwi** como entorno de simulación oficial para validar la captura y transmisión de datos IoT sin requerir hardware físico en la fase inicial.
 
-Se contempla utilizar **Wokwi** como entorno de simulación para demostrar el funcionamiento del flujo IoT sin depender inicialmente de hardware físico.
+Cada ESP32 simulado emula los sensores del local asignado y se conecta a Internet mediante la red virtual de Wokwi (`WiFi.begin("Wokwi-GUEST", "")`), publicando métricas periódicas hacia un broker MQTT seguro.
 
-La idea es utilizar ESP32 simulados para generar datos ficticios correspondientes a los dos locales.
+### Mapeo de Sensores en Wokwi
+- **Electricidad (kW):** Potenciómetro analógico que simula un transformador de corriente no invasivo (sensor CT SCT-013).
+- **Consumo de Agua (m³):** Generador de pulsos digitales que simula un caudalímetro de turbina tipo YF-S201.
+- **Radiación Solar (UV):** Sensor analógico que simula un fotodiodo UV con escala UVI 0–12.
 
-```text
-┌───────────────────┐
-│      WOKWI        │
-│                   │
-│  ESP32 Local 1    │
-│  ESP32 Local 2    │
-│                   │
-│  ⚡ 💧 ☀️         │
-└─────────┬─────────┘
-          │
-         MQTT
-          │
-          ▼
-        EDGE
-          │
-          ▼
-       AWS/API
-          │
-          ▼
-      DASHBOARD
-```
+### Formato de Telemetría (Payload JSON MQTT)
+El microcontrolador empaqueta las lecturas en un contrato estandarizado:
 
-### Escenarios posibles
-
-- 🟢 Funcionamiento normal.
-- ⚠️ Consumo eléctrico elevado.
-- ⚠️ Índice UV elevado.
-- ⚠️ Consumo de agua elevado.
-- 🔌 Pérdida de conexión.
-- 🔄 Recuperación y sincronización.
-
-La simulación no pretende representar físicamente una instalación industrial real, sino demostrar el comportamiento de la arquitectura propuesta.
-
----
-
-# 📴 15. Arquitectura híbrida
-
-Una de las características principales del proyecto será su capacidad de funcionar con y sin conexión a Internet.
-
-### Online
-
-```text
-ESP32
- ↓
-Edge
- ↓
-AWS
- ↓
-Dashboard
-```
-
-### Offline
-
-```text
-ESP32
- ↓
-Edge
- ↓
-SQLite
- ↓
-Dashboard local
-```
-
-### Recuperación
-
-```text
-SQLite
- ↓
-Registros pendientes
- ↓
-AWS
- ↓
-Sincronización
+```json
+{
+  "device_id": "esp32-local-01",
+  "timestamp": 1727736000,
+  "metrics": {
+    "potencia_kw": 48.2,
+    "agua_m3": 12.4,
+    "indice_uv": 5.1,
+    "unidades_prod": 140,
+    "hh_activas": 8
+  }
+}
 ```
 
 ---
 
-# 🔐 16. Ciberseguridad
+# 📴 15. Arquitectura Híbrida y Sincronización Cloud (Edge ↔ AWS ↔ Dashboard)
 
-La seguridad será considerada como parte de la arquitectura desde las primeras etapas.
+La plataforma implementa un modelo de resiliencia híbrido inspirado en la arquitectura probada de *Project You Shall Not Pass*, adaptado a la ingesta de telemetría continua:
 
-Las principales áreas serán:
+```mermaid
+flowchart TD
+    subgraph WOKWI["Simulación Wokwi (Navegador)"]
+        ESP1["ESP32 Local 1<br/>(Potenciómetro = kW / Caudal = Agua)"]
+        ESP2["ESP32 Local 2<br/>(Sensor UV / Producción)"]
+    end
 
-- Autenticación.
-- Autorización.
-- Protección de credenciales.
-- Cifrado de comunicaciones.
-- Protección de la API.
-- Seguridad del dispositivo Edge.
-- Seguridad de MQTT.
-- Control de acceso a la base de datos.
-- Registro de eventos.
-- Integridad de datos.
-- Copias de seguridad.
-- Protección de la sincronización Offline → Online.
+    subgraph BROKER["Broker MQTT (HiveMQ Cloud / Mosquitto)"]
+        Topic1["topic: induplac/local1/telemetria"]
+        Topic2["topic: induplac/local2/telemetria"]
+    end
 
-La implementación detallada de estas medidas será definida durante las siguientes etapas del proyecto.
+    subgraph EDGE["Edge Gateway (Raspberry Pi / Servicio Local)"]
+        ClientMQTT["Cliente MQTT (Suscripción)"]
+        DBLocal[("SQLite Local<br/>(telemetria, is_synced=0)")]
+        SyncService["Servicio de Sincronización"]
+    end
+
+    subgraph AWS["AWS Cloud (Learner Lab)"]
+        APIGW["API Gateway (HTTP POST /telemetria)"]
+        Lambda["AWS Lambda (Ingesta & Reglas de Alerta)"]
+        Dynamo[("DynamoDB<br/>(Tabla Histórica de Mediciones)")]
+    end
+
+    subgraph DASHBOARD["Dashboard (React + TypeScript)"]
+        UI["Interfaz Web Induplac<br/>(Vistas: Local 1, Local 2, General)"]
+    end
+
+    %% Conexiones de datos
+    ESP1 -->|WiFi / MQTTS| Topic1
+    ESP2 -->|WiFi / MQTTS| Topic2
+    Topic1 --> ClientMQTT
+    Topic2 --> ClientMQTT
+
+    ClientMQTT -->|Almacenamiento persistente| DBLocal
+    DBLocal --> SyncService
+
+    %% Estados Online / Offline
+    SyncService -.->|Modo Online: Sincroniza lotes| APIGW
+    APIGW --> Lambda
+    Lambda --> Dynamo
+
+    Dynamo -->|Modo Online: Lectura global e históricos| UI
+    DBLocal -.->|Modo Offline: Lectura directa en planta| UI
+```
+
+### Estados Operacionales del Sistema
+
+1. **🟢 Modo Online (Funcionamiento Normal):**
+   - El Gateway Edge recibe las métricas de MQTT y las registra en SQLite con `is_synced = 0`.
+   - El servicio de sincronización envía inmediatamente la lectura hacia **AWS API Gateway**.
+   - Una función **AWS Lambda** valida el esquema y persiste en **Amazon DynamoDB**, tras lo cual el Edge actualiza el registro local a `is_synced = 1`.
+   - El Dashboard consume la API de AWS en tiempo real.
+
+2. **🔴 Modo Offline (Corte de Internet o Caída Cloud):**
+   - El ESP32 continúa transmitiendo localmente hacia el Edge Gateway.
+   - El Gateway almacena todas las lecturas de forma ininterrumpida en **SQLite local** con `is_synced = 0`.
+   - El Dashboard en planta detecta la caída de red y conmuta su fuente de datos al Gateway local, informando al usuario en pantalla:
+     ```text
+     🔴 MODO OFFLINE — Operando sobre Gateway local (Sin conexión con AWS)
+     ```
+   - **Garantía:** Cero pérdida de información durante la contingencia.
+
+3. **🟡 Modo Recuperación y Sincronización (Syncing):**
+   - El Gateway detecta el restablecimiento de Internet mediante un *healthcheck* periódico.
+   - El servicio de sincronización agrupa los registros pendientes (`is_synced = 0`) y los envía en lotes (*batches*) hacia AWS.
+   - Cada registro posee un identificador único (UUIDv4) y marca temporal UTC para asegurar **idempotencia** (evita duplicar métricas en caso de reconexión inestable).
+   - Una vez confirmada la recepción por AWS, los registros se marcan con `is_synced = 1` y el Dashboard retorna a estado `🟢 ONLINE`.
+
+---
+
+# 🔐 16. Ciberseguridad (Estrategia de Defensa en 5 Capas)
+
+La seguridad no se aborda como un complemento tardío, sino como una propiedad estructural del diseño híbrido:
+
+```mermaid
+flowchart LR
+    subgraph C1["1. Sensores & MQTT"]
+        ESP[ESP32] -->|MQTTS + TLS 8883<br/>Credenciales por dispositivo| Broker
+    end
+
+    subgraph C2["2. Edge Gateway"]
+        Broker -->|SQLite con Checksum<br/>Roles IAM de menor privilegio| Edge[Raspberry Pi]
+    end
+
+    subgraph C3["3. Enlace Híbrido"]
+        Edge -->|HTTPS / TLS 1.3<br/>UUIDv4 Anti-Replay| AWS[AWS Cloud]
+    end
+
+    subgraph C4["4. Gestión de Acceso"]
+        AWS -->|JWT / Cognito<br/>RBAC: Operario / Admin| Dash[Dashboard React]
+    end
+```
+
+### Las 5 Capas de Protección
+
+1. **Capa 1 — Dispositivos y Protocolo MQTT:**
+   - **MQTTS con TLS (Puerto 8883):** Canal cifrado en la red local.
+   - **Autenticación por dispositivo:** Credenciales individuales para cada ESP32; se rechazan conexiones anónimas.
+   - **Validación de límites físicos:** El Gateway descarta lecturas incoherentes (ej. $kW < 0$ o $kW > 500$) para neutralizar inyecciones de datos.
+
+2. **Capa 2 — Gateway Edge (Raspberry Pi & SQLite):**
+   - **Zero Hardcoding:** Credenciales de AWS y broker almacenadas exclusivamente en `.env` (excluido de Git mediante `.gitignore`).
+   - **Mínimo privilegio en AWS IAM:** Permisos acotados estrictamente a la ingesta (`iot:Publish` o `execute-api:Invoke`), sin privilegios administrativos.
+   - **Integridad local:** Hashes de control para detectar adulteración manual de la base de datos SQLite mientras opera offline.
+
+3. **Capa 3 — Sincronización y Enlace Cloud:**
+   - **Prevención de Replay Attacks:** Uso de identificadores únicos (UUIDv4) por medición para garantizar idempotencia en AWS.
+   - **Canal seguro:** Transporte exclusivo mediante HTTPS / TLS 1.3.
+
+4. **Capa 4 — Control de Acceso en Dashboard (RBAC):**
+
+| Rol | Dashboard Local 1 / 2 | Dashboard General | Modificar Umbrales | Simulación de Fallas |
+| :--- | :---: | :---: | :---: | :---: |
+| **Operario de Planta** | ✅ Solo lectura | ❌ Denegado | ❌ Denegado | ❌ Denegado |
+| **Jefe de Mantenimiento** | ✅ Lectura / Alertas | ✅ Lectura | ❌ Denegado | ❌ Denegado |
+| **Administrador / Gerencia** | ✅ Control total | ✅ Consolidado | ✅ Permitido | ✅ Permitido |
+
+5. **Capa 5 — Privacidad y Cumplimiento Normativo (Ley 19.628 - Chile):**
+   - Las métricas de Horas Hombre (HH) son estrictamente agregadas y anónimas (ej. `trabajadores_activos: 12`, `hh_turno: 96`).
+   - No se almacenan nombres, RUTs ni datos personales de los colaboradores de Induplac.
+
+> 📖 Consulta la documentación técnica completa en [**`docs/ciberseguridad.md`**](docs/ciberseguridad.md).
 
 ---
 
