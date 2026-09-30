@@ -1,6 +1,3 @@
-[README.md](https://github.com/user-attachments/files/32879252/README.md)
-<div align="center">
-
 # 🏭 Induplac IoT
 
 ## Plataforma IoT para el monitoreo energético y operacional
