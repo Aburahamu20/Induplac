@@ -95,14 +95,90 @@ CREATE TABLE IF NOT EXISTS telemetria_local (
 CREATE INDEX IF NOT EXISTS idx_sync ON telemetria_local(is_synced);
 ```
 
-### 3.4. Capa 4: Nube AWS (Learner Lab Friendly)
-Para optimizar el presupuesto restringido de **\$100 dólares de AWS Academy**, la arquitectura evita bases de datos pesadas (Aurora/RDS) y utiliza componentes 100% serverless:
-- **Amazon API Gateway:** Expone la ruta `POST /telemetria` para recepción de lotes de datos y `GET /telemetria/{local_id}` para consulta del dashboard.
-- **AWS Lambda:** Función ligera de procesamiento con runtime Python 3.11 / Node.js 20.
-- **Amazon DynamoDB:** Tabla `Induplac_Telemetria`:
-  - **Partition Key (PK):** `local_id` (String)
-  - **Sort Key (SK):** `timestamp` (Number)
-  - Facturación bajo demanda (*Pay-per-request*), con costo prácticamente nulo para el volumen del prototipo.
+### 3.4. Capa 4: Nube AWS y Persistencia Políglota (NoSQL + SQL Relacional)
+
+La nube implementa un modelo de **persistencia políglota**, utilizando el motor óptimo según la naturaleza de los datos:
+
+1. **Amazon DynamoDB (NoSQL — Series Temporales y Telemetría Cruda):**
+   - **Propósito:** Ingesta de alta frecuencia proveniente de los sensores ESP32 (cada 5 s).
+   - **Tabla `Induplac_Telemetria`:**
+     - **Partition Key (PK):** `local_id` (String)
+     - **Sort Key (SK):** `timestamp` (Number)
+   - Facturación bajo demanda (*Pay-per-request*), alta velocidad de escritura y costo mínimo.
+
+2. **Amazon RDS PostgreSQL (SQL Relacional — Gestión, RBAC y Analítica):**
+   - **Propósito:** Almacenar entidades que requieren integridad referencial, transacciones y consultas analíticas agregadas (comparaciones de períodos históricos).
+   - **Despliegue:** Instancia `db.t3.micro` o `db.t4g.micro` en subred privada de la VPC, sin IP pública y accesible únicamente desde el Security Group de Lambda (`SG-Lambda` en puerto 5432).
+
+#### Esquema Relacional en PostgreSQL (DDL)
+
+```sql
+-- Catálogo de Locales
+CREATE TABLE locales (
+    local_id VARCHAR(50) PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    activo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Catálogo de Dispositivos (ESP32)
+CREATE TABLE dispositivos (
+    device_id VARCHAR(50) PRIMARY KEY,
+    local_id VARCHAR(50) REFERENCES locales(local_id),
+    tipo_sensor VARCHAR(50) NOT NULL,
+    ip_asignada INET,
+    activo BOOLEAN DEFAULT TRUE,
+    ultima_conexion TIMESTAMP WITH TIME ZONE
+);
+
+-- Umbrales de Alerta Configurables
+CREATE TABLE umbrales_alerta (
+    umbral_id SERIAL PRIMARY KEY,
+    local_id VARCHAR(50) REFERENCES locales(local_id),
+    variable VARCHAR(30) NOT NULL,       -- potencia_kw, agua_m3, indice_uv
+    valor_advertencia NUMERIC(8, 2),     -- Nivel Amarillo
+    valor_critico NUMERIC(8, 2),         -- Nivel Rojo
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Roles y Control de Acceso (RBAC)
+CREATE TABLE roles (
+    rol_id VARCHAR(30) PRIMARY KEY,      -- operario, mantenimiento, administrador
+    descripcion TEXT NOT NULL
+);
+
+CREATE TABLE usuarios (
+    usuario_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(150) UNIQUE NOT NULL,
+    nombre_completo VARCHAR(150) NOT NULL,
+    rol_id VARCHAR(30) REFERENCES roles(rol_id),
+    activo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Históricos Agregados para Comparaciones (Día vs Día anterior, Semana vs Semana anterior)
+CREATE TABLE metricas_agregadas_diarias (
+    id SERIAL PRIMARY KEY,
+    local_id VARCHAR(50) REFERENCES locales(local_id),
+    fecha DATE NOT NULL,
+    energia_total_kwh NUMERIC(10, 2) NOT NULL,
+    agua_total_m3 NUMERIC(10, 2) NOT NULL,
+    produccion_total INT NOT NULL,
+    uv_promedio NUMERIC(4, 2) NOT NULL,
+    hh_totales INT NOT NULL,
+    UNIQUE(local_id, fecha)
+);
+```
+
+### 3.5. Capa 5: Infraestructura de Red y Túneles VPN Site-to-Site
+
+Para una protección integral de la red de planta y la nube:
+- **Redes en Planta:** Segmentadas mediante VLANs dedicadas (`192.168.10.0/24` para Local 1 y `192.168.20.0/24` para Local 2) con regla de firewall de salida exclusiva (*Zero Inbound Ports*).
+- **VPN Site-to-Site (IPsec IKEv2 / AES-256):** Comunicación cifrada permanente entre el Customer Gateway de cada local y el Virtual Private Gateway (VGW) de la VPC en AWS.
+- **Topología VPC:** Subredes públicas y privadas, enrutamiento seguro y Security Groups por referencia.
+
+> 📖 Consulta los diagramas de topología y direccionamiento detallados en [**`infrastructure/README.md`**](../infrastructure/README.md).
 
 ---
 

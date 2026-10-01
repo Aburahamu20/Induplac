@@ -718,15 +718,18 @@ La carpeta `simulation/` podrá utilizarse para Wokwi si el equipo decide incorp
 
 | Área | Tecnología |
 |---|---|
-| Microcontrolador | ESP32 |
-| Comunicación | MQTT |
-| Edge | Raspberry Pi / Gateway |
-| Base local | SQLite |
-| Cloud | AWS |
-| Dashboard | React + TypeScript |
-| Simulación | Wokwi *(propuesta)* |
-| Control de versiones | Git + GitHub |
-| Documentación | Markdown + Mermaid |
+| **Microcontrolador** | ESP32 (sensores analógicos y digitales) |
+| **Simulación** | Wokwi (conectividad Wi-Fi virtual) |
+| **Protocolo IoT** | MQTTS sobre TLS (puerto 8883) |
+| **Redes en Planta** | VLANs segmentadas (`192.168.10.0/24` y `192.168.20.0/24`), *Zero Inbound Ports* |
+| **Conectividad Cloud** | VPN Site-to-Site (IPsec IKEv2 con cifrado AES-256) |
+| **Edge Gateway** | Raspberry Pi con buffer local SQLite (`is_synced`) |
+| **Cloud NoSQL** | Amazon DynamoDB (telemetría de alta frecuencia) |
+| **Cloud Relacional** | Amazon RDS PostgreSQL (`db.t3.micro` en subred privada para RBAC y analítica) |
+| **Cómputo Cloud** | AWS Lambda (Python / Node.js) con ENI en VPC |
+| **Dashboard** | React + TypeScript (Vite, Tailwind CSS) |
+| **Control de Versiones** | Git + GitHub (Flujo de ramas y Pull Requests) |
+| **Documentación** | Markdown + Diagramas nativos Mermaid |
 
 Las tecnologías pueden cambiar durante la implementación si existe una justificación técnica.
 
