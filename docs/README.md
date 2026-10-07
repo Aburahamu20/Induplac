@@ -8,6 +8,7 @@ Este directorio contiene la especificación técnica completa de la plataforma *
 
 | Documento | Descripción |
 | :--- | :--- |
+| **[CONTEXTO.md](CONTEXTO.md)** | **Documento maestro de contexto:** visión, decisiones de diseño, requisitos, restricciones y roadmap. |
 | **[arquitectura.md](arquitectura.md)** | Arquitectura híbrida (Edge + Cloud), integración Wokwi/ESP32, esquema SQLite y DynamoDB + RDS. |
 | **[ciberseguridad.md](ciberseguridad.md)** | Estrategia de defensa en 5 capas, modelo STRIDE, matriz RBAC y cumplimiento Ley 19.628 (Chile). |
 | **[decisiones-tecnicas.md](decisiones-tecnicas.md)** | Registro de Decisiones de Arquitectura (ADR): persistencia políglota, VPN Site-to-Site y VLANs. |
