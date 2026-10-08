@@ -158,7 +158,9 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 3. **VPN real:** VPN Site-to-Site IPsec operativa. → Ingesta por **API Gateway privada** con VPC Endpoint `execute-api` (ADR-02).
 4. **MFA implementado:** autenticación con MFA (Microsoft Authenticator) para administradores y quienes pueden cambiar cosas. → Cognito con MFA TOTP obligatorio para Administrador y Jefe de Mantenimiento/Operaciones; Operario sin MFA (ADR-08).
 
-### Documentos actualizados (rama `docs/decisiones-cloud`)
+**Criterio para la VPN:** la factibilidad se revisa más adelante. **Si el Learner Lab no permite levantarla, la VPN se mantiene en el diseño documentado, pero no se demuestra.** En ese caso, para la demo el Edge necesitará una ruta de ingesta alternativa hacia AWS (por ejemplo, API Gateway pública con HTTPS/TLS y credenciales IAM de mínimo privilegio), porque la API privada solo es alcanzable a través del túnel.
+
+### Documentos actualizados (PR #3, mergeado a `main`)
 - `docs/CONTEXTO.md`: agregación de 15 min, protocolos por tramo, alertas en dos niveles, umbrales nuevos (UV ≥ 8, energía +20 % con respaldo fijo), producción en tableros, roles y MFA, showcase actualizado.
 - `docs/decisiones-tecnicas.md`: ADR-01 con nuevos argumentos; ADR-02 VPN real + API privada; ADR-03 con VLAN de operarios; ADR-04 con `SG-VPCE-API`; nuevos ADR-05 a ADR-08.
 - `docs/modo-offline.md`: tablas `lecturas_crudas`, `intervalos_15min`, `alertas_local`; cálculo de capacidad unificado; nuevo ciclo de vida; estados con dashboard local.
@@ -169,8 +171,9 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 **Resueltos en esta actualización:** autonomía offline unificada · supuesto del cálculo explícito · NAT/Multi-AZ en el diagrama · VPN vs. API Gateway · failover del dashboard · dominio `api.induplac.aws` · ADR-01 · VLAN de operarios, DNS y certificado locales · alertas sin internet · idempotencia con agregados · intervalos durante un corte · regla de energía sin historia · NTP en el ESP32.
 
 **Siguen abiertos:**
-- [ ] **Verificar en Learner Lab** que se puedan crear VPN Site-to-Site, VPC Interface Endpoints y Cognito con MFA. Plan B para la VPN: EC2 con strongSwan.
-- [ ] **Costo de la VPN:** ~USD 0,05/h por conexión (~USD 72/mes con 2 sedes 24/7). Crear para pruebas/demo y eliminar al terminar; usar una sola conexión en pruebas diarias.
+- [ ] **Factibilidad de la VPN (se revisa más adelante):** verificar si el Learner Lab permite VPN Site-to-Site y VPC Interface Endpoints. Si no, queda documentada sin demostrarse (ver criterio arriba). Plan B posible: EC2 con strongSwan.
+- [ ] **Costo de la VPN:** ~USD 0,05/h por conexión (~USD 72/mes con 2 sedes 24/7). Si se levanta, crearla para pruebas/demo y eliminarla al terminar.
+- [ ] **Cognito con MFA en Learner Lab:** verificar disponibilidad.
 - [ ] **Acciones permitidas offline (propuesta):** reconocer alertas con login local; umbrales y usuarios solo online con MFA. Validar con el equipo.
 - [ ] **Broker MQTT para Wokwi:** HiveMQ Cloud vs. Mosquitto (limitación de `Wokwi-GUEST`).
 - [ ] **Identificador por lectura (`device_id + seq`)** entre ESP32 y Edge, para reenvíos desde el ring buffer.
