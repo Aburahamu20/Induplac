@@ -99,3 +99,50 @@ Propuesta de acceso local (falta en `infrastructure/README.md`):
 
 ### 5. Próximo paso
 - Definir con el equipo qué sigue: Paso 1 del roadmap (Dashboard React), demo del flujo online/offline o diseño de históricos.
+
+---
+
+## 2026-10-07 (noche) — Documento "Decisiones Cloud" del equipo
+
+Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedra). Resumen de lo decidido en clase:
+
+1. **Qué sube a Cloud:** solo datos **agregados y validados** por el Edge, nunca la lectura cruda:
+   - Consumo: promedios de electricidad y agua **cada 15 minutos**.
+   - Producción: tableros fabricados en el mes y acumulado anual.
+   - Seguridad: HH sin incidentes.
+   - Ambiental: índice UV del día.
+2. **Local vs. backend:** el Edge filtra y guarda (crudo reciente, buffer offline, validación). AWS consolida, compara y decide (histórico, alertas, inventario de dispositivos, usuarios y roles).
+3. **Protocolos:** ESP32 → Edge por MQTTS 8883. Edge → AWS por HTTPS/REST a API Gateway **dentro del túnel VPN IPsec**. Dashboard → backend por HTTPS/REST.
+4. **Almacenamiento:** SQLite (buffer Edge), DynamoDB (series de tiempo de consumo), RDS PostgreSQL (usuarios, roles, catálogo, umbrales e históricos agregados).
+5. **Alertas (Lambda en AWS, por cada dato nuevo):**
+   - Electricidad: consumo horario **20 % sobre el promedio de las últimas 4 semanas en el mismo horario**.
+   - Agua: consumo diario sobre un umbral definido.
+   - UV: **≥ 8**.
+   - La alerta se registra en RDS y el dashboard la muestra en rojo. Correo/Telegram queda post-MVP.
+6. **Dashboard:** monitor por sede (consumo actual vs. promedio histórico, producción, HH, UV, alertas) + histórico comparando sedes y períodos.
+7. **Acceso:** RBAC con roles en RDS y **MFA (Microsoft Authenticator)**. Operario: su sede. Jefe de Mantenimiento/Operaciones: ambas sedes + gestión de alertas. Administrador: todo.
+8. **Sin internet:** el Edge sigue leyendo y guardando en SQLite; la pantalla de la sede muestra los **últimos valores conocidos**. Al volver la conexión/VPN sincroniza sin perder ni duplicar.
+
+### Diferencias con lo que dice el repo (a conciliar)
+
+| Tema | Repo (`CONTEXTO.md`, `modo-offline.md`, etc.) | Documento del equipo |
+|---|---|---|
+| Qué sube a AWS | Cada lectura cruda (5 s) en lotes de 50 | Solo promedios cada 15 min |
+| Rol de DynamoDB | Telemetría cruda de alta frecuencia | Series de 15 min (≈ 96 registros/día por variable y local) |
+| Umbral UV | Advertencia sobre 6 | Alerta en 8 o más |
+| Umbral energía | Fijo: < 45 kW verde, 45–55 amarillo, > 55 rojo | Relativo: +20 % vs. promedio de 4 semanas a la misma hora |
+| Dónde se calculan alertas | Edge muestra alarmas en planta en tiempo real | Lambda en AWS |
+| Pantalla offline | Datos en tiempo real desde la Pi | Últimos valores conocidos |
+| Autenticación | JWT / Cognito; MVP con mock JWT | MFA con Microsoft Authenticator |
+| Producción | Placas y molduras vs. meta del turno | Tableros del mes y acumulado anual |
+| Roles | Operario / Jefe de Mantenimiento / Admin | Igual, con "Jefe de Mantenimiento/Operaciones" |
+
+### Puntos a revisar cuando se decidan cambios
+- [ ] **Alertas sin internet:** si las alertas solo las calcula Lambda, durante un corte la planta no recibe alertas (ej. UV alto). Evaluar umbrales simples también en el Edge.
+- [ ] **Idempotencia con agregados:** al subir promedios de 15 min, la llave natural pasa a ser `local + variable + inicio_intervalo` (reemplaza/complementa al `record_id` por lectura).
+- [ ] **Cálculo del promedio de 15 min durante un corte:** el Edge debe seguir calculando intervalos offline y subirlos todos al reconectar.
+- [ ] **Regla de electricidad relativa:** requiere guardar el histórico horario/15 min (4 semanas mínimo) y definir qué hacer las primeras 4 semanas sin historia (umbral fijo de respaldo).
+- [ ] **MFA sin internet:** el TOTP de Microsoft Authenticator funciona offline, pero el servicio que lo valida (Cognito / Entra ID) está en la nube. Definir login local en la Pi.
+- [ ] **Argumento de DynamoDB:** con datos cada 15 min el volumen baja mucho; el ADR-01 debe apoyarse en costo/disponibilidad y Lambda sin conexiones, no en volumen.
+- [ ] **Históricos (ideas A y B):** los intervalos de 15 min en la nube ya permiten curvas por hora y comparaciones por período; el crudo de 5 s solo vive 30 días en el Edge.
+- [ ] **Actualizar `CONTEXTO.md`, `modo-offline.md` y `ciberseguridad.md`** para reflejar estas decisiones una vez conciliadas.
