@@ -1,6 +1,8 @@
 # 🌐 Infraestructura de Red y Conectividad Cloud — Induplac IoT
 
-Este documento describe la topología de red completa del proyecto **Induplac IoT**, cubriendo la segmentación en los locales físicos, la interconexión segura mediante **VPN Site-to-Site** y el diseño de la **Virtual Private Cloud (VPC)** en AWS.
+Este documento describe la topología de red del proyecto **Induplac IoT**: la segmentación en los locales físicos, la interconexión segura mediante **VPN Site-to-Site** y el diseño de la **VPC** en AWS.
+
+> Actualizado 2026-10-08: VPN real con API Gateway privada para la ingesta, VLAN de operarios, sin NAT Gateway y RDS Single-AZ.
 
 ---
 
@@ -8,83 +10,96 @@ Este documento describe la topología de red completa del proyecto **Induplac Io
 
 ```mermaid
 flowchart TD
-    subgraph LOCAL1["🏭 Local 1 (Planta / Taller) — 192.168.10.0/24"]
-        VLAN10["VLAN IoT (192.168.10.0/24)<br/>• ESP32 Sensores<br/>• Broker MQTT Local (8883)"]
-        CGW1["Edge Gateway / Customer Gateway<br/>(Raspberry Pi — 192.168.10.10)"]
-        VLAN10 --> CGW1
+    subgraph LOCAL1["🏭 Local 1 (Planta / Taller)"]
+        VLAN10["VLAN IoT 192.168.10.0/24<br/>• ESP32 Sensores"]
+        VLAN11["VLAN Operarios 192.168.11.0/24<br/>• PCs / tablets"]
+        CGW1["Edge Gateway / Customer Gateway<br/>Raspberry Pi — 192.168.10.10<br/>Broker MQTT · SQLite · Dashboard · strongSwan"]
+        VLAN10 -->|MQTTS 8883| CGW1
+        VLAN11 -->|HTTPS 443| CGW1
     end
 
-    subgraph LOCAL2["🏢 Local 2 (Oficinas / Administración) — 192.168.20.0/24"]
-        VLAN20["VLAN IoT (192.168.20.0/24)<br/>• ESP32 Sensores<br/>• Broker MQTT Local (8883)"]
-        CGW2["Edge Gateway / Customer Gateway<br/>(Raspberry Pi — 192.168.20.10)"]
-        VLAN20 --> CGW2
-    end
-
-    subgraph INTERNET["Internet / Red Pública"]
-        IPSEC1["Túnel IPsec 1 & 2 (AES-256, IKEv2)"]
-        IPSEC2["Túnel IPsec 1 & 2 (AES-256, IKEv2)"]
+    subgraph LOCAL2["🏢 Local 2 (Oficinas / Administración)"]
+        VLAN20["VLAN IoT 192.168.20.0/24<br/>• ESP32 Sensores"]
+        VLAN21["VLAN Operarios 192.168.21.0/24<br/>• PCs / tablets"]
+        CGW2["Edge Gateway / Customer Gateway<br/>Raspberry Pi — 192.168.20.10"]
+        VLAN20 -->|MQTTS 8883| CGW2
+        VLAN21 -->|HTTPS 443| CGW2
     end
 
     subgraph AWS_VPC["☁️ AWS VPC (10.0.0.0/16)"]
         VGW["Virtual Private Gateway (VGW)"]
-        
-        subgraph PUBLIC_SUBNET["Subred Pública (10.0.1.0/24)"]
-            NAT["NAT Gateway"]
-            IGW["Internet Gateway"]
-        end
 
-        subgraph PRIVATE_SUBNET["Subred Privada (10.0.2.0/24)"]
+        subgraph PRIVATE_SUBNET["Subredes Privadas (10.0.2.0/24 · 10.0.3.0/24)"]
+            VPCE_API["VPC Endpoint execute-api<br/>SG-VPCE-API (443)"]
             Lambda["AWS Lambda (ENI en VPC)<br/>SG-Lambda"]
-            RDS[("Amazon RDS PostgreSQL<br/>(Multi-AZ / Privada)<br/>SG-RDS (Puerto 5432)")]
-            VPCE["VPC Endpoints (DynamoDB, Secrets Manager)"]
+            RDS[("Amazon RDS PostgreSQL<br/>Single-AZ · SG-RDS (5432)")]
+            VPCE_DDB["Gateway Endpoint DynamoDB"]
         end
     end
 
-    subgraph CLOUD_SERVICES["Servicios Cloud Gestionados"]
-        Dynamo[("Amazon DynamoDB<br/>(Telemetría Cruda NoSQL)")]
-        APIGW["API Gateway (HTTPS Dashboard)"]
+    subgraph CLOUD_SERVICES["Servicios Gestionados"]
+        APIPRIV["API Gateway PRIVADA<br/>(ingesta del Edge)"]
+        APIPUB["API Gateway PÚBLICA<br/>(consulta del dashboard, Cognito)"]
+        Cognito["Amazon Cognito + MFA TOTP"]
+        Dynamo[("Amazon DynamoDB<br/>Intervalos 15 min")]
     end
 
-    CGW1 -->|IPsec VPN| IPSEC1 --> VGW
-    CGW2 -->|IPsec VPN| IPSEC2 --> VGW
-    VGW --> PRIVATE_SUBNET
-
-    NAT --> IGW
-    Lambda -->|Conexión SQL (5432)| RDS
-    Lambda -->|SDK AWS| VPCE --> Dynamo
-    APIGW --> Lambda
+    CGW1 ==>|Túnel IPsec IKEv2 AES-256| VGW
+    CGW2 ==>|Túnel IPsec IKEv2 AES-256| VGW
+    VGW --> VPCE_API --> APIPRIV --> Lambda
+    APIPUB --> Lambda
+    Cognito -.-> APIPUB
+    Lambda -->|SQL 5432| RDS
+    Lambda --> VPCE_DDB --> Dynamo
 ```
+
+**Dos APIs con propósitos distintos:**
+- **API privada (ingesta):** solo alcanzable desde la VPC a través del VPC Endpoint; el Edge llega por la VPN. Expone `POST /intervalos`, `POST /alertas`, `GET /umbrales`, `GET /health`.
+- **API pública (consulta):** la usa el dashboard de gerencia desde Internet, protegida con un *authorizer* de Cognito (JWT). Solo lectura de indicadores e histórico y acciones de usuarios con MFA.
 
 ---
 
 ## 2. Segmentación en Locales Físicos (LAN & Edge)
 
-Para mitigar riesgos de movimiento lateral en caso de que un microcontrolador sea vulnerado:
-
 | Parámetro | Local 1 (Planta / Taller) | Local 2 (Administración) |
 | :--- | :--- | :--- |
-| **Segmento de Red (VLAN IoT)** | `192.168.10.0/24` | `192.168.20.0/24` |
-| **Gateway Edge (Raspberry Pi)** | `192.168.10.10` | `192.168.20.10` |
-| **Rango DHCP Sensores (ESP32)** | `192.168.10.100 - 192.168.10.200` | `192.168.20.100 - 192.168.20.200` |
-| **Aislamiento de Red** | VLAN aislada para dispositivos IoT sin acceso a equipos administrativos de oficina. | VLAN aislada sin visibilidad cruzada con equipos de contabilidad/ventas. |
-| **Reglas de Firewall Perimetral** | **Solo tráfico de salida** (Stateful Egress). Cero puertos entrantes abiertos al exterior (*Zero Inbound Ports*). | **Solo tráfico de salida** (Stateful Egress). Cero puertos entrantes abiertos al exterior. |
+| **VLAN IoT** | `192.168.10.0/24` | `192.168.20.0/24` |
+| **Edge Gateway (Raspberry Pi)** | `192.168.10.10` | `192.168.20.10` |
+| **DHCP sensores (ESP32)** | `192.168.10.100 - 192.168.10.200` | `192.168.20.100 - 192.168.20.200` |
+| **VLAN Operarios** | `192.168.11.0/24` | `192.168.21.0/24` |
+| **Aislamiento** | Los ESP32 solo hablan MQTTS con el Edge. Los operarios solo llegan al Edge por HTTPS. | Igual que Local 1. |
+| **Firewall perimetral** | Solo salida (*Stateful Egress*); el túnel VPN se inicia desde la planta. **Cero puertos entrantes**. | Igual que Local 1. |
+
+### 2.1. Acceso de Operarios al Dashboard Local (ejemplo Local 1)
+
+```
+ip access-list extended OPERARIOS_A_EDGE
+ permit tcp 192.168.11.0 0.0.0.255 host 192.168.10.10 eq 443
+ deny   ip  192.168.11.0 0.0.0.255 192.168.10.0 0.0.0.255
+ permit ip  any any
+!
+interface Vlan11
+ ip access-group OPERARIOS_A_EDGE in
+```
+
+- **DNS local:** `edge.induplac.local` → `192.168.10.10` (en el router o en la propia Pi).
+- **Certificado:** emitido por una CA interna instalada en los equipos de planta (autofirmado para la demo). Let's Encrypt no sirve porque no renueva sin Internet.
 
 ---
 
 ## 3. Conexión VPN Site-to-Site (IPsec)
 
-Para evitar exponer el tráfico de telemetría y sincronización en Internet público, se utiliza una **VPN Site-to-Site gestionada**:
-
 * **Componentes:**
-  - **Customer Gateway (CGW):** Configurado en el Edge Gateway de cada sede física (Raspberry Pi ejecutando strongSwan o router compatible con IPsec).
-  - **Virtual Private Gateway (VGW):** Puerta de enlace VPN en la VPC de AWS.
-* **Cifrado y Parámetros:**
+  - **Customer Gateway (CGW):** strongSwan en el Edge Gateway de cada sede.
+  - **Virtual Private Gateway (VGW):** asociado a la VPC.
+* **Parámetros:**
   - **Protocolo:** IPsec con **IKEv2**.
-  - **Cifrado:** AES-GCM-256 bits con HMAC-SHA-384.
-  - **Redundancia:** 2 túneles activos/pasivos independientes por cada sede hacia AWS.
-* **Ventaja Arquitectónica:**
-  - El tráfico del Edge entra **directamente a la subred privada de la VPC**, sin pasar por endpoints públicos.
-  - **Defensa en profundidad:** Se suma cifrado a nivel de red (Capa 3 OSI con IPsec) por debajo del cifrado de aplicación (Capa 7 con TLS/HTTPS).
+  - **Cifrado:** AES-GCM-256 con HMAC-SHA-384.
+  - **Redundancia:** 2 túneles por conexión.
+  - **Rutas:** estáticas hacia `192.168.10.0/24` y `192.168.20.0/24` en la VPC; `10.0.0.0/16` por el túnel en el Edge.
+* **Resolución de la API privada:** el Edge usa el nombre DNS específico del VPC Endpoint (`<api-id>-<vpce-id>.execute-api.us-east-1.amazonaws.com`), que resuelve a IPs privadas de la VPC y viaja por el túnel.
+* **Ventaja:** la ingesta entra **directamente a la subred privada** sin endpoints públicos; cifrado en Capa 3 (IPsec) bajo Capa 7 (TLS).
+* **Plan B:** si el Learner Lab no permite VGW/VPN, una instancia EC2 pequeña con strongSwan actúa como extremo del túnel dentro de la VPC.
 
 ---
 
@@ -92,40 +107,46 @@ Para evitar exponer el tráfico de telemetría y sincronización en Internet pú
 
 | Recurso | Configuración | Propósito |
 | :--- | :--- | :--- |
-| **Bloque CIDR VPC** | `10.0.0.0/16` | Espacio privado no superpuesto con los locales (`192.168.x.x`). |
-| **Subred Pública** | `10.0.1.0/24` (us-east-1a) | Aloja el NAT Gateway y el Internet Gateway para salida controlada. |
-| **Subred Privada 1** | `10.0.2.0/24` (us-east-1a) | Aloja funciones Lambda (ENI) y base de datos primaria RDS. |
-| **Subred Privada 2** | `10.0.3.0/24` (us-east-1b) | Requerida para el Subnet Group de RDS (alta disponibilidad Multi-AZ). |
+| **Bloque CIDR VPC** | `10.0.0.0/16` | Sin superposición con las sedes (`192.168.x.x`). |
+| **Subred Privada 1** | `10.0.2.0/24` (us-east-1a) | Lambda (ENI), RDS, VPC Endpoint `execute-api`. |
+| **Subred Privada 2** | `10.0.3.0/24` (us-east-1b) | Requerida por el Subnet Group de RDS. |
+| **NAT Gateway** | **No se usa** | Lambda accede a DynamoDB por Gateway Endpoint gratuito. |
+| **RDS** | `db.t3.micro` PostgreSQL **Single-AZ** | Ahorro de crédito; se apaga fuera de pruebas. |
 
 ---
 
 ## 5. Matriz de Security Groups (Seguridad por Referencia)
 
-Se descarta el uso de reglas basadas en direcciones IP volátiles; en su lugar, se aplican **Security Groups referenciados por grupo**:
-
 ```mermaid
 flowchart LR
+    SG_VPCE["SG-VPCE-API<br/>(Endpoint execute-api)"]
     SG_Lambda["SG-Lambda<br/>(Funciones Backend)"]
-    SG_RDS["SG-RDS<br/>(Base Relacional PostgreSQL)"]
+    SG_RDS["SG-RDS<br/>(PostgreSQL)"]
 
-    SG_Lambda -->|Permite Salida TCP 5432 hacia SG-RDS| SG_RDS
-    SG_RDS -->|Permite Entrada TCP 5432 SOLO desde SG-Lambda| SG_Lambda
+    SG_Lambda -->|TCP 5432| SG_RDS
 ```
 
-1. **`SG-Lambda` (Security Group para AWS Lambda):**
-   - **Inbound:** Sin reglas de entrada (Lambda solo responde a eventos).
-   - **Outbound:** Permitido tráfico TCP puerto 5432 con destino exclusivo a `SG-RDS`.
-2. **`SG-RDS` (Security Group para RDS PostgreSQL):**
-   - **Inbound:** Permitido tráfico TCP puerto 5432 exclusivamente con origen `SG-Lambda`.
-   - **Outbound:** Sin salida a Internet; denegado por defecto.
-   - **IP Pública:** Deshabilitada (`PubliclyAccessible: false`).
+1. **`SG-VPCE-API`:** entrada TCP 443 solo desde `192.168.10.0/24` y `192.168.20.0/24` (sedes vía VPN).
+2. **`SG-Lambda`:** sin entrada; salida TCP 5432 solo hacia `SG-RDS` y HTTPS hacia los endpoints de la VPC.
+3. **`SG-RDS`:** entrada TCP 5432 solo desde `SG-Lambda`; sin IP pública (`PubliclyAccessible: false`).
 
 ---
 
 ## 6. Consideraciones de Costo para AWS Academy Learner Lab
 
+> [!WARNING]
+> **Servicios con costo por hora (valores aproximados, verificar precios vigentes en us-east-1):**
+> - **Conexión VPN Site-to-Site:** ~USD 0,05/h por conexión → ~USD 36/mes por sede si queda encendida 24/7 (~USD 72/mes con 2 sedes).
+> - **VPC Interface Endpoint (`execute-api`):** ~USD 0,01/h por AZ → ~USD 7/mes por AZ.
+>
+> Con USD 100 de crédito, **la VPN y el endpoint se crean para las sesiones de prueba y la demo y se eliminan al terminar** (idealmente con un script o plantilla para recrearlos en minutos). Para las pruebas diarias basta **una sola conexión VPN** (Local 1).
+
 > [!TIP]
-> **Optimización de Presupuesto en Learner Lab:**
-> - El **NAT Gateway** tiene un costo por hora (~$0.045/hr) que puede mermar el saldo de $100.
-> - **Alternativa económica:** Para la comunicación entre Lambda y DynamoDB/Secrets Manager dentro de la VPC, se utilizan **VPC Endpoints de tipo Gateway (gratuitos)** para DynamoDB (`com.amazonaws.us-east-1.dynamodb`).
-> - Para la base relacional, se selecciona una instancia **`db.t3.micro` o `db.t4g.micro` en PostgreSQL Single-AZ**, apagándola cuando no esté en sesiones de prueba para maximizar la duración de los créditos.
+> **Servicios de costo mínimo:**
+> - DynamoDB on-demand y Gateway Endpoint de DynamoDB: prácticamente USD 0.
+> - Lambda y API Gateway: dentro de la capa gratuita para el volumen del proyecto.
+> - RDS `db.t3.micro` Single-AZ: apagado cuando no se usa.
+> - Sin NAT Gateway.
+
+> [!NOTE]
+> **Verificar en el Learner Lab** que se permita crear VPN Site-to-Site, VPC Interface Endpoints y Cognito con MFA antes de comprometer la demo a esos servicios.

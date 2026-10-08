@@ -1,27 +1,27 @@
 # 🔐 Estrategia de Ciberseguridad y Defensa en Profundidad — Induplac IoT
 
+> Actualizado 2026-10-08: idempotencia por intervalo, VPN IPsec real con API Gateway privada y autenticación con MFA para roles con permisos de escritura.
+
 ## 1. Propósito y Alcance
 
-La plataforma **Induplac IoT** procesa telemetría crítica de consumo energético (kW), recursos hídricos (m³), índices de radiación UV y métricas de producción y personal de dos locales operativos.
+La plataforma **Induplac IoT** procesa telemetría de consumo energético (kW), recursos hídricos (m³), radiación UV y métricas de producción y personal de dos locales operativos.
 
-Dado que el sistema opera bajo una **arquitectura híbrida (Edge + Cloud)**, la superficie de ataque abarca desde la captura física/simulada en microcontroladores (ESP32) y la red de planta (MQTT), hasta el almacenamiento en pasarelas locales (Raspberry Pi / SQLite) y la nube centralizada (AWS).
+Dado que el sistema opera bajo una **arquitectura híbrida (Edge + Cloud)**, la superficie de ataque abarca desde la captura en microcontroladores (ESP32) y la red de planta (MQTT), hasta la pasarela local (Raspberry Pi / SQLite), el túnel VPN y la nube (AWS).
 
-Este documento especifica el modelo de amenazas, las medidas técnicas implementadas y el marco de gobernanza y privacidad aplicado conforme a la normativa vigente en Chile.
+Este documento especifica el modelo de amenazas, las medidas técnicas y el marco de privacidad aplicado conforme a la normativa vigente en Chile.
 
 ---
 
 ## 2. Modelo de Amenazas (Matriz STRIDE aplicada a IoT)
 
-Se evaluaron los vectores de riesgo específicos sobre cada frontera de confianza del sistema:
-
 | Categoría STRIDE | Amenaza en el contexto Induplac | Impacto | Mitigación Implementada |
 | :--- | :--- | :--- | :--- |
-| **Spoofing (Suplantación)** | Dispositivo no autorizado conectándose al broker MQTT simulando ser el ESP32 del Local 1. | Inyección de datos falsos, alteración de métricas de producción. | Autenticación individual por cliente MQTT (usuario/contraseña únicos por dispositivo). Conexiones anónimas denegadas. |
-| **Tampering (Manipulación)** | Alteración de mediciones almacenadas en la base SQLite local durante un corte de Internet. | Pérdida de integridad de auditoría histórica. | Generación de hash SHA-256 por lote y validación de rangos físicos lógicos antes de la sincronización. |
-| **Repudiation (Repudio)** | Un operario desactiva o reconoce una alarma crítica sin dejar registro de autoría. | Falta de trazabilidad en incidentes operacionales. | Registro de auditoría con marca temporal UTC e identificador de usuario en toda acción administrativa. |
-| **Information Disclosure (Fuga de Información)** | Interceptación de paquetes de telemetría o credenciales en la red local o en tránsito hacia AWS. | Exposición de patrones de producción industrial o credenciales cloud. | MQTTS sobre TLS 8883 en red local y HTTPS / TLS 1.3 hacia endpoints de API Gateway. Cero secretos en código (`.env`). |
-| **Denial of Service (Denegación de Servicio)** | Saturación del broker MQTT o del Gateway Edge mediante flooding de mensajes. | Dashboard sin datos en tiempo real, retardo de alarmas. | Rate limiting en el broker MQTT y descarte de payloads que excedan el tamaño máximo permitido (máx. 2 KB). |
-| **Elevation of Privilege (Elevación de Privilegios)** | Un usuario de planta modifica umbrales de alerta o accede al dashboard consolidado de gerencia. | Decisiones operativas erróneas o fuga de datos entre sedes. | Control de acceso basado en roles (RBAC) gestionado por tokens JWT firmados con roles estrictos. |
+| **Spoofing (Suplantación)** | Dispositivo no autorizado se conecta al broker simulando ser el ESP32 del Local 1. Usuario que se hace pasar por administrador. | Inyección de datos falsos; cambios de configuración no autorizados. | Credenciales MQTT únicas por dispositivo, conexiones anónimas denegadas. **MFA TOTP** obligatorio para roles con permisos de escritura. |
+| **Tampering (Manipulación)** | Alteración de datos en SQLite durante un corte de Internet. | Pérdida de integridad del histórico. | Hash SHA-256 por lote y validación de rangos físicos antes de agregar y sincronizar. |
+| **Repudiation (Repudio)** | Un usuario reconoce una alarma o cambia un umbral sin dejar registro. | Falta de trazabilidad. | Auditoría con marca temporal UTC e identificador de usuario en toda acción de escritura, incluidas las hechas offline en el Edge. |
+| **Information Disclosure (Fuga)** | Interceptación de telemetría o credenciales en la red local o hacia AWS. | Exposición de patrones de producción o credenciales. | MQTTS (TLS 8883) en planta; **VPN IPsec** + HTTPS/TLS hacia una **API Gateway privada**; a la nube solo suben agregados; cero secretos en código (`.env`). |
+| **Denial of Service** | Saturación del broker o del Edge con mensajes. | Dashboard sin datos, retardo de alarmas. | Rate limiting en el broker y descarte de payloads > 2 KB. |
+| **Elevation of Privilege** | Un operario modifica umbrales o accede a la vista de otra sede. | Decisiones erróneas o fuga entre sedes. | RBAC con tokens JWT firmados por Cognito; escritura solo para grupos con MFA. |
 
 ---
 
@@ -30,28 +30,28 @@ Se evaluaron los vectores de riesgo específicos sobre cada frontera de confianz
 ```mermaid
 flowchart TD
     subgraph C1["Capa 1: Dispositivos & Captura (ESP32 / Wokwi)"]
-        A1["Credenciales MQTT por Local"] --> A2["MQTTS TLS 8883"]
+        A1["Credenciales MQTT por Dispositivo"] --> A2["MQTTS TLS 8883"]
         A2 --> A3["Filtro de Rangos Físicos"]
     end
 
     subgraph C2["Capa 2: Pasarela Edge (Raspberry Pi)"]
-        B1["Variables de Entorno (.env)"] --> B2["Roles IAM Mínimos (AWS STS)"]
+        B1["Variables de Entorno (.env)"] --> B2["IAM Mínimo Privilegio"]
         B2 --> B3["SQLite con Checksum de Integridad"]
     end
 
     subgraph C3["Capa 3: Enlace Híbrido & Sincronización"]
-        C1_["UUIDv4 Anti-Replay"] --> C2_["Batch Ingestion Idempotente"]
-        C2_["Batch Ingestion Idempotente"] --> C3_["HTTPS TLS 1.3 hacia AWS"]
+        C1_["VPN IPsec IKEv2 AES-256"] --> C2_["API Gateway Privada (VPC Endpoint)"]
+        C2_ --> C3_["Upsert Idempotente por Intervalo"]
     end
 
-    subgraph C4["Capa 4: Presentación & Control de Acceso (Dashboard)"]
-        D1["Tokens JWT / Cognito"] --> D2["Matriz RBAC (Operario / Mantenimiento / Admin)"]
+    subgraph C4["Capa 4: Presentación & Control de Acceso"]
+        D1["Cognito + MFA TOTP"] --> D2["Matriz RBAC (Operario / Jefe / Admin)"]
         D2 --> D3["Protección XSS & CORS Estricto"]
     end
 
     subgraph C5["Capa 5: Privacidad & Normativa"]
         E1["Ley 19.628 (Chile)"] --> E2["Anonimización de Horas Hombre (HH)"]
-        E2 --> E3["Cero Datos Personales Sensibles"]
+        E2 --> E3["Solo Agregados en la Nube"]
     end
 
     C1 --> C2 --> C3 --> C4 --> C5
@@ -61,92 +61,84 @@ flowchart TD
 
 ### Capa 1: Seguridad en Microcontroladores y Protocolo MQTT
 1. **Aislamiento de Tópicos MQTT:**
-   - Cada dispositivo publica únicamente en su tópico correspondiente:
-     - `induplac/local1/telemetria`
-     - `induplac/local2/telemetria`
-   - El broker deniega permisos de publicación cruzada entre locales.
-2. **Validación de Rangos Físicos (Sanitización en Ingesta):**
-   - El microcontrolador y el Gateway descartan de inmediato mediciones que desafíen los límites de la física industrial:
-     - Potencia eléctrica: $0.0 \le kW \le 250.0$
-     - Flujo de agua: $0.0 \le m^3/h \le 50.0$
-     - Radiación UV: $0 \le UVI \le 15$
-   - Si una lectura cae fuera de rango, se clasifica como anomalía de sensor y se registra una alarma técnica sin propagar el valor erróneo a la base histórica.
+   - `induplac/local1/telemetria`
+   - `induplac/local2/telemetria`
+   - El broker deniega la publicación cruzada entre locales.
+2. **Validación de Rangos Físicos:**
+   - Potencia eléctrica: $0.0 \le kW \le 250.0$
+   - Flujo de agua: $0.0 \le m^3/h \le 50.0$
+   - Radiación UV: $0 \le UVI \le 15$
+   - Una lectura fuera de rango se registra como anomalía de sensor y no entra al cálculo de intervalos.
 
 ---
 
 ### Capa 2: Seguridad en el Gateway Edge (Raspberry Pi & SQLite)
-1. **Gestión de Secretos (Zero Hardcoding):**
-   - El código fuente no contiene URLs privadas, tokens ni contraseñas.
-   - Las variables sensibles residen en archivos `.env` ignorados por Git mediante `.gitignore`:
-     ```bash
-     MQTT_BROKER_HOST=broker.induplac.local
-     MQTT_USER=gateway_edge_local
-     MQTT_PASSWORD=****************
-     AWS_API_GATEWAY_URL=https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/prod
-     AWS_ACCESS_KEY_ID=****************
-     AWS_SECRET_ACCESS_KEY=****************
-     ```
-2. **Principio de Mínimo Privilegio (IAM):**
-   - Las credenciales asignadas al Edge en AWS corresponden a un usuario o rol IAM exclusivo para ingesta:
-     - Acción permitida: `execute-api:Invoke` sobre la ruta `POST /telemetria`.
-     - Acciones denegadas: Creación, lectura, eliminación o modificación de tablas en DynamoDB, funciones Lambda o servicios de facturación.
-3. **Hardening del Sistema Operativo Edge:**
-   - Deshabilitación de acceso SSH mediante contraseña de root (únicamente llaves SSH Ed25519).
-   - Bloqueo de puertos no requeridos mediante firewall local (`ufw`).
+1. **Gestión de Secretos (Zero Hardcoding):** variables sensibles en `.env` ignorado por Git:
+   ```bash
+   MQTT_BROKER_HOST=broker.induplac.local
+   MQTT_USER=gateway_edge_local
+   MQTT_PASSWORD=****************
+   AWS_API_URL=https://<api-id>-<vpce-id>.execute-api.us-east-1.amazonaws.com/prod
+   AWS_ACCESS_KEY_ID=****************
+   AWS_SECRET_ACCESS_KEY=****************
+   IPSEC_PSK=****************
+   ```
+2. **Mínimo Privilegio (IAM):** el Edge solo puede invocar `POST /intervalos`, `POST /alertas`, `GET /umbrales` y `GET /health`. Sin permisos sobre DynamoDB, Lambda, RDS ni facturación.
+3. **Hardening:** SSH solo con llaves Ed25519, sin login de root por contraseña; `ufw` permite solo 443 desde la VLAN de operarios y 8883 desde la VLAN IoT.
 
 ---
 
-### Capa 3: Sincronización Segura y Protección Anti-Replay
-1. **Idempotencia mediante UUIDv4:**
-   - Cada medición generada en el Edge incorpora un identificador globalmente único:
-     ```json
-     {
-       "record_id": "7b8e1f20-94f7-4c8d-bf34-a1b023de89fa",
-       "device_id": "esp32-local-01",
-       "timestamp": 1727736000,
-       "is_synced": 0
-     }
-     ```
-   - Al restablecerse la conectividad a Internet, la Lambda de AWS utiliza `record_id` como clave única. Si una solicitud batch se reenvía por inestabilidad de red, DynamoDB realiza un `putItem` idempotente o descarta el duplicado, asegurando que las métricas de consumo no se contabilicen dos veces.
+### Capa 3: Sincronización Segura e Idempotencia
+1. **Transporte:** el Edge llega a AWS por el **túnel VPN IPsec** y consume una **API Gateway privada** cuya *resource policy* solo acepta tráfico del VPC Endpoint `execute-api`. La ingesta no existe en Internet público.
+2. **Idempotencia por llave natural:**
+   - Intervalo: `local_id + inicio_intervalo`.
+   - Alerta: `local_id + variable + inicio_intervalo`.
+   ```json
+   {
+     "local_id": 1,
+     "inicio_intervalo": 1759874400,
+     "energia_kw_prom": 42.7,
+     "agua_m3": 0.81,
+     "uv_max": 5.4
+   }
+   ```
+   Si un lote se reenvía por inestabilidad de red, AWS hace *upsert* sobre la misma llave: los consumos no se cuentan dos veces y una alerta generada offline por el Edge no se duplica con la que detecta Lambda.
 
 ---
 
-### Capa 4: Control de Acceso Basado en Roles (RBAC en Dashboard)
+### Capa 4: Control de Acceso Basado en Roles (RBAC) con MFA
 
-El acceso a las interfaces web se segmenta de acuerdo con la responsabilidad operacional:
-
-| Operación / Vista | Operario de Planta | Jefe de Mantenimiento | Administrador / Gerencia |
+| Operación / Vista | Operario | Jefe de Mantenimiento/Operaciones | Administrador |
 | :--- | :---: | :---: | :---: |
-| **Ver Dashboard de su propio Local** | ✅ Permitido | ✅ Permitido | ✅ Permitido |
-| **Ver Dashboard de otro Local** | ❌ Denegado | ✅ Permitido | ✅ Permitido |
-| **Ver Dashboard Consolidado (Auditoría General)** | ❌ Denegado | ✅ Permitido | ✅ Permitido |
-| **Reconocer / Silenciar Alertas Activas** | ❌ Denegado | ✅ Permitido | ✅ Permitido |
-| **Modificar Umbrales Críticos de Consumo** | ❌ Denegado | ❌ Denegado | ✅ Permitido |
-| **Activar Panel de Simulación de Fallas (Demo)** | ❌ Denegado | ❌ Denegado | ✅ Permitido |
+| **Ver dashboard de su propio local** | ✅ | ✅ | ✅ |
+| **Ver dashboard de otro local / consolidado** | ❌ | ✅ | ✅ |
+| **Reconocer / silenciar alertas** | ❌ | ✅ | ✅ |
+| **Modificar umbrales de alerta** | ❌ | ❌ | ✅ |
+| **Administrar usuarios y configuración** | ❌ | ❌ | ✅ |
+| **Activar panel de simulación de fallas (demo)** | ❌ | ❌ | ✅ |
+| **MFA obligatorio** | No | **Sí** | **Sí** |
 
-- **Autenticación:** Mediante JSON Web Tokens (JWT) con tiempo de expiración corto (1 hora) y refresco automático.
+- **Autenticación:** Amazon Cognito User Pool. **MFA TOTP** (compatible con Microsoft Authenticator) obligatorio para los grupos `jefe_mantenimiento_operaciones` y `administrador`. El Operario, de solo lectura, entra sin MFA.
+- **Tokens:** JWT de 1 hora con refresco automático; el grupo del usuario viaja en el token y la API lo valida en cada solicitud.
+- **Sin internet (propuesta a validar con el equipo):**
+  - El Edge ofrece un **login local** con usuarios y roles replicados desde RDS para ver el dashboard de planta.
+  - Un Jefe puede **reconocer alertas** offline; la acción queda auditada y se sincroniza después.
+  - **Modificar umbrales, usuarios o configuración requiere conexión y MFA de Cognito**, para evitar conflictos con RDS y no guardar secretos MFA en el Edge.
 
 ---
 
 ### Capa 5: Privacidad y Normativa de Datos (Chile — Ley 19.628)
 
-En cumplimiento con la legislación chilena sobre protección de la vida privada y datos personales (Ley 19.628):
-
-1. **Anonimización Estricta de Horas Hombre (HH):**
-   - El sistema no monitorea identidades individuales, números de RUT, tiempos por persona ni geolocalización de trabajadores.
-   - La métrica de Horas Hombre representa únicamente un contador consolidado de horas sin incidentes operacionales por turno y cantidad agregada de personal activo en faena.
-2. **Propiedad Industrial:**
-   - La totalidad de los datos analíticos generados corresponden a métricas de consumo de suministros y eficiencia de maquinaria, sin invadir la privacidad individual de los colaboradores.
+1. **Anonimización de Horas Hombre (HH):** sin identidades, RUT, tiempos por persona ni geolocalización de trabajadores; solo contadores agregados por turno.
+2. **Solo agregados en la nube:** a AWS suben intervalos de 15 min, nunca la lectura cruda ni datos que identifiquen a la organización real o a personas.
+3. **Datos de usuarios del sistema:** Cognito y RDS guardan solo lo necesario para autenticar y autorizar (correo corporativo, rol, configuración MFA).
 
 ---
 
 ## 4. Procedimiento de Verificación y Auditoría
 
-Para verificar la efectividad de las medidas de seguridad durante la presentación del prototipo:
-
-1. **Prueba de Inyección de Rango Inválido:**
-   - Se inyecta intencionalmente un valor de $9999\text{ kW}$ desde el simulador. El Edge Gateway debe registrar un log de rechazo y no propagar el valor a SQLite ni a AWS.
-2. **Prueba de Resistencia a Replay Attack:**
-   - Se reenvía manualmente un lote de telemetría previamente sincronizado. AWS debe confirmar la recepción sin duplicar el acumulado de energía o agua en DynamoDB.
-3. **Prueba de Violación de Rol en Dashboard:**
-   - Con sesión de `Operario`, el Dashboard debe ocultar y bloquear cualquier intento de acceso al panel consolidado o al panel de configuración de umbrales.
+1. **Inyección de rango inválido:** se inyectan $9999\text{ kW}$ desde el simulador. El Edge registra el rechazo y el valor no entra a los intervalos ni a AWS.
+2. **Resistencia a replay:** se reenvía un lote ya sincronizado. AWS confirma sin duplicar consumos ni alertas.
+3. **Violación de rol:** con sesión de Operario, el dashboard bloquea la vista consolidada y la configuración de umbrales.
+4. **MFA:** un Administrador sin código TOTP válido no puede iniciar sesión ni cambiar umbrales.
+5. **Alerta offline:** con la red cortada se inyecta UV ≥ 8; la alerta aparece en planta y, al reconectar, aparece una sola vez en la vista de gerencia.
