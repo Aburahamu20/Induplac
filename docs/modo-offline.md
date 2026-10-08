@@ -1,49 +1,58 @@
 # 📴 Especificación del Modo Offline, Resiliencia y Retención de Datos — Induplac IoT
 
+> Actualizado 2026-10-08: agregación de 15 min en el Edge, alertas locales y dashboard de planta servido desde el Edge (ADR-05, ADR-06, ADR-07).
+
 ## 1. Justificación del Modelo Híbrido (Edge + Cloud)
 
-En instalaciones industriales como **Induplac**, depender exclusivamente de una arquitectura 100% Cloud introduce un riesgo crítico: la pérdida de conectividad a Internet (por cortes de fibra óptica, fallas de ISP o problemas de red externa) dejaría a la planta **a ciegas**, interrumpiendo el monitoreo de seguridad operacional y generando vacíos irreversibles en la trazabilidad de consumo eléctrico y agua.
+En instalaciones industriales como **Induplac**, depender exclusivamente de una arquitectura 100% Cloud introduce un riesgo crítico: la pérdida de conectividad a Internet (cortes de fibra, fallas del ISP o caída del túnel VPN) dejaría a la planta **a ciegas**, interrumpiendo el monitoreo de seguridad operacional y generando vacíos en la trazabilidad de consumo.
 
 La arquitectura de **Induplac IoT** adopta un modelo híbrido basado en dos premisas:
 
 1. **Autonomía Operacional Local (Supervivencia en Planta):**
-   - El personal en faena debe visualizar variables críticas y alarmas (como picos de potencia eléctrica o radiación UV excesiva) en tiempo real con **latencia menor a 5 ms**, exista o no exista enlace con AWS.
+   - El personal en faena ve las variables críticas y **recibe las alertas** en tiempo real exista o no enlace con AWS. **Sin internet, el dashboard de planta funciona exactamente igual que con internet**; solo cambia el indicador de enlace.
 2. **Consolidación y Auditoría Centralizada (Cloud):**
-   - La nube de AWS consolida la visión gerencial de ambos locales, gestiona el control de acceso unificado (RBAC) y genera análisis comparativos históricos (semanales, mensuales y anuales).
+   - AWS consolida la visión gerencial de ambos locales, gestiona usuarios y roles (RBAC + MFA) y genera análisis comparativos históricos.
 
 > **Principio de Diseño:**  
-> *La nube proporciona escala y analítica global; el Edge garantiza la continuidad operativa y la resiliencia local inmediata.*
+> *El Edge filtra, guarda, agrega y alerta; AWS consolida, compara y decide.*
 
 ---
 
 ## 2. Arquitectura de Almacenamiento en Dos Niveles (Two-Tier Buffering)
 
-Ante una contingencia de conectividad, el almacenamiento se organiza en dos capas diferenciadas según la capacidad de hardware:
-
 ```mermaid
 flowchart TD
     subgraph TIER1["Nivel 1: Microcontroladores (ESP32)"]
         Sensors["Sensores (Potenciómetro, Caudal, UV)"] --> ADC["Lectura ADC / GPIO (Cada 5s)"]
-        ADC --> RingBuf["Ring Buffer en RAM (Circular)<br/>• Capacidad: ~1.500 lecturas<br/>• Autonomía: 1,5 a 2 horas (FIFO)"]
+        ADC --> RingBuf["Ring Buffer en RAM (Circular)<br/>• Capacidad: ~1.500 lecturas<br/>• Autonomía: ~2 horas (FIFO)"]
     end
 
     subgraph TIER2["Nivel 2: Pasarela Edge (Raspberry Pi)"]
         BrokerLocal["Broker MQTT Local (Puerto 8883)"]
-        SQLiteLocal[("SQLite Local Persistente<br/>• Capacidad en 32 GB: > 3 años<br/>• Estado: is_synced = 0")]
-        ServerLocal["Servidor HTTP / Dashboard Local en Planta"]
+        Crudo[("SQLite: lecturas_crudas<br/>• Retención 30 días")]
+        Agregador["Agregador 15 min"]
+        Intervalos[("SQLite: intervalos_15min<br/>• is_synced = 0 / 1")]
+        Alertas["Motor de Alertas Local"]
+        ServerLocal["Nginx: Dashboard + API Local (443)"]
         SyncService["Servicio de Sincronización Batch"]
     end
 
-    subgraph CLOUD["Nube AWS"]
-        AWS_GW["Amazon API Gateway / DynamoDB"]
+    subgraph CLOUD["Nube AWS (vía VPN IPsec)"]
+        AWS_GW["API Gateway Privada → Lambda → DynamoDB / RDS"]
     end
 
     RingBuf -->|MQTTS Red Local| BrokerLocal
-    BrokerLocal --> SQLiteLocal
-    SQLiteLocal --> ServerLocal
+    BrokerLocal --> Crudo
+    Crudo --> Agregador --> Intervalos
+    Intervalos --> Alertas
+    Crudo --> ServerLocal
+    Intervalos --> ServerLocal
+    Alertas --> ServerLocal
+    Intervalos --> SyncService
+    Alertas --> SyncService
 
-    SQLiteLocal -.->|❌ Falla de Internet: Retención local| AWS_GW
-    SQLiteLocal ==>|✅ Conexión recuperada: Sync en Lotes| AWS_GW
+    SyncService -.->|❌ Sin enlace: retención local| AWS_GW
+    SyncService ==>|✅ Enlace recuperado: sync en lotes| AWS_GW
 ```
 
 ---
@@ -51,63 +60,67 @@ flowchart TD
 ## 3. Capacidad de Retención y Límites de Hardware
 
 ### 3.1. Nivel 1: Microcontrolador ESP32
-* **Hardware:** Microcontrolador ESP32 con 520 KB de SRAM interna y 4 MB de memoria Flash.
-* **Mecanismo:** **Ring Buffer (Buffer circular en memoria RAM)**.
-  - Almacena hasta **1.500 mediciones**.
-  - A una tasa de 1 muestra cada 5 segundos, otorga **hasta 2 horas de autonomía** en caso de que la Raspberry Pi esté apagada, en mantenimiento o reiniciándose.
-  - Al llenarse, aplica política **FIFO** (descarta el dato más antiguo para preservar la telemetría más reciente).
+* **Hardware:** ESP32 con 520 KB de SRAM interna y 4 MB de Flash.
+* **Mecanismo:** **Ring Buffer en RAM** de hasta **1.500 mediciones** (≈ 2 horas a 1 muestra cada 5 s) para cubrir reinicios o mantención de la Raspberry Pi. Al llenarse aplica **FIFO**.
+* **Hora:** el ESP32 sincroniza su reloj por **NTP** al arrancar para que las lecturas del buffer lleguen con marca de tiempo válida.
 
 ### 3.2. Nivel 2: Pasarela Edge (Raspberry Pi con SQLite)
-* **Hardware:** Raspberry Pi 4 con almacenamiento en tarjeta MicroSD / disco SSD de **32 GB o 64 GB**.
-* **Base de Datos:** SQLite local en modo WAL (*Write-Ahead Logging*) para soportar lecturas y escrituras simultáneas de alto rendimiento.
+* **Hardware:** Raspberry Pi 4 con MicroSD / SSD de **32 GB o 64 GB**.
+* **Base de datos:** SQLite en modo WAL con tres tablas principales:
+
+| Tabla | Contenido | ¿Sube a AWS? |
+| :--- | :--- | :---: |
+| `lecturas_crudas` | Cada lectura validada (cada 5 s) | No |
+| `intervalos_15min` | Promedios / máximos / acumulados por local cada 15 min, con `is_synced` | Sí |
+| `alertas_local` | Alertas generadas por el Edge, con `is_synced` | Sí |
 
 ---
 
-## 4. Cálculo Matemático de Almacenamiento y Autonomía
+## 4. Cálculo de Almacenamiento y Autonomía
 
-Para determinar cuánto tiempo exacto puede operar la plataforma sin conexión a Internet antes de agotar su capacidad:
+**Supuesto explícito:** cada local publica **un mensaje JSON con todas sus variables** cada 5 segundos.
 
-| Parámetro | Valor Técnico |
+### 4.1. Lecturas crudas (solo locales)
+| Parámetro | Valor |
 | :--- | :--- |
-| **Frecuencia de muestreo por local** | 1 lectura cada 5 segundos |
-| **Muestras por minuto (1 local)** | $60 / 5 = 12\text{ lecturas/min}$ |
-| **Muestras por hora (1 local)** | $12 \times 60 = 720\text{ lecturas/hora}$ |
-| **Muestras por hora (2 locales combinados)** | $720 \times 2 = 1.440\text{ lecturas/hora}$ |
-| **Muestras diarias totales (Ambos locales)** | $1.440 \times 24 = \mathbf{34.560\text{ registros/día}}$ |
-| **Tamaño promedio por registro en SQLite** | $\approx 150 \text{ a } 200 \text{ bytes}$ (incluyendo índices y UUID) |
-| **Consumo de disco diario** | $34.560 \times 200\text{ bytes} \approx \mathbf{6,91\text{ MB / día}}$ |
-| **Consumo de disco semanal (7 días)** | $\approx \mathbf{48,4\text{ MB / semana}}$ |
-| **Consumo de disco mensual (30 días)** | $\approx \mathbf{207,3\text{ MB / mes}}$ |
-| **Consumo de disco anual (365 días)** | $\approx \mathbf{2,52\text{ GB / año}}$ |
+| Lecturas por día (2 locales) | $2 \times 17.280 = \mathbf{34.560}$ |
+| Tamaño por registro | $\approx 200\text{ bytes}$ (incluye índices) |
+| Consumo diario | $\approx \mathbf{6,9\text{ MB/día}}$ |
+| Retención | 30 días → $\approx \mathbf{210\text{ MB}}$ ocupados de forma constante |
 
-### Conclusión de Capacidad:
-En una tarjeta MicroSD estándar de **32 GB**, reservando 10 GB para el sistema operativo Linux y logs del sistema, quedan aproximadamente **22 GB libres exclusivamente para telemetría**.
+### 4.2. Intervalos de 15 minutos (los que se sincronizan)
+| Parámetro | Valor |
+| :--- | :--- |
+| Intervalos por día (2 locales) | $2 \times 96 = \mathbf{192}$ |
+| Tamaño por registro | $\approx 300\text{ bytes}$ |
+| Consumo diario | $\approx \mathbf{58\text{ KB/día}}$ |
+| Consumo anual | $\approx \mathbf{21\text{ MB/año}}$ |
 
-$$\text{Autonomía Offline} = \frac{22.000\text{ MB}}{6,91\text{ MB/día}} \approx \mathbf{3.183\text{ días}}\;(\mathbf{> 8,7\text{ años de operación ininterrumpida sin Internet}})$$
+### Conclusión de Capacidad
+En una MicroSD de **32 GB**, reservando 10 GB para el sistema operativo y logs, quedan ≈ **22 GB** para datos. El crudo ocupa un tamaño fijo (~210 MB) y **un año completo sin internet acumula solo ~21 MB de intervalos pendientes**.
 
 > [!IMPORTANT]
-> El sistema posee capacidad matemática para soportar cortes de conectividad de semanas o meses enteros sin pérdida de información.
+> **El almacenamiento deja de ser una restricción para el modo offline:** el Edge puede operar meses o años sin conexión sin perder ningún intervalo ni alerta pendiente de sincronizar.
 
 ---
 
-## 5. Ciclo de Vida y Política de Purga de Datos (Data Lifecycle)
+## 5. Ciclo de Vida y Política de Purga de Datos
 
-Para evitar la fragmentación del archivo SQLite y mantener tiempos de consulta óptimos en la pasarela local:
-
-1. **Registros No Sincronizados (`is_synced = 0`):**
-   - **Retención indefinida.** Ningún registro es eliminado mientras no exista confirmación HTTP 200/201 emitida por la API de AWS.
-2. **Registros Sincronizados (`is_synced = 1`):**
-   - **Retención local de 30 días:** Se conservan en el Edge para permitir al Dashboard en planta graficar comparativas recientes de forma instantánea sin requerir consultas salientes a Internet.
-3. **Mantenimiento y Purga Automática (Cron Job Semanal):**
-   - Se ejecuta una rutina programada los domingos a las 02:00 AM para depurar registros sincronizados con más de 30 días de antigüedad y compactar el archivo de base de datos:
+1. **Intervalos y alertas no sincronizados (`is_synced = 0`):** **retención indefinida**. Nada se elimina sin confirmación HTTP 200/201 de AWS.
+2. **Intervalos sincronizados (`is_synced = 1`):** se conservan **13 meses** en el Edge. Sirven para el dashboard de planta sin internet (comparaciones históricas) y como base de la regla de energía (mínimo 4 semanas).
+3. **Lecturas crudas:** se conservan **30 días** (ya están resumidas en los intervalos).
+4. **Purga automática (cron semanal, domingos 02:00):**
 
 ```sql
--- Purga de datos sincronizados antiguos
-DELETE FROM telemetria_local 
-WHERE is_synced = 1 
-  AND timestamp < strftime('%s', 'now', '-30 days');
+-- Crudo con más de 30 días
+DELETE FROM lecturas_crudas
+WHERE ts < strftime('%s', 'now', '-30 days');
 
--- Recuperación de espacio en disco
+-- Intervalos ya sincronizados con más de 13 meses
+DELETE FROM intervalos_15min
+WHERE is_synced = 1
+  AND inicio_intervalo < strftime('%s', 'now', '-13 months');
+
 VACUUM;
 ```
 
@@ -115,26 +128,41 @@ VACUUM;
 
 ## 6. Procedimiento de Transición de Estados
 
-### 6.1. Detección de Falla (Online ➔ Offline)
-1. El demonio de sincronización del Edge emite un *healthcheck* cada 10 segundos hacia `https://api.induplac.aws/health`.
-2. Si se registran **3 fallas consecutivas** o un *timeout* superior a 3.000 ms:
-   - El sistema conmuta su bandera interna a `STATE_OFFLINE`.
-   - Se mantiene la ingesta de MQTT directamente hacia SQLite con `is_synced = 0`.
-   - El Dashboard en planta detecta el estado y conmuta automáticamente su *endpoint* hacia la IP local de la Raspberry Pi (`http://192.168.10.10:8000/api/telemetria`), alertando al operario:
-     ```text
-     🔴 MODO OFFLINE — Operando sobre Gateway local (Sin conexión con AWS)
-     ```
+```
+ONLINE ──3 fallos──▶ OFFLINE ──healthcheck OK──▶ SINCRONIZANDO ──pendientes = 0──▶ ONLINE
+```
 
-### 6.2. Recuperación y Sincronización (Offline ➔ Syncing ➔ Online)
-1. Al restablecerse el enlace, el *healthcheck* responde exitosamente (HTTP 200).
-2. El sistema pasa a `STATE_SYNCING`.
-3. El servicio de sincronización recupera bloques de **50 registros** (`LIMIT 50`) ordenados cronológicamente (`ORDER BY timestamp ASC`).
-4. Se envían en un payload *batch* hacia AWS API Gateway.
-5. AWS persiste en DynamoDB de forma **idempotente** (utilizando el `record_id` UUIDv4 como clave para ignorar posibles duplicados).
-6. Tras recibir confirmación exitosa de AWS, el Edge ejecuta:
-   ```sql
-   UPDATE telemetria_local 
-   SET is_synced = 1 
-   WHERE record_id IN ('uuid-1', 'uuid-2', ...);
+### 6.1. Lo que NO cambia entre estados
+- El ESP32 publica, el Edge valida y guarda, calcula intervalos cada 15 min y **evalúa alertas**.
+- El dashboard de planta, servido por el Edge (`https://edge.induplac.local`), **sigue mostrando datos en tiempo real y alertas**. No conmuta de endpoint.
+
+### 6.2. Detección de Falla (Online ➔ Offline)
+1. El servicio de sincronización emite un *healthcheck* cada 10 s a `GET ${AWS_API_URL}/health` (API Gateway privada, por el túnel VPN).
+2. Con **3 fallas consecutivas** o un *timeout* > 3.000 ms el Edge pasa a `STATE_OFFLINE`.
+3. El dashboard de planta muestra el indicador:
+   ```text
+   🔴 OFFLINE — Sin enlace con AWS. Monitoreo y alertas locales activos.
    ```
-7. Al no restar registros pendientes con `is_synced = 0`, el sistema vuelve a `STATE_ONLINE`.
+4. El dashboard de gerencia (nube) muestra el local como **desconectado**, con su último dato y hora.
+
+### 6.3. Recuperación y Sincronización (Offline ➔ Sincronizando ➔ Online)
+1. El *healthcheck* responde HTTP 200 → `STATE_SYNCING`.
+2. El Edge toma bloques de **50 intervalos** pendientes en orden cronológico:
+   ```sql
+   SELECT * FROM intervalos_15min
+   WHERE is_synced = 0
+   ORDER BY inicio_intervalo ASC
+   LIMIT 50;
+   ```
+3. Envía el lote a `POST /intervalos`. Lambda hace *upsert* en DynamoDB con la llave `local_id + inicio_intervalo`, evalúa las reglas de alerta y registra en RDS.
+4. Las alertas generadas offline se envían a `POST /alertas`. RDS hace *upsert* con la llave `local_id + variable + inicio_intervalo`, de modo que la misma alerta **no se duplica** aunque Lambda también la detecte.
+5. Tras la confirmación de AWS:
+   ```sql
+   UPDATE intervalos_15min SET is_synced = 1
+   WHERE local_id = ? AND inicio_intervalo IN (...);
+   ```
+6. En la misma sincronización el Edge descarga los **umbrales vigentes** desde RDS.
+7. Sin pendientes → `STATE_ONLINE`.
+
+### 6.4. Si lo que se cae es la Raspberry Pi
+El ESP32 retiene hasta ~2 horas en su ring buffer y las reenvía al volver la Pi. Si el corte supera esa capacidad, se descartan las lecturas más antiguas (FIFO).
