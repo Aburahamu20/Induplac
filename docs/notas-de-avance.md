@@ -1,7 +1,8 @@
 # 📝 Notas de Avance — Induplac IoT
 
 > Bitácora de sesiones de trabajo: observaciones, decisiones e ideas en evaluación.  
-> Complementa a `docs/CONTEXTO.md`. Lo marcado como **idea** o **propuesta** todavía no es decisión del equipo.
+> Complementa a `docs/CONTEXTO.md`. Lo marcado como **idea** o **propuesta** todavía no es decisión del equipo.  
+> Las entradas antiguas se conservan como registro; el estado vigente de cada pendiente está en la entrada más reciente.
 
 ---
 
@@ -146,3 +147,32 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - [ ] **Argumento de DynamoDB:** con datos cada 15 min el volumen baja mucho; el ADR-01 debe apoyarse en costo/disponibilidad y Lambda sin conexiones, no en volumen.
 - [ ] **Históricos (ideas A y B):** los intervalos de 15 min en la nube ya permiten curvas por hora y comparaciones por período; el crudo de 5 s solo vive 30 días en el Edge.
 - [ ] **Actualizar `CONTEXTO.md`, `modo-offline.md` y `ciberseguridad.md`** para reflejar estas decisiones una vez conciliadas.
+
+---
+
+## 2026-10-08 — Decisiones del equipo y actualización de la documentación
+
+### Decisiones tomadas
+1. **Offline = online en planta:** sin internet el dashboard de planta muestra los datos en tiempo real igual que con conexión. → El Edge sirve el dashboard (ADR-07).
+2. **Alertas en los dos niveles:** Edge y Lambda evalúan las mismas reglas, para que haya alertas también offline (ADR-06).
+3. **VPN real:** VPN Site-to-Site IPsec operativa. → Ingesta por **API Gateway privada** con VPC Endpoint `execute-api` (ADR-02).
+4. **MFA implementado:** autenticación con MFA (Microsoft Authenticator) para administradores y quienes pueden cambiar cosas. → Cognito con MFA TOTP obligatorio para Administrador y Jefe de Mantenimiento/Operaciones; Operario sin MFA (ADR-08).
+
+### Documentos actualizados (rama `docs/decisiones-cloud`)
+- `docs/CONTEXTO.md`: agregación de 15 min, protocolos por tramo, alertas en dos niveles, umbrales nuevos (UV ≥ 8, energía +20 % con respaldo fijo), producción en tableros, roles y MFA, showcase actualizado.
+- `docs/decisiones-tecnicas.md`: ADR-01 con nuevos argumentos; ADR-02 VPN real + API privada; ADR-03 con VLAN de operarios; ADR-04 con `SG-VPCE-API`; nuevos ADR-05 a ADR-08.
+- `docs/modo-offline.md`: tablas `lecturas_crudas`, `intervalos_15min`, `alertas_local`; cálculo de capacidad unificado; nuevo ciclo de vida; estados con dashboard local.
+- `docs/ciberseguridad.md`: idempotencia por intervalo, VPN + API privada, RBAC con MFA, login local offline, nuevas pruebas de verificación.
+- `infrastructure/README.md`: VLAN de operarios con ACL, API privada y pública, sin NAT, RDS Single-AZ, costos de VPN y endpoint.
+
+### Estado de pendientes anteriores
+**Resueltos en esta actualización:** autonomía offline unificada · supuesto del cálculo explícito · NAT/Multi-AZ en el diagrama · VPN vs. API Gateway · failover del dashboard · dominio `api.induplac.aws` · ADR-01 · VLAN de operarios, DNS y certificado locales · alertas sin internet · idempotencia con agregados · intervalos durante un corte · regla de energía sin historia · NTP en el ESP32.
+
+**Siguen abiertos:**
+- [ ] **Verificar en Learner Lab** que se puedan crear VPN Site-to-Site, VPC Interface Endpoints y Cognito con MFA. Plan B para la VPN: EC2 con strongSwan.
+- [ ] **Costo de la VPN:** ~USD 0,05/h por conexión (~USD 72/mes con 2 sedes 24/7). Crear para pruebas/demo y eliminar al terminar; usar una sola conexión en pruebas diarias.
+- [ ] **Acciones permitidas offline (propuesta):** reconocer alertas con login local; umbrales y usuarios solo online con MFA. Validar con el equipo.
+- [ ] **Broker MQTT para Wokwi:** HiveMQ Cloud vs. Mosquitto (limitación de `Wokwi-GUEST`).
+- [ ] **Identificador por lectura (`device_id + seq`)** entre ESP32 y Edge, para reenvíos desde el ring buffer.
+- [ ] **Ley 21.719:** confirmar vigencia antes de citarla.
+- [ ] **Ideas de históricos A y B:** siguen estacionadas.
