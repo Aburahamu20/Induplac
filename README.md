@@ -17,6 +17,12 @@
 
 ---
 
+> 🧭 **¿Te perdiste cambios o no manejas algún tema?** Lee la **[Guía del Equipo](docs/GUIA-EQUIPO.md)**: explica todo el proyecto en simple y trae las preguntas típicas del profe con cómo responderlas.
+>
+> 📌 La versión vigente de las decisiones está en **[docs/CONTEXTO.md](docs/CONTEXTO.md)**. Si algo de este README no coincide, manda CONTEXTO.
+
+---
+
 ## 📋 Información del proyecto
 
 | Información | Detalle |
