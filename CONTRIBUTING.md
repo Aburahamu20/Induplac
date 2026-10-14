@@ -37,6 +37,14 @@
 
 ---
 
+## 🚧 Antes de empezar: reservar la tarea
+
+1. Revisa [`docs/EN-CURSO.md`](docs/EN-CURSO.md). Si la tarea está **🟡 En curso** por otra persona, no la tomes.
+2. Si está libre, resérvala (nombre, fecha, rama, estado 🟡) y haz push. **Es el único cambio que se puede subir directo a `main`**, y solo tocando ese archivo.
+3. Si trabajas con una IA, pídele que lea [`AGENTS.md`](AGENTS.md) antes de empezar.
+
+---
+
 ## 📋 Proceso para Enviar un Pull Request
 
 1. Actualiza tu rama con los últimos cambios de `main`:
@@ -49,8 +57,10 @@
    ```bash
    git push -u origin feature/tu-rama
    ```
-4. Abre el Pull Request en GitHub indicando:
-   - Resumen de los cambios realizados.
-   - Motivación o problema que resuelve.
+4. Abre el Pull Request en GitHub. La plantilla se carga sola; complétala indicando:
+   - Qué cambiaste (lista concreta).
+   - Por qué (número de la tarea en `docs/EN-CURSO.md`).
    - Cómo probar o validar los cambios.
-5. Espera la revisión y aprobación antes de fusionar (*merge*).
+5. Agrega una entrada con fecha en [`docs/notas-de-avance.md`](docs/notas-de-avance.md) dentro del mismo PR.
+6. Cambia la tarea a **🔵 En revisión** en `docs/EN-CURSO.md` y **avisa en el grupo** con el link al PR.
+7. Espera la revisión y aprobación antes de fusionar (*merge*). Después del merge, marca la tarea como **✅ Listo**.

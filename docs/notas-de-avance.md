@@ -215,3 +215,13 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - Nuevo **tablero `docs/EN-CURSO.md`**: antes de empezar una tarea se reserva ahí (nombre, fecha, rama, estado) con commit + push; al terminar se marca lista. Evita que dos personas o dos IA hagan lo mismo.
 - Nuevo **`AGENTS.md`** en la raíz con las reglas para cualquier IA (leer CONTEXTO, notas y EN-CURSO; reservar antes de trabajar; registrar al terminar). `CLAUDE.md` y `GEMINI.md` apuntan a él.
 - README enlaza al tablero.
+
+---
+
+## 2026-10-14 (noche) — Reglas de Pull Request
+
+- **Todo cambio va por Pull Request**; nadie hace commit directo en `main` (ya lo decía `CONTRIBUTING.md`). Única excepción: reservar o cambiar estados en `docs/EN-CURSO.md`, para que la reserva se vea de inmediato.
+- Nueva **plantilla de PR** (`.github/pull_request_template.md`): obliga a dejar escrito qué se cambió, por qué, cómo probarlo y un checklist (reserva, notas, CONTEXTO, sin secretos, aviso al grupo).
+- `AGENTS.md`, `CONTRIBUTING.md` y `docs/EN-CURSO.md` actualizados con estas reglas.
+- Nota: los commits de documentación del 2026-10-07 al 2026-10-14 se hicieron directo en `main` (salvo PR #3). Desde ahora se respeta el flujo por PR.
+- Rama del dashboard renombrada a `feature/dashboard` para seguir la convención de `CONTRIBUTING.md`.

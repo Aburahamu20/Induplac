@@ -12,8 +12,8 @@
    - Si está **🟢 Libre**, reservala: pon tu nombre, la fecha, la rama y cambia el estado a **🟡 En curso**. Haz commit y **push de inmediato**, antes de empezar a trabajar.
    - Si está **🟡 En curso** por otra persona, **no la tomes**. Coordina con quien la tiene.
    - Si no existe, agrégala como fila nueva.
-3. Trabaja en tu propia rama (`feat/...` o `docs/...`), nunca directo sobre lo que otro tiene reservado.
-4. Al terminar: estado **✅ Listo**, link al PR o commit, y una entrada en [`docs/notas-de-avance.md`](notas-de-avance.md).
+3. Trabaja en tu propia rama (`feature/...`, `fix/...` o `docs/...`) y entrega todo por **Pull Request** con la plantilla (qué cambiaste, por qué, cómo probarlo). **Nadie hace commit directo en `main`**, salvo para reservar o cambiar estados en este archivo.
+4. Al abrir el PR: estado **🔵 En revisión** con el link. Al hacer merge: **✅ Listo**, y una entrada en [`docs/notas-de-avance.md`](notas-de-avance.md). Avisa en el grupo.
 5. Si una tarea lleva **más de 7 días** en curso sin cambios, pregunta en el grupo antes de tomarla.
 
 **Estados:** 🟢 Libre · 🟡 En curso · 🔵 En revisión (PR abierto) · ✅ Listo · ⛔ Bloqueado (explicar por qué)
@@ -24,7 +24,7 @@
 
 | # | Tarea | Carpeta | Estado | Quién | Desde | Rama / PR | Notas |
 |---|---|---|---|---|---|---|---|
-| 1 | Dashboard React (monitor por sede, alertas, histórico, panel de simulación) con datos simulados | `dashboard/` | 🟡 En curso | Abraham (con Claude) | 2026-10-14 | `feat/dashboard` | Primero la simulación del dashboard con datos ficticios; no depende del broker. |
+| 1 | Dashboard React (monitor por sede, alertas, histórico, panel de simulación) con datos simulados | `dashboard/` | 🟡 En curso | Abraham (con Claude) | 2026-10-14 | `feature/dashboard` | Primero la simulación del dashboard con datos ficticios; no depende del broker. |
 | 2 | Crear y configurar broker MQTT de la simulación | — | ⛔ Bloqueado | | | | Falta confirmar EMQX Serverless vs. HiveMQ (ver notas 2026-10-14). |
 | 3 | Sketch ESP32 en Wokwi (sensores virtuales, NTP, JSON por MQTT) | `simulation/` | ⛔ Bloqueado | | | | Depende de la tarea 2. |
 | 4 | Agente Edge en Python (MQTT → SQLite → intervalos 15 min → alertas → sync) | `edge/` | ⛔ Bloqueado | | | | Depende de la tarea 2. |
