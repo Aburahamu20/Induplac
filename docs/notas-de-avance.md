@@ -207,3 +207,11 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - [ ] Identificador por lectura (`device_id + seq`) entre ESP32 y Edge.
 - [ ] Ley 21.719: confirmar vigencia antes de citarla.
 - [ ] Ideas de históricos A y B: siguen estacionadas.
+
+---
+
+## 2026-10-14 (noche) — Coordinación del trabajo en paralelo
+
+- Nuevo **tablero `docs/EN-CURSO.md`**: antes de empezar una tarea se reserva ahí (nombre, fecha, rama, estado) con commit + push; al terminar se marca lista. Evita que dos personas o dos IA hagan lo mismo.
+- Nuevo **`AGENTS.md`** en la raíz con las reglas para cualquier IA (leer CONTEXTO, notas y EN-CURSO; reservar antes de trabajar; registrar al terminar). `CLAUDE.md` y `GEMINI.md` apuntan a él.
+- README enlaza al tablero.

@@ -20,6 +20,8 @@
 > 🧭 **¿Te perdiste cambios o no manejas algún tema?** Lee la **[Guía del Equipo](docs/GUIA-EQUIPO.md)**: explica todo el proyecto en simple y trae las preguntas típicas del profe con cómo responderlas.
 >
 > 📌 La versión vigente de las decisiones está en **[docs/CONTEXTO.md](docs/CONTEXTO.md)**. Si algo de este README no coincide, manda CONTEXTO.
+>
+> 🚧 **¿Vas a trabajar en algo?** Revisa y reserva la tarea en **[docs/EN-CURSO.md](docs/EN-CURSO.md)** antes de empezar, para no rehacer trabajo de otro. Las IA deben seguir **[AGENTS.md](AGENTS.md)**.
 
 ---
 
