@@ -24,7 +24,7 @@
 
 | # | Tarea | Carpeta | Estado | Quién | Desde | Rama / PR | Notas |
 |---|---|---|---|---|---|---|---|
-| 1 | Dashboard React (monitor por sede, alertas, histórico, panel de simulación) con datos simulados | `dashboard/` | 🟢 Libre | | | | Se puede empezar ya; no depende del broker. |
+| 1 | Dashboard React (monitor por sede, alertas, histórico, panel de simulación) con datos simulados | `dashboard/` | 🟡 En curso | Abraham (con Claude) | 2026-10-14 | `feat/dashboard` | Primero la simulación del dashboard con datos ficticios; no depende del broker. |
 | 2 | Crear y configurar broker MQTT de la simulación | — | ⛔ Bloqueado | | | | Falta confirmar EMQX Serverless vs. HiveMQ (ver notas 2026-10-14). |
 | 3 | Sketch ESP32 en Wokwi (sensores virtuales, NTP, JSON por MQTT) | `simulation/` | ⛔ Bloqueado | | | | Depende de la tarea 2. |
 | 4 | Agente Edge en Python (MQTT → SQLite → intervalos 15 min → alertas → sync) | `edge/` | ⛔ Bloqueado | | | | Depende de la tarea 2. |
