@@ -179,3 +179,31 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - [ ] **Identificador por lectura (`device_id + seq`)** entre ESP32 y Edge, para reenvíos desde el ring buffer.
 - [ ] **Ley 21.719:** confirmar vigencia antes de citarla.
 - [ ] **Ideas de históricos A y B:** siguen estacionadas.
+
+---
+
+## 2026-10-14 — Respuestas del equipo a los pendientes
+
+### Decisiones tomadas
+1. **Demo 100 % en Wokwi** (sin hardware físico).
+2. **Broker MQTT:** el equipo eligió **HiveMQ Cloud**. Al revisarlo, su plan gratuito permanente (Serverless) fue retirado y hoy solo ofrece una **prueba de 15 días** del plan Starter, que se borra al terminar si no se agrega un medio de pago. **Propuesta:** usar **EMQX Serverless** (gratis, con TLS; ~1 millón de minutos de sesión al mes, suficiente para 2 ESP32 + 2 Edge conectados 24/7 ≈ 173 mil min/mes). *Pendiente de confirmar por el equipo.*
+3. **Acciones sin internet: aprobadas** — ver todo y reconocer alertas con login local en el Edge; umbrales y usuarios solo online con MFA.
+4. **Umbrales de agua** (valores ficticios de referencia, ver `CONTEXTO.md` §8.2):
+   - Local 1 (planta): normal ~10 m³/día · advertencia > 12 · alerta > 14 m³/día · posible fuga > 0,3 m³/h sostenido 1 h de noche o fin de semana.
+   - Local 2 (oficinas): normal ~1,5 m³/día · advertencia > 2 · alerta > 2,5 m³/día · posible fuga > 0,05 m³/h sostenido 1 h de noche o fin de semana.
+5. **Cognito con MFA se implementa; la VPN queda solo como diseño y no se demuestra.** En la demo, el Edge sincroniza por HTTPS contra una API Gateway pública con credenciales IAM de mínimo privilegio.
+
+### Aclaración importante para la demo
+- En el diseño real el broker vive **dentro de la planta** (Mosquitto en la Raspberry Pi). En la simulación va **en la nube** solo porque Wokwi corre en el navegador y no alcanza la red local.
+- Por eso, en la demo el **"corte de red"** se simula sobre el **enlace Edge → AWS** (la sincronización), que es el que realmente se cae en una planta.
+
+### Documentos actualizados
+`docs/CONTEXTO.md`, `docs/decisiones-tecnicas.md` (ADR-02, ADR-06, ADR-08), `docs/ciberseguridad.md`, `infrastructure/README.md`, `docs/GUIA-EQUIPO.md`.
+
+### Siguen abiertos
+- [ ] Confirmar broker: **EMQX Serverless** (propuesto) o prueba de HiveMQ solo para la semana de la demo.
+- [ ] Probar en el Learner Lab que **Cognito con MFA** funcione.
+- [ ] Actualizar secciones 14 y 15 del `README.md` (todavía muestran el diseño anterior).
+- [ ] Identificador por lectura (`device_id + seq`) entre ESP32 y Edge.
+- [ ] Ley 21.719: confirmar vigencia antes de citarla.
+- [ ] Ideas de históricos A y B: siguen estacionadas.

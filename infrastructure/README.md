@@ -101,6 +101,9 @@ interface Vlan11
 * **Ventaja:** la ingesta entra **directamente a la subred privada** sin endpoints públicos; cifrado en Capa 3 (IPsec) bajo Capa 7 (TLS).
 * **Plan B:** si el Learner Lab no permite VGW/VPN, una instancia EC2 pequeña con strongSwan actúa como extremo del túnel dentro de la VPC.
 
+> [!NOTE]
+> **Alcance en el MVP (decisión 2026-10-14):** la VPN queda **documentada como diseño y no se demuestra**. En la demo, el Edge sincroniza por HTTPS contra una **API Gateway pública** con credenciales IAM de mínimo privilegio.
+
 ---
 
 ## 4. Diseño de la VPC en AWS

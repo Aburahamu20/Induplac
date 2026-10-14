@@ -63,6 +63,7 @@ El tráfico entre los locales y AWS no debe exponerse sobre Internet público, n
 - **API Gateway privada** para la ingesta (`POST /intervalos`, `POST /alertas`, `GET /health`), alcanzable solo desde la VPC mediante un **VPC Interface Endpoint `execute-api`**, con *resource policy* que solo acepta tráfico de ese endpoint.
 - El Edge llama a la API usando el **nombre DNS específico del endpoint** (resuelve a IPs privadas de la VPC), que viaja por el túnel.
 - **Plan B** si el Learner Lab no permite crear VGW/VPN: instancia EC2 pequeña con strongSwan como extremo del túnel dentro de la VPC.
+- **Alcance en el MVP (2026-10-14):** la VPN se mantiene como diseño y **no se demuestra**. Para la demo, el Edge sincroniza por HTTPS contra una API Gateway pública con credenciales IAM de mínimo privilegio (solo `POST /intervalos`, `POST /alertas`, `GET /umbrales`, `GET /health`).
 
 ### Consecuencias
 - **Positivas:** la ingesta nunca toca Internet público; cifrado en Capa 3 (IPsec) bajo el cifrado de Capa 7 (TLS).
@@ -132,7 +133,7 @@ Subir cada lectura de 5 s a la nube no aporta valor para reportes y alertas por 
 El documento del equipo define que una Lambda evalúa las alertas. Si solo existiera ese nivel, durante un corte de internet la planta no recibiría alertas (por ejemplo, UV alto).
 
 ### Decisión
-- **Mismas reglas en ambos niveles** (ver `docs/CONTEXTO.md` §8.2): energía +20 % sobre el promedio de 4 semanas a la misma hora (umbral fijo de respaldo sin historia), agua diaria sobre umbral, UV ≥ 8.
+- **Mismas reglas en ambos niveles** (ver `docs/CONTEXTO.md` §8.2): energía +20 % sobre el promedio de 4 semanas a la misma hora (umbral fijo de respaldo sin historia), agua diaria sobre umbral por local más consumo fuera de horario como posible fuga, UV ≥ 8.
 - **Edge:** evalúa cada intervalo al cerrarlo y muestra la alerta en el dashboard de planta, con o sin internet. Conserva al menos 5 semanas de intervalos para calcular la regla de energía.
 - **Lambda:** evalúa cada intervalo recibido y registra la alerta en RDS.
 - **Sin duplicados:** la alerta se identifica por `local_id + variable + inicio_intervalo`. Las alertas creadas offline se sincronizan y Lambda hace *upsert* sobre la misma llave.
@@ -174,7 +175,7 @@ Modificar umbrales, usuarios o configuración tiene impacto operacional y de seg
 - **Amazon Cognito User Pool** con **MFA TOTP** (estándar compatible con Microsoft Authenticator).
 - MFA **obligatorio** para los grupos `administrador` y `jefe_mantenimiento_operaciones`; el grupo `operario` (solo lectura) inicia sesión sin MFA.
 - Los roles se guardan en RDS y se reflejan como grupos de Cognito; el token JWT (1 h) lleva el grupo y la API lo valida.
-- **Sin internet** (propuesta a validar): el Edge ofrece login local para ver el dashboard y reconocer alertas (acción auditada que se sincroniza después). Cambiar umbrales, usuarios o configuración **requiere conexión y MFA**.
+- **Sin internet** (aprobado 2026-10-14): el Edge ofrece login local para ver el dashboard y reconocer alertas (acción auditada que se sincroniza después). Cambiar umbrales, usuarios o configuración **requiere conexión y MFA**.
 
 ### Consecuencias
 - **Positivas:** las acciones críticas quedan protegidas por un segundo factor y auditadas.

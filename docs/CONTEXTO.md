@@ -57,7 +57,7 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
   - API local + servidor del dashboard de planta.
   - Hilo de sincronización en lotes hacia AWS por la VPN.
 - [ ] **Simulador ESP32 en Wokwi (C++):**
-  - Conexión a red virtual `Wokwi-GUEST`, hora por NTP.
+  - Conexión a red virtual `Wokwi-GUEST`, hora por NTP. **La demo es 100 % en Wokwi.**
   - Publicación periódica de telemetría JSON vía MQTT.
 - [ ] **Backend AWS:** Lambda de ingesta y alertas, API de consulta para el dashboard, Cognito con MFA.
 
@@ -124,21 +124,21 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 
 ### 4.7. VPN Site-to-Site Real
 * **Decisión:** Túnel **VPN Site-to-Site (IPsec IKEv2, AES-256)** real entre cada Edge (strongSwan como Customer Gateway) y el Virtual Private Gateway de la VPC. La ingesta usa una **API Gateway privada** alcanzable solo desde la VPC mediante un **VPC Interface Endpoint (execute-api)**, de modo que el tráfico del Edge nunca sale por Internet público.
-* **Costo:** la conexión VPN y el endpoint de interfaz se cobran por hora; se levantan para pruebas y para la demo (detalle en `infrastructure/README.md`).
+* **Costo:** la conexión VPN y el endpoint de interfaz se cobran por hora (detalle en `infrastructure/README.md`).
+* **Alcance en el MVP (2026-10-14):** la VPN queda **documentada como diseño y no se demuestra**, porque no hay certeza de que el Learner Lab la permita. En la demo, el Edge sincroniza por **HTTPS contra una API Gateway pública** con credenciales IAM de mínimo privilegio.
 
 ### 4.8. Autenticación con MFA
 * **Decisión:** Amazon Cognito con **MFA TOTP** (compatible con Microsoft Authenticator), **obligatorio para los roles que pueden cambiar cosas** (Administrador y Jefe de Mantenimiento/Operaciones). El Operario, que solo consulta, inicia sesión sin MFA.
-* **Sin internet:** la planta sigue viendo el dashboard con un login local en el Edge; los cambios de configuración (umbrales, usuarios) requieren conexión y MFA. Ver `docs/ciberseguridad.md`.
+* **Sin internet (aprobado 2026-10-14):** la planta sigue viendo el dashboard y puede reconocer alertas con un login local en el Edge; los cambios de configuración (umbrales, usuarios) requieren conexión y MFA. Ver `docs/ciberseguridad.md`.
 
 ---
 
 ## 5. Puntos Discutidos Pendientes de Decisión Definitiva
 
-1. **Hardware Físico para la Presentación Final:** maqueta física (ESP32 real) o demostración 100% en Wokwi. *Estado:* ambos viables; Wokwi aprobado como simulación oficial.
-2. **Broker MQTT en Desarrollo:** **HiveMQ Cloud** (TLS gratis) o **Mosquitto** en Docker en el Edge. *Ojo:* el ESP32 en Wokwi web sale por `Wokwi-GUEST` y no alcanza un broker en la LAN sin el gateway privado de Wokwi.
-3. **Acciones permitidas offline:** propuesta en `docs/ciberseguridad.md` (reconocer alertas con login local; umbrales y usuarios solo online). Validar con el equipo.
-4. **Disponibilidad en Learner Lab:** verificar que el Learner Lab permita crear VPN Site-to-Site, VPC Interface Endpoints y Cognito con MFA. Plan B para la VPN: instancia EC2 con strongSwan como extremo del túnel en la VPC.
+1. **Broker MQTT para la simulación:** el equipo eligió **HiveMQ Cloud**, pero su plan gratuito permanente fue retirado (hoy solo ofrece una prueba de 15 días). Propuesta: **EMQX Serverless** (gratis, TLS). *Pendiente de confirmar.* En el diseño real el broker vive en la Raspberry Pi (Mosquitto); en la simulación va en la nube porque el ESP32 en Wokwi web sale por `Wokwi-GUEST` y no alcanza la red local.
+2. **Verificar Cognito con MFA en el Learner Lab** (se implementa; hay que probar que el Learner Lab lo permita).
 
+> Resueltos el 2026-10-14: demo **100 % en Wokwi**; acciones offline aprobadas (reconocer alertas con login local; umbrales y usuarios solo online con MFA); umbrales de agua definidos (§8.2); **VPN solo como diseño**: no se demuestra y la ingesta de la demo va por HTTPS a una API Gateway pública con credenciales de mínimo privilegio.
 > Resueltos el 2026-10-08: proveedor de autenticación (Cognito + MFA para roles con escritura), comportamiento offline del dashboard (igual que online), alertas offline (Edge + Lambda) y VPN (real).
 
 ---
@@ -160,7 +160,7 @@ LO QUE FALTA PARA EL MVP EJECUTABLE (En orden):
 ├── [PENDIENTE] Código C++ para ESP32 en 'simulation/' (Wokwi)
 ├── [PENDIENTE] Agente Edge en 'edge/' (Python: MQTT -> SQLite -> Agregación 15 min -> Alertas -> Sync)
 ├── [PENDIENTE] Backend AWS en 'backend/' (Lambda ingesta/alertas, API consulta, Cognito MFA)
-└── [PENDIENTE] VPN Site-to-Site + API Gateway privada (verificar Learner Lab)
+└── [DISEÑO] VPN Site-to-Site + API Gateway privada (documentada, no se demuestra en el MVP)
 ```
 
 ---
@@ -199,7 +199,14 @@ La evaluación se gana demostrando la **resiliencia híbrida en vivo**:
 - **Energía Eléctrica (kW / kWh):**
   - Alerta 🔴 si el consumo horario supera en **20 % el promedio de las últimas 4 semanas en ese mismo horario**.
   - Mientras no existan 4 semanas de historia se usa el umbral fijo de respaldo: normal < 45 kW (`Verde`), advertencia 45–55 kW (`Amarillo`), crítico > 55 kW (`Rojo`).
-- **Consumo de Agua (m³):** alerta 🔴 cuando el consumo diario supera el umbral definido por local (tabla `umbrales_alerta`). Se mantiene la detección de consumo nocturno como indicio de fuga.
+- **Consumo de Agua (m³):** umbral diario por local (tabla `umbrales_alerta`, valores ficticios de referencia):
+
+  | Local | Consumo normal (día hábil) | 🟡 Advertencia | 🔴 Alerta | Posible fuga (22:00–06:00 o fin de semana) |
+  | :--- | :---: | :---: | :---: | :--- |
+  | **Local 1 (Planta)** | ~10 m³/día | > 12 m³/día | > 14 m³/día | Caudal > 0,3 m³/h sostenido por 1 hora |
+  | **Local 2 (Oficinas)** | ~1,5 m³/día | > 2 m³/día | > 2,5 m³/día | Caudal > 0,05 m³/h sostenido por 1 hora |
+
+  *Base del cálculo:* planta ≈ 40 personas × 80 L + lavado y procesos ≈ 10 m³/día; oficinas ≈ 20 personas × 50 L + aseo ≈ 1,5 m³/día. Las alertas se ponen ~40 % sobre lo normal. La regla de fuga detecta consumo cuando no debería haberlo.
 - **Radiación Solar (Índice UV, escala 1 a 12):** alerta 🔴 con **valor 8 o superior** (riesgo para personal en exteriores). Entre 6 y 7,9 se muestra en amarillo como recomendación de protector y sombra.
 - **Horas Hombre (HH):** contador de horas sin incidentes con tiempo perdido.
 - **Producción:** tableros fabricados en el mes y acumulado anual.

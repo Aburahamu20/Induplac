@@ -3,7 +3,7 @@
 > **Para quién es:** para cualquier integrante que no estuvo en alguna reunión, que se perdió cambios o que no maneja bien algún tema (redes, nube, IoT).
 > **Objetivo:** que después de leer esto puedas **explicar el proyecto completo** y **responder las preguntas del profe** con seguridad.
 >
-> Última actualización: 2026-10-13. Si algo de esta guía no coincide con otro documento, manda lo que diga [`docs/CONTEXTO.md`](CONTEXTO.md) y avisa al equipo.
+> Última actualización: 2026-10-14. Si algo de esta guía no coincide con otro documento, manda lo que diga [`docs/CONTEXTO.md`](CONTEXTO.md) y avisa al equipo.
 
 ---
 
@@ -181,7 +181,7 @@ El sistema tiene tres estados:
 | Variable | Cuándo hay alerta 🔴 |
 |---|---|
 | ⚡ **Electricidad** | El consumo de una hora supera en **20 %** el promedio de esa misma hora en las **últimas 4 semanas**. Mientras no hay 4 semanas de historia, se usa un umbral fijo: sobre 55 kW es crítico (45–55 kW advertencia). |
-| 💧 **Agua** | El consumo diario supera el umbral definido para la sede. También se vigila el consumo de noche, que puede indicar una fuga. |
+| 💧 **Agua** | **Local 1 (planta):** alerta sobre 14 m³/día (amarillo sobre 12). **Local 2 (oficinas):** alerta sobre 2,5 m³/día (amarillo sobre 2). Además, **posible fuga** si hay consumo de noche (22:00–06:00) o el fin de semana: más de 0,3 m³/h en la planta o 0,05 m³/h en oficinas durante 1 hora. |
 | ☀️ **UV** | Índice **8 o más** (riesgo para quienes trabajan afuera). Entre 6 y 7,9 se muestra amarillo como recomendación de protector y sombra. |
 
 **¿Por qué comparar contra el promedio y no un número fijo en electricidad?** Porque un lunes a las 10:00 es normal consumir mucho, pero un domingo a las 3:00 no. Comparar contra "lo normal para esa hora" detecta lo raro.
@@ -221,7 +221,7 @@ Usamos **"defensa en profundidad"**: varias capas, para que si una falla, las ot
 
 **¿Por qué MFA solo para algunos?** Porque el MFA protege las acciones que **cambian cosas**. El operario solo mira; pedirle MFA agrega fricción sin mucho beneficio.
 
-**¿Cómo se inicia sesión sin internet?** La Raspberry Pi tiene un login local para ver el dashboard. Lo que cambia la configuración (umbrales, usuarios) requiere internet y MFA. *(La propuesta de qué se permite exactamente sin internet todavía la está validando el equipo.)*
+**¿Cómo se inicia sesión sin internet?** La Raspberry Pi tiene un login local para ver el dashboard. Lo que cambia la configuración (umbrales, usuarios) requiere internet y MFA. Sin internet también se pueden **reconocer alertas** (queda registrado y se sube después). *(Aprobado por el equipo.)*
 
 ---
 
@@ -240,7 +240,7 @@ Si preguntan por la parte de redes, estos son los puntos:
   - Una **pública**, protegida con login (Cognito), para el dashboard de gerencia.
 - **Sin NAT Gateway** y **RDS en una sola zona**, para no gastar el crédito.
 
-> ⚠️ **Sobre la VPN:** está diseñada y documentada, pero falta comprobar que el Learner Lab permita crearla (y cuesta unos USD 0,05 por hora por conexión). **Si no se puede, se mantiene en el diseño y se explica, pero no se demuestra.**
+> ⚠️ **Sobre la VPN (decisión del equipo):** está diseñada y documentada, pero **no se demuestra**, porque no sabemos si el Learner Lab la permite y además cuesta unos USD 0,05 por hora por conexión. En la demo, la Raspberry Pi sube los datos por **HTTPS a una API pública** con permisos mínimos. Si preguntan, se explica como el diseño para producción.
 
 ---
 
@@ -269,7 +269,7 @@ Qué muestra:
 La evaluación no se gana con gráficos bonitos, sino mostrando que **el sistema aguanta sin internet**. El guion:
 
 1. Todo funciona en 🟢 **ONLINE**.
-2. Se presiona **"Simular corte de red"** → el indicador pasa a 🔴 **OFFLINE**, pero el dashboard **sigue mostrando datos en tiempo real**.
+2. Se presiona **"Simular corte de red"** → se corta el enlace entre la Raspberry Pi y AWS. El indicador pasa a 🔴 **OFFLINE**, pero el dashboard **sigue mostrando datos en tiempo real**.
 3. Se inyecta un **UV alto** → **la alerta aparece igual**, generada por la Raspberry Pi.
 4. Mientras tanto, los resúmenes se acumulan en la Pi como pendientes.
 5. Se **reconecta** → 🟡 **SINCRONIZANDO (XX pendientes)**.
@@ -297,13 +297,17 @@ Pruebas de seguridad que también se pueden mostrar:
 2. Código del ESP32 en Wokwi.
 3. Programa de la Raspberry Pi (Python): recibir, guardar, resumir, alertar y sincronizar.
 4. Backend en AWS: Lambdas, bases de datos y Cognito con MFA.
-5. VPN y API privada (si el Learner Lab lo permite).
+5. ~~VPN y API privada~~ → queda solo como diseño (no se demuestra).
 
-**❓ Pendiente de decidir:**
-- ¿Demo con hardware real o 100 % en Wokwi?
-- Broker MQTT: HiveMQ Cloud o Mosquitto (Wokwi web no llega a un broker dentro de la red local, por eso se está evaluando HiveMQ Cloud).
-- Si el Learner Lab permite VPN y Cognito con MFA.
-- Qué acciones exactas se permiten sin internet.
+**✅ Decidido el 2026-10-14:**
+- La demo es **100 % en Wokwi**.
+- Sin internet se puede **ver todo y reconocer alertas**; umbrales y usuarios solo con internet y MFA.
+- Umbrales de agua definidos (ver sección 8).
+- La **VPN queda como diseño** y no se demuestra; Cognito con MFA **sí se implementa**.
+
+**❓ Pendiente:**
+- **Broker MQTT:** elegimos HiveMQ Cloud, pero ya no tiene plan gratis permanente (solo prueba de 15 días). Propuesta: **EMQX Serverless**, que sí es gratis. Falta confirmar.
+- Probar que el Learner Lab permita **Cognito con MFA**.
 
 ---
 
@@ -316,6 +320,9 @@ Pruebas de seguridad que también se pueden mostrar:
 
 **¿Por qué usan datos ficticios si la empresa es real?**
 > Por ética y confidencialidad: no tenemos acceso a los sistemas internos de Induplac. Simulamos datos con órdenes de magnitud coherentes con la industria.
+
+**Si el broker está en la nube, ¿cómo sigue funcionando la planta sin internet?**
+> En el diseño real, el broker vive dentro de la planta (en la Raspberry Pi), así que un corte de internet no lo afecta. En la simulación lo pusimos en la nube solo porque Wokwi corre en el navegador y no puede llegar a la red local. Por eso, en la demo el "corte" que simulamos es el del enlace entre la Raspberry Pi y AWS, que es el que de verdad se cae en una planta.
 
 **¿Por qué Wokwi y no sensores reales?**
 > Para el prototipo, Wokwi permite simular el ESP32 y los sensores sin costo de hardware. El diseño está pensado para pasar después a sensores reales (por ejemplo, SCT-013 para corriente y caudalímetros).
@@ -370,6 +377,9 @@ Pruebas de seguridad que también se pueden mostrar:
 **¿Para qué la VPN si ya usan HTTPS?**
 > Es defensa en profundidad. HTTPS cifra los datos de la aplicación; la VPN cifra a nivel de red y además permite que la puerta de entrada de los datos sea privada, que no exista en internet. Si una capa falla, la otra sigue protegiendo.
 
+**¿Por qué no muestran la VPN funcionando?**
+> Porque no tenemos certeza de que la cuenta educativa de AWS permita crearla y además cobra por hora. La dejamos diseñada y documentada para una implementación real; en la demo los datos viajan por HTTPS a una API con permisos mínimos.
+
 **¿Qué pasa si hackean un ESP32?**
 > Está en una VLAN aislada: solo puede hablar con la Raspberry Pi por MQTT. No llega a los computadores de la oficina. Además, el broker no le deja publicar datos de la otra sede, y los valores imposibles se descartan.
 
@@ -388,7 +398,7 @@ Pruebas de seguridad que también se pueden mostrar:
 ### Sobre costos y alcance
 
 **¿Cuánto cuesta? ¿Les alcanza con los USD 100 del Learner Lab?**
-> La mayoría de los servicios cuesta casi nada a esta escala (DynamoDB, Lambda, API Gateway). RDS es una instancia pequeña que apagamos cuando no se usa, y no usamos NAT Gateway. Lo único caro es la VPN (unos USD 0,05 por hora por conexión), por eso se levanta solo para pruebas y la demo.
+> La mayoría de los servicios cuesta casi nada a esta escala (DynamoDB, Lambda, API Gateway). RDS es una instancia pequeña que apagamos cuando no se usa, y no usamos NAT Gateway. Lo único caro sería la VPN (unos USD 0,05 por hora por conexión); por eso en el MVP queda como diseño y no se levanta.
 
 **¿Qué tienen listo y qué falta?**
 > El diseño completo y la documentación están listos. Falta el código: primero el dashboard, después el ESP32 en Wokwi, el programa de la Raspberry Pi y el backend en AWS.
@@ -415,6 +425,8 @@ Pruebas de seguridad que también se pueden mostrar:
 | Alerta UV | **≥ 8** |
 | Rango válido de electricidad | 0 – 250 kW |
 | Rango válido de agua | 0 – 50 m³/h |
+| Alerta agua Local 1 / Local 2 | > **14** / > **2,5** m³/día (amarillo > 12 / > 2) |
+| Posible fuga Local 1 / Local 2 | > **0,3** / > **0,05** m³/h por 1 h, de noche o fin de semana |
 | Rango válido de UV | 0 – 15 |
 | MQTT cifrado | Puerto **8883** |
 | Red de AWS (VPC) | `10.0.0.0/16` |

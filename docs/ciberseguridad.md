@@ -120,7 +120,7 @@ flowchart TD
 
 - **Autenticación:** Amazon Cognito User Pool. **MFA TOTP** (compatible con Microsoft Authenticator) obligatorio para los grupos `jefe_mantenimiento_operaciones` y `administrador`. El Operario, de solo lectura, entra sin MFA.
 - **Tokens:** JWT de 1 hora con refresco automático; el grupo del usuario viaja en el token y la API lo valida en cada solicitud.
-- **Sin internet (propuesta a validar con el equipo):**
+- **Sin internet (aprobado por el equipo 2026-10-14):**
   - El Edge ofrece un **login local** con usuarios y roles replicados desde RDS para ver el dashboard de planta.
   - Un Jefe puede **reconocer alertas** offline; la acción queda auditada y se sincroniza después.
   - **Modificar umbrales, usuarios o configuración requiere conexión y MFA de Cognito**, para evitar conflictos con RDS y no guardar secretos MFA en el Edge.
