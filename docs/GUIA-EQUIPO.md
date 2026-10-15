@@ -67,7 +67,7 @@ Hoy, en muchas empresas, el consumo se ve **tarde**: llega la boleta a fin de me
 | **ESP32** | Un microcontrolador barato con WiFi (un "mini cerebro" para sensores). | Lee los sensores cada 5 segundos y envía los datos. |
 | **Wokwi** | Un simulador web de ESP32. | Simulamos los sensores sin comprar hardware. |
 | **MQTT** | Un protocolo de mensajes muy liviano, pensado para dispositivos pequeños. | Es el "idioma" con que el ESP32 envía datos. |
-| **Broker MQTT** | El "cartero" de MQTT: recibe mensajes y los entrega a quien los pidió. | Recibe los datos de los ESP32 y se los pasa al Edge. |
+| **Broker MQTT** | El "cartero" de MQTT: recibe mensajes y los entrega a quien los pidió. | Recibe los datos de los ESP32 y se los pasa al Edge. En la simulación usamos **EMQX Serverless** (en la nube, gratis). |
 | **Edge / Edge Gateway** | Un computador que está **en la sede**, cerca de los sensores ("en el borde" de la red). | En nuestro caso es una **Raspberry Pi**: guarda, resume, alerta y muestra el dashboard de planta. |
 | **SQLite** | Una base de datos liviana que vive en un solo archivo. | Base de datos local de la Raspberry Pi. |
 | **AWS** | La nube de Amazon. Usamos el **Learner Lab** (cuenta educativa con USD 100). | Junta las dos sedes, guarda el histórico, administra usuarios. |
@@ -303,10 +303,10 @@ Pruebas de seguridad que también se pueden mostrar:
 - La demo es **100 % en Wokwi**.
 - Sin internet se puede **ver todo y reconocer alertas**; umbrales y usuarios solo con internet y MFA.
 - Umbrales de agua definidos (ver sección 8).
+- **Broker MQTT: EMQX Serverless** (gratis, con TLS). HiveMQ Cloud se descartó porque ya no tiene plan gratis permanente.
 - La **VPN queda como diseño** y no se demuestra; Cognito con MFA **sí se implementa**.
 
 **❓ Pendiente:**
-- **Broker MQTT:** elegimos HiveMQ Cloud, pero ya no tiene plan gratis permanente (solo prueba de 15 días). Propuesta: **EMQX Serverless**, que sí es gratis. Falta confirmar.
 - Probar que el Learner Lab permita **Cognito con MFA**.
 
 ---

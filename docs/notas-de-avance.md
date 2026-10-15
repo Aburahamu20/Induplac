@@ -225,3 +225,12 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - `AGENTS.md`, `CONTRIBUTING.md` y `docs/EN-CURSO.md` actualizados con estas reglas.
 - Nota: los commits de documentación del 2026-10-07 al 2026-10-14 se hicieron directo en `main` (salvo PR #3). Desde ahora se respeta el flujo por PR.
 - Rama del dashboard renombrada a `feature/dashboard` para seguir la convención de `CONTRIBUTING.md`.
+
+---
+
+## 2026-10-14 (noche) — Broker MQTT definido
+
+- **Decisión:** el broker de la simulación es **EMQX Serverless**. HiveMQ Cloud se descarta porque su plan gratuito permanente fue retirado (solo ofrece prueba de 15 días).
+- Configuración acordada: *spend limit* en **0** (solo cuota gratis), un usuario por dispositivo (`esp32-local1`, `esp32-local2`, `edge-local1`, `edge-local2`), puertos **8883** (MQTT/TLS) y **8084** (WebSocket/TLS). Las credenciales **no se suben al repo**; van en `.env`.
+- Tarea 2 del tablero reservada para Abraham; tareas 3 y 4 quedan libres para cuando el broker esté listo.
+- Actualizados `docs/CONTEXTO.md` y `docs/GUIA-EQUIPO.md`.
