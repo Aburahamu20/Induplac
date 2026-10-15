@@ -56,8 +56,8 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 | 10 | 🔥 Matriz RACI (6–10 actividades, cada una con R y un solo A) | 3 | 🟢 Libre | | | | Depende de la 9. Hay un borrador en NOTA-2.md. |
 | 11 | Modelo Cloud (híbrido + serverless/PaaS) y tabla de tecnologías con su aporte concreto | 6, 7 | 🟢 Libre | | | | Justificar cada tecnología; no nombrar por nombrar. |
 | 12 | Pipeline DevOps: diagrama + GitHub Actions que compile/pruebe en cada PR | 8 | 🟢 Libre | | | | Si se implementa de verdad, sirve como evidencia. |
-| 13 | Planificación: Scrum del MVP (backlog, sprints) + PMI con las 5 fases | 9 | 🟢 Libre | | | | Vale 15 % junto con la Gantt. |
-| 14 | Carta Gantt hasta la puesta en marcha (responsables, duración, dependencias, hitos) | 10 | 🟢 Libre | | | | Depende de la 10 y la 13. Hay un borrador en NOTA-2.md. |
+| 13 | Planificación: Scrum del MVP (backlog, sprints) + PMI con las 5 fases | 9 | 🟡 En curso | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | — | Vale 15 % junto con la Gantt. Reservada por Abraham a su nombre. |
+| 14 | Carta Gantt hasta la puesta en marcha (responsables, duración, dependencias, hitos) | 10 | 🟡 En curso | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | — | Necesita los roles (9) y la RACI (10) para asignar responsables. Hay un borrador en NOTA-2.md. Reservada por Abraham a su nombre. |
 | 15 | Conclusiones y defensa: problema, beneficios, limitaciones, siguientes pasos | 12 | 🟢 Libre | | | | Material en CONTEXTO.md y GUIA-EQUIPO.md. |
 | 16 | Informe del proyecto actualizado | 13 | 🟢 Libre | | | | Confirmar formato (¿Word?) y si existe el de la Nota 1. |
 | 17 | Presentación PowerPoint (consolida todo, en el orden que pide el profe) | 1 | 🟢 Libre | | | | Al final; depende de casi todo. |
