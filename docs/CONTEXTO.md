@@ -135,7 +135,7 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 
 ## 5. Puntos Discutidos Pendientes de Decisión Definitiva
 
-1. **Broker MQTT para la simulación:** el equipo eligió **HiveMQ Cloud**, pero su plan gratuito permanente fue retirado (hoy solo ofrece una prueba de 15 días). Propuesta: **EMQX Serverless** (gratis, TLS). *Pendiente de confirmar.* En el diseño real el broker vive en la Raspberry Pi (Mosquitto); en la simulación va en la nube porque el ESP32 en Wokwi web sale por `Wokwi-GUEST` y no alcanza la red local.
+1. **Broker MQTT para la simulación: EMQX Serverless (decidido 2026-10-14).** HiveMQ Cloud se descartó porque su plan gratuito permanente fue retirado (solo prueba de 15 días). EMQX Serverless es gratis, usa TLS (8883 MQTT, 8084 WebSocket) y se configura con *spend limit* 0 para no generar cobros. En el diseño real el broker vive en la Raspberry Pi (Mosquitto); en la simulación va en la nube porque el ESP32 en Wokwi web sale por `Wokwi-GUEST` y no alcanza la red local.
 2. **Verificar Cognito con MFA en el Learner Lab** (se implementa; hay que probar que el Learner Lab lo permita).
 
 > Resueltos el 2026-10-14: demo **100 % en Wokwi**; acciones offline aprobadas (reconocer alertas con login local; umbrales y usuarios solo online con MFA); umbrales de agua definidos (§8.2); **VPN solo como diseño**: no se demuestra y la ingesta de la demo va por HTTPS a una API Gateway pública con credenciales de mínimo privilegio.

@@ -228,6 +228,12 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 
 ---
 
+## 2026-10-14 (noche) — Broker MQTT definido
+
+- **Decisión:** el broker de la simulación es **EMQX Serverless**. HiveMQ Cloud se descarta porque su plan gratuito permanente fue retirado (solo ofrece prueba de 15 días).
+- Configuración acordada: *spend limit* en **0** (solo cuota gratis), un usuario por dispositivo (`esp32-local1`, `esp32-local2`, `edge-local1`, `edge-local2`), puertos **8883** (MQTT/TLS) y **8084** (WebSocket/TLS). Las credenciales **no se suben al repo**; van en `.env`.
+- Tarea 2 del tablero reservada para Abraham; tareas 3 y 4 quedan libres para cuando el broker esté listo.
+- Actualizados `docs/CONTEXTO.md` y `docs/GUIA-EQUIPO.md`.
 ## 2026-10-14 (noche) — Pauta de la Nota 2
 
 - El profesor envió la pauta de la **Nota 2** (13 entregables) y la clase de **PMI, roles y RACI**. Resumen y borradores en [`docs/NOTA-2.md`](NOTA-2.md).
