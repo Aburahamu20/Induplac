@@ -225,3 +225,14 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - `AGENTS.md`, `CONTRIBUTING.md` y `docs/EN-CURSO.md` actualizados con estas reglas.
 - Nota: los commits de documentación del 2026-10-07 al 2026-10-14 se hicieron directo en `main` (salvo PR #3). Desde ahora se respeta el flujo por PR.
 - Rama del dashboard renombrada a `feature/dashboard` para seguir la convención de `CONTRIBUTING.md`.
+
+---
+
+## 2026-10-14 (noche) — Pauta de la Nota 2
+
+- El profesor envió la pauta de la **Nota 2** (13 entregables) y la clase de **PMI, roles y RACI**. Resumen y borradores en [`docs/NOTA-2.md`](NOTA-2.md).
+- Ponderación conocida: roles y fortalezas **15 %**; planificación ágil + PMI/Gantt **15 %**.
+- Se cargaron las tareas **9 a 18** en `docs/EN-CURSO.md`, todas libres para que cada integrante reserve la suya. Prioridad de hoy: roles (9) y RACI (10).
+- Propuesta: como somos 5, agregar el rol **Seguridad y DevOps** a los 4 que sugiere el profe.
+- Mayor riesgo: la **demo del prototipo** (el código va recién en la base del dashboard).
+- Pendiente: fecha de entrega, asignación de roles y formato del informe.
