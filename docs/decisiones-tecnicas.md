@@ -14,6 +14,7 @@ Este documento recopila las decisiones técnicas y de arquitectura clave tomadas
 - [ADR-06: Alertas en Dos Niveles (Edge + Lambda)](#adr-06-alertas-en-dos-niveles-edge--lambda)
 - [ADR-07: Dashboard de Planta Servido desde el Edge](#adr-07-dashboard-de-planta-servido-desde-el-edge)
 - [ADR-08: Autenticación con MFA para Roles con Permisos de Escritura](#adr-08-autenticación-con-mfa-para-roles-con-permisos-de-escritura)
+- [ADR-09: Login Obligatorio y Permisos por Usuario](#adr-09-login-obligatorio-y-permisos-por-usuario)
 
 ---
 
@@ -166,7 +167,7 @@ Un dashboard servido desde la nube no carga sin internet y el navegador bloquea 
 
 ## ADR-08: Autenticación con MFA para Roles con Permisos de Escritura
 
-### Estado: Aceptado (2026-10-08)
+### Estado: Aceptado (2026-10-08) · **Ampliado por ADR-09 (2026-10-16)**: el MFA pasa a depender de los permisos del usuario, no del grupo.
 
 ### Contexto
 Modificar umbrales, usuarios o configuración tiene impacto operacional y de seguridad. El documento del equipo define MFA con Microsoft Authenticator.
@@ -180,3 +181,30 @@ Modificar umbrales, usuarios o configuración tiene impacto operacional y de seg
 ### Consecuencias
 - **Positivas:** las acciones críticas quedan protegidas por un segundo factor y auditadas.
 - **Negativas:** verificar soporte de Cognito con MFA en el Learner Lab; doble mecanismo de login (Cognito y local en el Edge).
+
+---
+
+## ADR-09: Login Obligatorio y Permisos por Usuario
+
+### Estado: Propuesto (2026-10-16) — en revisión del equipo
+
+### Contexto
+El dashboard muestra datos operacionales de la empresa, así que no debe verse sin identificarse, ni siquiera en la red de planta. Además, los tres roles fijos no cubren casos reales (por ejemplo, un operario de confianza que necesita ver el histórico sin poder modificar nada).
+
+### Decisión
+- **Login obligatorio para ver**, con o sin internet. Ningún endpoint de datos responde sin token.
+- **Ciclo de vida de la cuenta:** el Administrador crea la cuenta con una **clave temporal**; en el primer login el usuario la **cambia por una personal**; la clave se guarda solo como hash y **nadie puede verla**. Clave olvidada → el Administrador la **resetea**. Celular perdido → el Administrador **resetea el MFA**.
+- **Permisos por usuario:** el rol es una plantilla y el Administrador marca o desmarca permisos de ver (`ver_actual`, `ver_alertas`, `ver_historico`, `ver_general`) y de modificar (`reconocer_alertas`, `modificar_umbrales`, `gestionar_usuarios`), más los locales visibles.
+- **MFA obligatorio** para cualquier usuario con al menos un permiso de modificación, también en planta (TOTP propio del Edge, que se valida sin internet).
+- Reglas: nadie otorga permisos que no tiene; siempre existe al menos un usuario con `gestionar_usuarios`; la API valida permisos en cada petición; los cambios quedan auditados sin datos personales (Ley 19.628).
+- Los permisos se guardan en RDS (tablas `permisos` y `usuario_permisos`) y el Edge los recibe al sincronizar.
+- Detalle de endpoints y formato: `docs/api-dashboard.md` §6.
+
+### Alternativas Evaluadas
+1. **Solo roles fijos (ADR-08 original):** más simple, pero rígido.
+2. **Permisos libres sin plantillas:** flexible, pero propenso a errores al crear cuentas.
+3. **Roles como plantilla + permisos ajustables (elegida).**
+
+### Consecuencias
+- **Positivas:** acceso mínimo necesario por persona; claves personales que ni el Administrador conoce.
+- **Negativas:** el Edge debe replicar el flujo de cambio de clave y MFA; como Cognito no exporta claves ni secretos TOTP, quien tenga MFA tendrá dos entradas en Microsoft Authenticator (nube y planta).

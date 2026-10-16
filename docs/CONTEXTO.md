@@ -3,7 +3,7 @@
 > **Documento de transferencia de contexto para asistentes y desarrolladores:**  
 > Este documento condensa la visión, la filosofía de diseño, los requisitos, las discusiones de ingeniería y el estado del proyecto **Induplac IoT**. Si eres una IA o un desarrollador que retoma este repositorio, este archivo te otorga todo el contexto conversacional previo sin necesidad de acceder al historial de chats.
 >
-> **Última actualización:** 2026-10-08 — incorpora el documento del equipo *"Decisiones Cloud aplicadas al proyecto Induplac"* y las decisiones tomadas a partir de él. El detalle de la discusión está en `docs/notas-de-avance.md`.
+> **Última actualización:** 2026-10-16 — contrato de datos del dashboard (`docs/api-dashboard.md`), login obligatorio y permisos por usuario. El detalle de la discusión está en `docs/notas-de-avance.md`.
 
 ---
 
@@ -49,6 +49,8 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
   - Histórico: comparación entre sedes y entre períodos.
   - Indicador de estado de enlace (`🟢 ONLINE`, `🔴 OFFLINE`, `🟡 SINCRONIZANDO`).
   - **Mismo build en dos lugares:** servido por la Raspberry Pi en planta (lee la API local) y en la nube para gerencia (lee la API pública con Cognito).
+  - **Contrato de datos:** endpoints y formato JSON en `docs/api-dashboard.md`; el Edge y el backend AWS deben respetarlo.
+  - **Login obligatorio para ver**, con o sin internet.
   - **Panel de Control de Demostración (Simulador de Fallas):** Botón para simular corte de red y botones para inyectar alertas de sobreconsumo o UV alto en vivo frente al docente.
 - [ ] **Agente Edge Gateway (Python):**
   - Escucha el broker MQTT local, valida rangos y guarda las lecturas crudas en SQLite.
@@ -84,7 +86,7 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 
 ## 4. Decisiones de Arquitectura y Razones de Diseño
 
-> Registro formal en `docs/decisiones-tecnicas.md` (ADR-01 a ADR-08).
+> Registro formal en `docs/decisiones-tecnicas.md` (ADR-01 a ADR-09).
 
 ### 4.1. Arquitectura Híbrida vs. 100% Cloud Pura
 * **Idea descartada:** Enviar datos directamente de los ESP32 a endpoints públicos en la nube de AWS.
@@ -127,8 +129,11 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 * **Costo:** la conexión VPN y el endpoint de interfaz se cobran por hora (detalle en `infrastructure/README.md`).
 * **Alcance en el MVP (2026-10-14):** la VPN queda **documentada como diseño y no se demuestra**, porque no hay certeza de que el Learner Lab la permita. En la demo, el Edge sincroniza por **HTTPS contra una API Gateway pública** con credenciales IAM de mínimo privilegio.
 
-### 4.8. Autenticación con MFA
-* **Decisión:** Amazon Cognito con **MFA TOTP** (compatible con Microsoft Authenticator), **obligatorio para los roles que pueden cambiar cosas** (Administrador y Jefe de Mantenimiento/Operaciones). El Operario, que solo consulta, inicia sesión sin MFA.
+### 4.8. Autenticación con MFA y permisos por usuario
+* **Decisión:** Amazon Cognito con **MFA TOTP** (compatible con Microsoft Authenticator), **obligatorio para todo usuario con algún permiso de modificación** (reconocer alertas, umbrales o usuarios). Quien solo consulta inicia sesión sin MFA.
+* **Login obligatorio para ver (2026-10-16):** el dashboard siempre pide usuario y contraseña, con o sin internet.
+* **Cuentas (2026-10-16):** el Administrador crea la cuenta con una clave temporal; en el primer login el usuario la cambia por una personal que nadie puede ver (solo hash). Si la olvida, el Administrador la resetea.
+* **Permisos por usuario (2026-10-16):** el rol es una plantilla; al crear la cuenta el Administrador marca o desmarca qué puede ver y modificar. Detalle en `docs/api-dashboard.md` §6.
 * **Sin internet (aprobado 2026-10-14):** la planta sigue viendo el dashboard y puede reconocer alertas con un login local en el Edge; los cambios de configuración (umbrales, usuarios) requieren conexión y MFA. Ver `docs/ciberseguridad.md`.
 
 ---
@@ -212,9 +217,11 @@ La evaluación se gana demostrando la **resiliencia híbrida en vivo**:
 - **Producción:** tableros fabricados en el mes y acumulado anual.
 - Correo/Telegram para alertas: mejora futura, fuera del MVP.
 
-### 8.3. Roles
-| Rol | Acceso | MFA |
+### 8.3. Roles (plantillas de permisos)
+Desde 2026-10-16 el rol es una **plantilla**: el Administrador puede ajustar los permisos de cada usuario al crear su cuenta (`docs/api-dashboard.md` §6.4). El MFA depende de los permisos, no del rol.
+
+| Rol (plantilla) | Acceso por defecto | MFA |
 | :--- | :--- | :---: |
-| **Operario** | Indicadores de su propia sede (solo lectura) | No |
-| **Jefe de Mantenimiento/Operaciones** | Ambas sedes y gestión de alertas | Sí |
-| **Administrador** | Acceso total: usuarios, configuración y umbrales | Sí |
+| **Operario** | Indicadores y alertas de su propia sede (solo lectura) | No (salvo que se le den permisos de modificación) |
+| **Jefe de Mantenimiento/Operaciones** | Ambas sedes, histórico, vista general y reconocer alertas | Sí |
+| **Administrador** | Acceso total: usuarios, permisos, configuración y umbrales | Sí |
