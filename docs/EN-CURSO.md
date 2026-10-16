@@ -43,7 +43,7 @@ La pauta completa de la Nota 2 y los borradores de roles, RACI y Gantt están en
 | 6 | Cognito con MFA (probar primero que el Learner Lab lo permita) | `backend/` | 🟢 Libre | | | | |
 | 7 | Actualizar secciones 14 y 15 del `README.md` al diseño vigente | raíz | 🟢 Libre | | | | Hoy muestran el diseño anterior. |
 | 8 | Identificador por lectura (`device_id + seq`) entre ESP32 y Edge | `simulation/`, `edge/` | 🟢 Libre | | | | Definir junto con las tareas 3 y 4. |
-| 19 | Contrato de datos del dashboard (API, login, permisos por usuario) | `docs/` | 🟡 En curso | Abraham (con Claude) | 2026-10-16 | `docs/contrato-api-dashboard` | Lo usan las tareas 1, 4 y 5. Pide revisión de todo el equipo. |
+| 19 | Contrato de datos del dashboard (API, login, permisos por usuario) | `docs/` | 🔵 En revisión | Abraham (con Claude) | 2026-10-16 | [PR #8](https://github.com/Aburahamu20/Induplac/pull/8) | Lo usan las tareas 1, 4 y 5. Pide revisión de todo el equipo. |
 
 ---
 
