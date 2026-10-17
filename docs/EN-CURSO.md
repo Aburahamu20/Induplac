@@ -37,7 +37,7 @@ La pauta completa de la Nota 2 y los borradores de roles, RACI y Gantt están en
 |---|---|---|---|---|---|---|---|
 | 1 | Dashboard React (monitor por sede, alertas, histórico, panel de simulación) con datos simulados | `dashboard/` | 🟡 En curso | Abraham (con Claude) | 2026-10-14 | `feature/dashboard` | Primero la simulación del dashboard con datos ficticios; no depende del broker. |
 | 2 | Crear y configurar broker MQTT de la simulación (EMQX Serverless) | — | 🟡 En curso | Abraham (con Claude) | 2026-10-14 | — | Broker elegido: EMQX Serverless, spend limit 0. Usuarios: esp32-local1/2, edge-local1/2. Credenciales fuera del repo. |
-| 3 | Sketch ESP32 en Wokwi (sensores virtuales, NTP, JSON por MQTT) | `simulation/` | 🟢 Libre | | | | Lista para empezar cuando la tarea 2 esté ✅. |
+| 3 | Sketch ESP32 en Wokwi (sensores virtuales, NTP, JSON por MQTT) | `simulation/` | 🟡 En curso | Sebastián Fuentes | 2026-10-16 | — | Necesita el broker (tarea 2) y acordar el JSON con quien haga el Edge (tarea 4). |
 | 4 | Agente Edge en Python (MQTT → SQLite → intervalos 15 min → alertas → sync) | `edge/` | 🟢 Libre | | | | Lista para empezar cuando la tarea 2 esté ✅. Debe exponer la API de `docs/api-dashboard.md`. |
 | 5 | Backend AWS: Lambda de ingesta y alertas, DynamoDB, RDS, API | `backend/` | 🟢 Libre | | | | Debe exponer la API de `docs/api-dashboard.md`. |
 | 6 | Cognito con MFA (probar primero que el Learner Lab lo permita) | `backend/` | 🟢 Libre | | | | |
