@@ -3,6 +3,7 @@
 //   VITE_API_URL=/api (planta) o la URL de API Gateway (nube)
 
 import type { Fuente } from './fuente'
+import { obtenerToken } from '../auth/token'
 import { FuenteApi } from './real'
 import { FuenteSimulada } from './simulada'
 
@@ -13,7 +14,7 @@ export const conDemo = import.meta.env.VITE_DEMO !== 'false'
 
 export const fuente: Fuente = usaSimulacion
   ? new FuenteSimulada()
-  : new FuenteApi(import.meta.env.VITE_API_URL ?? '/api', () => null, conDemo)
+  : new FuenteApi(import.meta.env.VITE_API_URL ?? '/api', obtenerToken, conDemo)
 
 export type { ControlDemo, Fuente } from './fuente'
 export * from './tipos'

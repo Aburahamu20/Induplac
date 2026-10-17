@@ -71,6 +71,16 @@ export class FuenteApi implements Fuente {
     return this.get<Alerta[]>(`/alertas${qs ? `?${qs}` : ''}`)
   }
 
+  async reconocerAlerta(id: string) {
+    const t = this.token()
+    const res = await fetch(`${this.base}/alertas/${encodeURIComponent(id)}/reconocer`, {
+      method: 'POST',
+      headers: t ? { Authorization: `Bearer ${t}` } : {},
+    })
+    if (!res.ok) throw new Error(`Error HTTP ${res.status}`)
+    return res.json() as Promise<Alerta>
+  }
+
   historico(c: ConsultaHistorico) {
     const q = new URLSearchParams()
     for (const l of c.local_ids) q.append('local_id', l)

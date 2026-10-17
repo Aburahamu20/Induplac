@@ -19,6 +19,7 @@ export interface Fuente {
   actual(local: LocalId): Promise<ActualRespuesta>
   alertas(filtro?: { local_id?: LocalId; estado?: Alerta['estado'] }): Promise<Alerta[]>
   historico(consulta: ConsultaHistorico): Promise<HistoricoRespuesta>
+  reconocerAlerta(id: string): Promise<Alerta>
   // Solo en la demo (contrato §5). Undefined en producción.
   demo?: ControlDemo
 }

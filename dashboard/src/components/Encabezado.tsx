@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { EstadoLocal } from '../api'
+import { NOMBRE_ROL } from '../auth'
+import { useSesion } from '../auth/sesion'
 
 const PILDORA = {
   online: { texto: 'En vivo', clase: 'border-ok/40 bg-ok/10 text-ok', punto: 'bg-ok' },
@@ -24,6 +26,7 @@ export function Encabezado({
   simulado: boolean
 }) {
   const ahora = useReloj()
+  const { sesion, cerrar } = useSesion()
   const p = enlace ? PILDORA[enlace.enlace] : null
 
   return (
@@ -49,6 +52,18 @@ export function Encabezado({
             {enlace.enlace === 'sincronizando' && ` (${enlace.pendientes} pendientes)`}
           </span>
         )}
+        <div className="flex items-center gap-2 border-l border-borde pl-3">
+          <div className="text-right leading-tight">
+            <p className="text-sm font-bold">{sesion.usuario}</p>
+            <p className="text-[11px] text-tinta-2">{NOMBRE_ROL[sesion.rol]}</p>
+          </div>
+          <button
+            onClick={cerrar}
+            className="rounded-md border border-borde px-2.5 py-1 text-xs text-tinta-2 hover:border-tinta-3 hover:text-tinta"
+          >
+            Salir
+          </button>
+        </div>
       </div>
     </div>
   )

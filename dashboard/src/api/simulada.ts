@@ -416,6 +416,16 @@ export class FuenteSimulada implements Fuente {
       .map((a) => ({ ...a }))
   }
 
+  async reconocerAlerta(id: string): Promise<Alerta> {
+    const a = this.listaAlertas.find((x) => x.id === id)
+    if (!a) throw new Error('Alerta no encontrada')
+    a.estado = 'reconocida'
+    a.reconocida_en = iso(new Date())
+    // Reconocer sin internet también queda pendiente de subir (ADR-08)
+    if (this.sim[a.local_id].enlace.enlace === 'offline') this.sim[a.local_id].enlace.pendientes += 1
+    return { ...a }
+  }
+
   async historico(c: ConsultaHistorico): Promise<HistoricoRespuesta> {
     const desde = new Date(c.desde).getTime()
     const hasta = new Date(c.hasta).getTime()
