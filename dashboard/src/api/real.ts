@@ -1,7 +1,7 @@
 // Fuente real: llama a la API del Edge (planta) o de AWS (nube).
 // Se activa con VITE_FUENTE=api. Mismo contrato que la simulada.
 
-import type { Fuente } from './fuente'
+import type { ControlDemo, Fuente } from './fuente'
 import type {
   ActualRespuesta,
   Alerta,
@@ -16,9 +16,27 @@ export class FuenteApi implements Fuente {
   private base: string
   private token: () => string | null
 
-  constructor(base: string, token: () => string | null = () => null) {
+  readonly demo?: ControlDemo
+
+  constructor(base: string, token: () => string | null = () => null, conDemo = false) {
     this.base = base.replace(/\/$/, '')
     this.token = token
+    if (conDemo) {
+      this.demo = {
+        enlace: (local, conectado) => this.post('/demo/enlace', { local_id: local, conectado }),
+        inyectar: (local, variable, valor) => this.post('/demo/inyectar', { local_id: local, variable, valor }),
+      }
+    }
+  }
+
+  private async post(ruta: string, cuerpo: unknown): Promise<void> {
+    const t = this.token()
+    const res = await fetch(`${this.base}${ruta}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(t ? { Authorization: `Bearer ${t}` } : {}) },
+      body: JSON.stringify(cuerpo),
+    })
+    if (!res.ok) throw new Error(`Error HTTP ${res.status}`)
   }
 
   private async get<T>(ruta: string): Promise<T> {

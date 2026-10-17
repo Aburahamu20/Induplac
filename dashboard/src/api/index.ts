@@ -8,9 +8,12 @@ import { FuenteSimulada } from './simulada'
 
 export const usaSimulacion = import.meta.env.VITE_FUENTE !== 'api'
 
+// Panel de demo: visible salvo que VITE_DEMO=false (en producción se apaga)
+export const conDemo = import.meta.env.VITE_DEMO !== 'false'
+
 export const fuente: Fuente = usaSimulacion
   ? new FuenteSimulada()
-  : new FuenteApi(import.meta.env.VITE_API_URL ?? '/api')
+  : new FuenteApi(import.meta.env.VITE_API_URL ?? '/api', () => null, conDemo)
 
-export type { Fuente } from './fuente'
+export type { ControlDemo, Fuente } from './fuente'
 export * from './tipos'

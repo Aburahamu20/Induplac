@@ -4,6 +4,7 @@
 
 import type {
   ActualRespuesta,
+  VariableId,
   Alerta,
   ConsultaHistorico,
   EstadoRespuesta,
@@ -18,4 +19,12 @@ export interface Fuente {
   actual(local: LocalId): Promise<ActualRespuesta>
   alertas(filtro?: { local_id?: LocalId; estado?: Alerta['estado'] }): Promise<Alerta[]>
   historico(consulta: ConsultaHistorico): Promise<HistoricoRespuesta>
+  // Solo en la demo (contrato §5). Undefined en producción.
+  demo?: ControlDemo
+}
+
+export interface ControlDemo {
+  enlace(local: LocalId, conectado: boolean): Promise<void>
+  inyectar(local: LocalId, variable: VariableId, valor: number): Promise<void>
+  limpiar?(): Promise<void>
 }

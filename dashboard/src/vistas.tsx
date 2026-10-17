@@ -127,9 +127,10 @@ const fechaHora = (iso: string) =>
     month: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
+    hour12: false,
   })
 
-function TarjetaAlerta({ a }: { a: Alerta }) {
+function TarjetaAlerta({ a, sincronizada }: { a: Alerta; sincronizada: boolean }) {
   const v = VARIABLES[a.variable]
   return (
     <article className="rounded-lg border border-critico/40 border-l-4 border-l-critico bg-critico/5 p-4">
@@ -140,9 +141,20 @@ function TarjetaAlerta({ a }: { a: Alerta }) {
           </h3>
           <p className="mt-1 text-sm text-tinta-2">{a.regla}</p>
         </div>
-        <span className="rounded-full border border-borde px-2 py-0.5 text-xs text-tinta-2">
-          {a.origen === 'edge' ? 'Generada en planta (sin internet)' : 'Generada en la nube'}
-        </span>
+        <div className="flex flex-wrap gap-1.5">
+          <span className="rounded-full border border-borde px-2 py-0.5 text-xs text-tinta-2">
+            {a.origen === 'edge' ? 'Generada en planta (sin internet)' : 'Generada en la nube'}
+          </span>
+          {a.origen === 'edge' && (
+            <span
+              className={`rounded-full border px-2 py-0.5 text-xs ${
+                sincronizada ? 'border-ok/40 text-ok' : 'border-aviso/40 text-aviso'
+              }`}
+            >
+              {sincronizada ? '✓ Sincronizada con la nube' : 'Pendiente de subir'}
+            </span>
+          )}
+        </div>
       </div>
       <p className="mt-3 text-sm">
         Valor <b className="tabular-nums">{formatear(a.variable, a.valor)} {v.unidad}</b> · umbral{' '}
@@ -155,7 +167,9 @@ function TarjetaAlerta({ a }: { a: Alerta }) {
 
 export function VistaAlertas() {
   const { datos } = usePolling(() => fuente.alertas(), 5_000)
+  const { datos: estado } = usePolling(() => fuente.estado(), 2_000)
   if (!datos) return <Cargando />
+  const enLinea = (l: LocalId) => estado?.locales.find((e) => e.local_id === l)?.enlace === 'online'
   const activas = datos.filter((a) => a.estado === 'activa')
   const otras = datos.filter((a) => a.estado !== 'activa')
 
@@ -167,7 +181,7 @@ export function VistaAlertas() {
       ) : (
         <div className="grid gap-3">
           {activas.map((a) => (
-            <TarjetaAlerta key={a.id} a={a} />
+            <TarjetaAlerta key={a.id} a={a} sincronizada={enLinea(a.local_id)} />
           ))}
         </div>
       )}

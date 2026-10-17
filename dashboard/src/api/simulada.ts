@@ -6,7 +6,7 @@
 // turno diurno con más consumo, noches casi en cero, UV según el sol.
 // Las reglas de nivel imitan las de CONTEXTO.md §8.2.
 
-import type { Fuente } from './fuente'
+import type { ControlDemo, Fuente } from './fuente'
 import type {
   ActualRespuesta,
   Alerta,
@@ -22,6 +22,8 @@ import type {
 } from './tipos'
 
 const TICK_MS = 5_000
+const DURACION_INYECCION_MS = 90_000 // lo que dura un valor inyectado en la demo
+const LOTE_SYNC = 2 // pendientes que "suben" por segundo al reconectar (demo)
 
 const LOCALES: LocalInfo[] = [
   {
@@ -185,8 +187,12 @@ interface EstadoSim {
 }
 
 export class FuenteSimulada implements Fuente {
+  readonly demo: ControlDemo
   private sim: Record<LocalId, EstadoSim>
   private listaAlertas: Alerta[] = []
+  // Valores inyectados desde el panel de demo: local -> variable -> { valor, hasta }
+  private inyectados: Partial<Record<LocalId, Partial<Record<VariableId, { valor: number; hasta: number }>>>> = {}
+  private sincronizador: ReturnType<typeof setInterval> | null = null
 
   constructor() {
     const ahora = new Date()
@@ -208,6 +214,17 @@ export class FuenteSimulada implements Fuente {
       dias: local === 'local1' ? 53 : 120,
     })
     this.sim = { local1: base('local1'), local2: base('local2') }
+    this.demo = {
+      enlace: async (local, conectado) => this.cambiarEnlace(local, conectado),
+      inyectar: async (local, variable, valor) => {
+        this.inyectados[local] = { ...this.inyectados[local], [variable]: { valor, hasta: Date.now() + DURACION_INYECCION_MS } }
+        this.tick()
+      },
+      limpiar: async () => {
+        this.inyectados = {}
+        this.tick()
+      },
+    }
     this.tick()
     setInterval(() => this.tick(), TICK_MS)
   }
@@ -274,9 +291,60 @@ export class FuenteSimulada implements Fuente {
         )
       }
 
+      this.aplicarInyecciones(local, v, p.noche)
       for (const x of v) s.valores[x.id] = x
+      // En la demo, cada lectura sin internet cuenta como un intervalo pendiente de subir
+      if (s.enlace.enlace === 'offline') s.enlace.pendientes += 1
       this.evaluarAlertas(local, v, ahora)
     }
+  }
+
+  // Reemplaza los valores inyectados desde el panel de demo y recalcula su nivel
+  private aplicarInyecciones(local: LocalId, valores: ValorVariable[], noche: boolean) {
+    const iny = this.inyectados[local]
+    if (!iny) return
+    const ahora = Date.now()
+    for (const x of valores) {
+      const dato = iny[x.id]
+      if (!dato) continue
+      if (dato.hasta < ahora) {
+        delete iny[x.id]
+        continue
+      }
+      x.valor = dato.valor
+      if (x.id === 'uv_index') x.nivel = nivelUv(x.valor)
+      else if (x.id === 'agua_m3h') x.nivel = x.valor > AGUA[local].fuga && (noche || x.valor > AGUA[local].fuga * 5) ? 'critico' : 'normal'
+      else if (x.referencia) x.nivel = nivelRelativo(x.valor, x.referencia)
+    }
+  }
+
+  // Corte o regreso del enlace Edge -> AWS (lo que se cae en una planta real)
+  private cambiarEnlace(local: LocalId, conectado: boolean) {
+    const e = this.sim[local].enlace
+    if (!conectado) {
+      e.enlace = 'offline'
+      return
+    }
+    if (e.enlace === 'online') return
+    e.enlace = e.pendientes > 0 ? 'sincronizando' : 'online'
+    if (this.sincronizador) return
+    // Sube los pendientes en lotes, como el Edge real (modo-offline.md §6.3)
+    this.sincronizador = setInterval(() => {
+      let quedan = false
+      for (const l of ['local1', 'local2'] as LocalId[]) {
+        const en = this.sim[l].enlace
+        if (en.enlace !== 'sincronizando') continue
+        en.pendientes = Math.max(0, en.pendientes - LOTE_SYNC)
+        if (en.pendientes === 0) {
+          en.enlace = 'online'
+          en.ultima_sincronizacion = iso(new Date())
+        } else quedan = true
+      }
+      if (!quedan && this.sincronizador) {
+        clearInterval(this.sincronizador)
+        this.sincronizador = null
+      }
+    }, 1_000)
   }
 
   // Motor de alertas simulado: una alerta por local + variable + intervalo de 15 min
@@ -286,22 +354,32 @@ export class FuenteSimulada implements Fuente {
       const inicio = inicioIntervalo(ahora)
       const id = `${local}:${x.id}:${inicio}`
       if (this.listaAlertas.some((al) => al.id === id)) continue
+      if (this.sim[local].enlace.enlace === 'offline') this.sim[local].enlace.pendientes += 1
       this.listaAlertas.unshift({
         id,
         local_id: local,
         variable: x.id,
         nivel: 'critico',
         valor: x.valor,
-        umbral: x.id === 'uv_index' ? 8 : x.id === 'agua_m3_dia' ? AGUA[local].critico : (x.referencia ?? 0) * 1.2,
+        umbral:
+          x.id === 'uv_index'
+            ? 8
+            : x.id === 'agua_m3_dia'
+              ? AGUA[local].critico
+              : x.id === 'agua_m3h'
+                ? AGUA[local].fuga
+                : (x.referencia ?? 0) * 1.2,
         regla:
           x.id === 'uv_index'
             ? 'UV mayor o igual a 8'
             : x.id === 'agua_m3_dia'
               ? `Agua diaria sobre ${AGUA[local].critico} m³`
+              : x.id === 'agua_m3h'
+                ? `Posible fuga: caudal sobre ${AGUA[local].fuga} m³/h fuera de horario`
               : '20 % sobre el promedio de 4 semanas a la misma hora',
         inicio_intervalo: inicio,
         estado: 'activa',
-        origen: this.sim[local].enlace.enlace === 'online' ? 'lambda' : 'edge',
+        origen: this.sim[local].enlace.enlace === 'offline' ? 'edge' : 'lambda',
         reconocida_en: null,
       })
     }

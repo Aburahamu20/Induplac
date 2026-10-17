@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { fuente, usaSimulacion } from './api'
+import { conDemo, fuente, usaSimulacion } from './api'
 import { Encabezado } from './components/Encabezado'
+import { PanelDemo } from './components/PanelDemo'
 import { peorEstado } from './components/estadoEnlace'
 import { usePolling } from './hooks/usePolling'
 import { VistaAlertas, VistaOficinas, VistaPlanta, VistaResumen } from './vistas'
@@ -16,7 +17,8 @@ const PESTANAS: { id: Pestana; nombre: string }[] = [
 
 export default function App() {
   const [pestana, setPestana] = useState<Pestana>('resumen')
-  const { datos: estado } = usePolling(() => fuente.estado(), 5_000)
+  // En simulación se consulta cada 1 s para que el showcase se vea fluido; contra la API, cada 5 s (contrato §2)
+  const { datos: estado } = usePolling(() => fuente.estado(), usaSimulacion ? 1_000 : 5_000)
   const { datos: alertas } = usePolling(() => fuente.alertas({ estado: 'activa' }), 5_000)
 
   const enlace = estado
@@ -57,6 +59,8 @@ export default function App() {
         {pestana === 'planta' && <VistaPlanta />}
         {pestana === 'alertas' && <VistaAlertas />}
       </main>
+
+      {conDemo && <PanelDemo />}
     </div>
   )
 }
