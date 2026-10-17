@@ -25,7 +25,9 @@ export function TarjetaEnergia({ titulo, v }: { titulo: string; v: ValorVariable
       estado={
         dif === null
           ? { texto: 'Sin promedio histórico aún', tono: 'neutro' }
-          : { texto: `${dif >= 0 ? '▲' : '▼'} ${fmtPct(dif)} vs promedio`, tono }
+          : Math.abs(dif) < 1
+            ? { texto: '● En el promedio', tono }
+            : { texto: `${dif >= 0 ? '▲' : '▼'} ${fmtPct(dif)} vs promedio`, tono }
       }
       barra={v.referencia ? { pct: pct(v.valor, v.referencia * 1.2), tono } : undefined}
     />

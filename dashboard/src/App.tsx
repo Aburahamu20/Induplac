@@ -31,7 +31,7 @@ export default function App() {
     <div className="min-h-screen">
       <header className="border-b border-borde">
         <Encabezado enlace={enlace} simulado={usaSimulacion} />
-        <nav className="mx-auto flex max-w-[1400px] gap-1 overflow-x-auto px-4 pb-0">
+        <nav className="mx-auto flex max-w-[1400px] gap-1 overflow-x-auto overflow-y-hidden px-4 pt-1 [scrollbar-width:none]">
           {PESTANAS.map((p) => (
             <button
               key={p.id}
