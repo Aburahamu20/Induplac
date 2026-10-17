@@ -10,8 +10,10 @@ import type { Fuente } from './fuente'
 import type {
   ActualRespuesta,
   Alerta,
+  ConsultaHistorico,
   EstadoLocal,
   EstadoRespuesta,
+  HistoricoRespuesta,
   LocalId,
   LocalInfo,
   Nivel,
@@ -25,14 +27,18 @@ const LOCALES: LocalInfo[] = [
   {
     local_id: 'local1',
     nombre: 'Local 1 · Planta',
-    variables: ['energia_kw', 'agua_m3h', 'agua_m3_dia', 'uv_index', 'produccion_mes', 'produccion_anual', 'hh_sin_incidentes'],
+    variables: ['energia_kw', 'agua_m3h', 'agua_m3_dia', 'uv_index', 'produccion_mes', 'produccion_anual', 'hh_sin_incidentes', 'dias_sin_incidentes'],
   },
   {
     local_id: 'local2',
     nombre: 'Local 2 · Oficinas',
-    variables: ['energia_kw', 'energia_climatizacion_kw', 'energia_iluminacion_kw', 'agua_m3h', 'agua_m3_dia', 'hh_sin_incidentes'],
+    variables: ['energia_kw', 'energia_climatizacion_kw', 'energia_iluminacion_kw', 'agua_m3h', 'agua_m3_dia', 'hh_sin_incidentes', 'dias_sin_incidentes'],
   },
 ]
+
+// Metas de producción (ficticias). Van en "referencia" de la variable.
+const META_MES = 400
+const META_ANIO = 5000
 
 // Umbrales de agua diaria (CONTEXTO §8.2)
 const AGUA = {
@@ -136,6 +142,34 @@ function nivelUv(uv: number): Nivel {
   return 'normal'
 }
 
+// ---------- Histórico simulado (determinístico: el mismo instante da el mismo valor) ----------
+
+function azar(t: number, semilla: number): number {
+  const x = Math.sin(t / 900_000 * 12.9898 + semilla * 78.233) * 43758.5453
+  return x - Math.floor(x)
+}
+
+function energiaEn(local: LocalId, t: number): number {
+  const f = new Date(t)
+  const base = local === 'local1' ? perfilPlanta(f).energia : perfilOficina(f).clima + perfilOficina(f).ilum
+  return base * (1 + (azar(t, local === 'local1' ? 1 : 2) - 0.5) * 0.16)
+}
+
+function aguaDelDia(local: LocalId, inicioDia: number): number {
+  let total = 0
+  for (let t = inicioDia; t < inicioDia + 86_400_000; t += 900_000) {
+    total += perfilBase(local, new Date(t)).agua_m3h * 0.25
+  }
+  return total * (0.9 + azar(inicioDia, local === 'local1' ? 3 : 4) * 0.2)
+}
+
+// Medianoche de Santiago del día de "fecha" (en ms UTC)
+function medianocheSantiago(fecha: Date): number {
+  const { hora } = horaSantiago(fecha)
+  const t = fecha.getTime() - hora * 3_600_000
+  return Math.round(t / 60_000) * 60_000
+}
+
 // ---------- Estado interno de cada local ----------
 
 interface EstadoSim {
@@ -147,6 +181,7 @@ interface EstadoSim {
   produccionMes: number
   produccionAnual: number
   hh: number
+  dias: number
 }
 
 export class FuenteSimulada implements Fuente {
@@ -170,6 +205,7 @@ export class FuenteSimulada implements Fuente {
       produccionMes: local === 'local1' ? 312 : 0,
       produccionAnual: local === 'local1' ? 3480 : 0,
       hh: local === 'local1' ? 1840 : 960,
+      dias: local === 'local1' ? 53 : 120,
     })
     this.sim = { local1: base('local1'), local2: base('local2') }
     this.tick()
@@ -208,6 +244,7 @@ export class FuenteSimulada implements Fuente {
           nivel: s.aguaDia > a.critico ? 'critico' : s.aguaDia > a.advertencia ? 'advertencia' : 'normal',
         },
         { id: 'hh_sin_incidentes', valor: s.hh, referencia: null, nivel: 'normal' },
+        { id: 'dias_sin_incidentes', valor: s.dias, referencia: null, nivel: 'normal' },
       ]
 
       if (local === 'local1') {
@@ -222,8 +259,8 @@ export class FuenteSimulada implements Fuente {
         v.push(
           { id: 'energia_kw', valor: kw, referencia: p.energia, nivel: nivelRelativo(kw, p.energia) },
           { id: 'uv_index', valor: uv, referencia: null, nivel: nivelUv(uv) },
-          { id: 'produccion_mes', valor: s.produccionMes, referencia: null, nivel: 'normal' },
-          { id: 'produccion_anual', valor: s.produccionAnual, referencia: null, nivel: 'normal' },
+          { id: 'produccion_mes', valor: s.produccionMes, referencia: META_MES, nivel: 'normal' },
+          { id: 'produccion_anual', valor: s.produccionAnual, referencia: META_ANIO, nivel: 'normal' },
         )
       } else {
         const p = perfilOficina(ahora)
@@ -299,5 +336,38 @@ export class FuenteSimulada implements Fuente {
       .filter((a) => !filtro?.local_id || a.local_id === filtro.local_id)
       .filter((a) => !filtro?.estado || a.estado === filtro.estado)
       .map((a) => ({ ...a }))
+  }
+
+  async historico(c: ConsultaHistorico): Promise<HistoricoRespuesta> {
+    const desde = new Date(c.desde).getTime()
+    const hasta = new Date(c.hasta).getTime()
+    const series = c.local_ids.map((local) => {
+      const puntos: HistoricoRespuesta['series'][number]['puntos'] = []
+      if (c.variable === 'energia_kw') {
+        const paso = c.agrupacion === '15min' ? 900_000 : 3_600_000
+        for (let t = Math.floor(desde / paso) * paso; t <= hasta; t += paso) {
+          const muestras = [0, 0.25, 0.5, 0.75].map((f) => energiaEn(local, t + f * paso))
+          puntos.push({
+            inicio: iso(new Date(t)),
+            promedio: muestras.reduce((a, b) => a + b, 0) / muestras.length,
+            maximo: Math.max(...muestras),
+            total: null,
+          })
+        }
+      } else if (c.variable === 'agua_m3_dia') {
+        const hoy = medianocheSantiago(new Date())
+        for (let t = medianocheSantiago(new Date(desde)); t <= hasta; t += 86_400_000) {
+          const dia = medianocheSantiago(new Date(t + 3_600_000 * 3))
+          puntos.push({
+            inicio: iso(new Date(dia)),
+            promedio: null,
+            maximo: null,
+            total: Math.abs(dia - hoy) < 3_600_000 ? this.sim[local].aguaDia : aguaDelDia(local, dia),
+          })
+        }
+      }
+      return { local_id: local, puntos }
+    })
+    return { variable: c.variable, agrupacion: c.agrupacion, series }
   }
 }

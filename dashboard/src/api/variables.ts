@@ -13,6 +13,7 @@ export const VARIABLES: Record<VariableId, { nombre: string; unidad: string; dec
   produccion_mes: { nombre: 'Tableros del mes', unidad: 'unid.', decimales: 0 },
   produccion_anual: { nombre: 'Tableros del año', unidad: 'unid.', decimales: 0 },
   hh_sin_incidentes: { nombre: 'Horas hombre sin incidentes', unidad: 'h', decimales: 0 },
+  dias_sin_incidentes: { nombre: 'Días sin incidentes', unidad: 'días', decimales: 0 },
 }
 
 export function formatear(id: VariableId, valor: number): string {

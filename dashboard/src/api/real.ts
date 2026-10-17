@@ -2,7 +2,15 @@
 // Se activa con VITE_FUENTE=api. Mismo contrato que la simulada.
 
 import type { Fuente } from './fuente'
-import type { ActualRespuesta, Alerta, EstadoRespuesta, LocalId, LocalInfo } from './tipos'
+import type {
+  ActualRespuesta,
+  Alerta,
+  ConsultaHistorico,
+  EstadoRespuesta,
+  HistoricoRespuesta,
+  LocalId,
+  LocalInfo,
+} from './tipos'
 
 export class FuenteApi implements Fuente {
   private base: string
@@ -43,5 +51,15 @@ export class FuenteApi implements Fuente {
     if (filtro?.estado) q.set('estado', filtro.estado)
     const qs = q.toString()
     return this.get<Alerta[]>(`/alertas${qs ? `?${qs}` : ''}`)
+  }
+
+  historico(c: ConsultaHistorico) {
+    const q = new URLSearchParams()
+    for (const l of c.local_ids) q.append('local_id', l)
+    q.set('variable', c.variable)
+    q.set('desde', c.desde)
+    q.set('hasta', c.hasta)
+    q.set('agrupacion', c.agrupacion)
+    return this.get<HistoricoRespuesta>(`/historico?${q}`)
   }
 }

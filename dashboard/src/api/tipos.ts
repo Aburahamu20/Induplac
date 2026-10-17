@@ -17,6 +17,7 @@ export type VariableId =
   | 'produccion_mes'
   | 'produccion_anual'
   | 'hh_sin_incidentes'
+  | 'dias_sin_incidentes'
 
 // §3.1 GET /api/estado
 export interface EstadoLocal {
@@ -67,4 +68,28 @@ export interface Alerta {
   estado: 'activa' | 'reconocida' | 'cerrada'
   origen: 'edge' | 'lambda'
   reconocida_en: string | null
+}
+
+// §3.6 GET /api/historico
+export type Agrupacion = '15min' | 'hora' | 'dia' | 'mes'
+
+export interface ConsultaHistorico {
+  local_ids: LocalId[]
+  variable: VariableId
+  desde: string
+  hasta: string
+  agrupacion: Agrupacion
+}
+
+export interface PuntoHistorico {
+  inicio: string
+  promedio: number | null
+  maximo: number | null
+  total: number | null
+}
+
+export interface HistoricoRespuesta {
+  variable: VariableId
+  agrupacion: Agrupacion
+  series: { local_id: LocalId; puntos: PuntoHistorico[] }[]
 }

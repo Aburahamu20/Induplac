@@ -1,66 +1,61 @@
 import { useState } from 'react'
-import { fuente, usaSimulacion, type LocalId } from './api'
-import { BadgeEnlace } from './components/BadgeEnlace'
+import { fuente, usaSimulacion } from './api'
+import { Encabezado } from './components/Encabezado'
 import { peorEstado } from './components/estadoEnlace'
-import { TablaValores } from './components/TablaValores'
 import { usePolling } from './hooks/usePolling'
+import { VistaAlertas, VistaOficinas, VistaPlanta, VistaResumen } from './vistas'
 
-type Vista = 'general' | LocalId
+type Pestana = 'resumen' | 'oficinas' | 'planta' | 'alertas'
 
-const VISTAS: { id: Vista; nombre: string; detalle: string }[] = [
-  { id: 'general', nombre: 'General', detalle: 'Vista consolidada de ambas sedes' },
-  { id: 'local1', nombre: 'Local 1 · Planta', detalle: 'Maquinaria, agua industrial, UV y producción' },
-  { id: 'local2', nombre: 'Local 2 · Oficinas', detalle: 'Climatización, iluminación y agua sanitaria' },
+const PESTANAS: { id: Pestana; nombre: string }[] = [
+  { id: 'resumen', nombre: 'Resumen general' },
+  { id: 'oficinas', nombre: 'Oficinas administrativas' },
+  { id: 'planta', nombre: 'Planta de fabricación' },
+  { id: 'alertas', nombre: 'Alertas' },
 ]
 
 export default function App() {
-  const [vista, setVista] = useState<Vista>('general')
+  const [pestana, setPestana] = useState<Pestana>('resumen')
   const { datos: estado } = usePolling(() => fuente.estado(), 5_000)
+  const { datos: alertas } = usePolling(() => fuente.alertas({ estado: 'activa' }), 5_000)
 
-  const actual = VISTAS.find((v) => v.id === vista)!
   const enlace = estado
-    ? vista === 'general'
-      ? peorEstado(estado.locales)
-      : estado.locales.find((l) => l.local_id === vista)
+    ? pestana === 'oficinas'
+      ? estado.locales.find((l) => l.local_id === 'local2')
+      : pestana === 'planta'
+        ? estado.locales.find((l) => l.local_id === 'local1')
+        : peorEstado(estado.locales)
     : undefined
 
   return (
     <div className="min-h-screen">
-      <header className="bg-slate-900 text-white">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4">
-          <div>
-            <h1 className="font-display text-2xl font-bold tracking-wide">Induplac IoT</h1>
-            {usaSimulacion && <p className="text-xs text-slate-400">Datos simulados</p>}
-          </div>
-          {enlace && <BadgeEnlace estado={enlace} />}
-        </div>
-        <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4">
-          {VISTAS.map((v) => (
+      <header className="border-b border-borde">
+        <Encabezado enlace={enlace} simulado={usaSimulacion} />
+        <nav className="mx-auto flex max-w-[1400px] gap-1 overflow-x-auto px-4 pb-0">
+          {PESTANAS.map((p) => (
             <button
-              key={v.id}
-              onClick={() => setVista(v.id)}
-              className={`whitespace-nowrap rounded-t-md px-4 py-2 font-display font-semibold ${
-                vista === v.id ? 'bg-slate-100 text-slate-900' : 'text-slate-300 hover:bg-slate-800'
+              key={p.id}
+              onClick={() => setPestana(p.id)}
+              className={`-mb-px flex items-center gap-2 whitespace-nowrap rounded-t-md border px-4 py-2 text-sm ${
+                pestana === p.id
+                  ? 'border-borde border-b-fondo bg-fondo font-bold text-tinta'
+                  : 'border-transparent text-tinta-2 hover:text-tinta'
               }`}
             >
-              {v.nombre}
+              {p.nombre}
+              {p.id === 'alertas' && alertas && alertas.length > 0 && (
+                <span className="rounded-full bg-critico px-1.5 text-xs font-bold text-white">{alertas.length}</span>
+              )}
             </button>
           ))}
         </nav>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-6">
-        <h2 className="font-display text-xl font-bold">{actual.nombre}</h2>
-        <p className="mb-6 text-slate-600">{actual.detalle}</p>
-
-        {vista === 'general' ? (
-          <div className="grid gap-6 lg:grid-cols-2">
-            <TablaValores local="local1" titulo="Local 1 · Planta" />
-            <TablaValores local="local2" titulo="Local 2 · Oficinas" />
-          </div>
-        ) : (
-          <TablaValores local={vista} />
-        )}
+      <main className="mx-auto max-w-[1400px] px-4 py-5">
+        {pestana === 'resumen' && <VistaResumen />}
+        {pestana === 'oficinas' && <VistaOficinas />}
+        {pestana === 'planta' && <VistaPlanta />}
+        {pestana === 'alertas' && <VistaAlertas />}
       </main>
     </div>
   )
