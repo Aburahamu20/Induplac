@@ -92,14 +92,15 @@ function PasoClave({ avanzar, error, cargando }: PropsPaso) {
 
       {usaSimulacion && authSimulada && (
         <div className="mt-6 border-t border-borde pt-4 text-xs text-tinta-2">
-          <p className="mb-2 font-bold uppercase tracking-[0.12em]">Usuarios de demo</p>
+          <p className="mb-1 font-bold uppercase tracking-[0.12em]">Usuarios de demo</p>
+          <p className="mb-2">Todos parten con clave temporal: en el primer ingreso se pide crear una personal.</p>
           <table className="w-full">
             <tbody>
               {USUARIOS_DEMO.map((u) => (
                 <tr key={u.usuario}>
                   <td className="py-0.5 font-bold text-tinta">{u.usuario}</td>
                   <td className="py-0.5 font-mono">{u.claveInicial}</td>
-                  <td className="py-0.5 text-right">{u.debeCambiar ? 'Clave temporal' : NOMBRE_ROL[u.rol].split(' ')[0]}</td>
+                  <td className="py-0.5 text-right">{NOMBRE_ROL[u.rol].split(' ')[0]}</td>
                 </tr>
               ))}
             </tbody>

@@ -25,7 +25,7 @@ export const USUARIOS_DEMO: UsuarioDemo[] = [
     rol: 'operario',
     locales: ['local1'],
     permisos: ['ver_actual', 'ver_alertas'],
-    debeCambiar: false,
+    debeCambiar: true,
   },
   {
     usuario: 'jefe',
@@ -33,7 +33,7 @@ export const USUARIOS_DEMO: UsuarioDemo[] = [
     rol: 'jefe_mantenimiento_operaciones',
     locales: ['local1', 'local2'],
     permisos: ['ver_actual', 'ver_alertas', 'ver_historico', 'ver_general', 'reconocer_alertas'],
-    debeCambiar: false,
+    debeCambiar: true,
   },
   {
     usuario: 'admin',
@@ -41,7 +41,7 @@ export const USUARIOS_DEMO: UsuarioDemo[] = [
     rol: 'administrador',
     locales: ['local1', 'local2'],
     permisos: ['ver_actual', 'ver_alertas', 'ver_historico', 'ver_general', 'reconocer_alertas', 'modificar_umbrales', 'gestionar_usuarios'],
-    debeCambiar: false,
+    debeCambiar: true,
   },
   {
     usuario: 'nuevo',
