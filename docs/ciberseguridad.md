@@ -84,7 +84,7 @@ flowchart TD
    IPSEC_PSK=****************
    ```
 2. **Mínimo Privilegio (IAM):** el Edge solo puede invocar `POST /intervalos`, `POST /alertas`, `GET /umbrales` y `GET /health`. Sin permisos sobre DynamoDB, Lambda, RDS ni facturación.
-3. **Hardening:** SSH solo con llaves Ed25519, sin login de root por contraseña; `ufw` permite solo 443 desde la VLAN de operarios y 8883 desde la VLAN IoT.
+3. **Hardening:** SSH solo con llaves Ed25519, sin login de root por contraseña; `ufw` permite solo 443 desde la VLAN de operarios, y 8883 (MQTTS) y 123/UDP (NTP, ADR-10) desde la VLAN IoT.
 
 ---
 

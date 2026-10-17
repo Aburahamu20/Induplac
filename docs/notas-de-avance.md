@@ -245,3 +245,29 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - Propuesta: como somos 5, agregar el rol **Seguridad y DevOps** a los 4 que sugiere el profe.
 - Mayor riesgo: la **demo del prototipo** (el código va recién en la base del dashboard).
 - Pendiente: fecha de entrega, asignación de roles y formato del informe.
+
+---
+
+## 2026-10-16 — Contrato de datos del dashboard, login y permisos
+
+- Nuevo **`docs/api-dashboard.md`**: qué le pide el dashboard a la API y qué JSON recibe. Si el Edge (tarea 4) y el backend (tarea 5) lo respetan, el mismo build funciona en planta y en la nube. El dashboard tendrá una fuente simulada y una real, intercambiables por variable de entorno.
+- El **nivel** (verde/amarillo/rojo) lo calcula la API, no el dashboard, para no tener una tercera copia de las reglas.
+- Cada Raspberry Pi solo ve su propio local; la **vista General** existe solo en la nube.
+- **Decisiones (Abraham, pendientes de revisión del equipo):**
+  1. **Login obligatorio para ver** el dashboard, con o sin internet.
+  2. **Clave temporal** creada por el Administrador y **cambio obligatorio** en el primer login; la clave personal nadie la puede ver (solo hash). Si se olvida, se resetea.
+  3. **Permisos por usuario:** el rol es una plantilla y el Administrador ajusta qué puede ver y modificar cada persona.
+  4. **MFA obligatorio** para quien tenga cualquier permiso de modificación, también en planta.
+- Nuevo **ADR-09**; actualizados `CONTEXTO.md` (§2.2, §4.8, §8.3) y la nota en ADR-08.
+
+### Siguen abiertos (ver `docs/api-dashboard.md` §7)
+- [ ] Usuarios del Edge: propios del Edge (propuesta) o caché tras login online.
+- [ ] Polling cada 5 s (propuesta) o WebSocket.
+- [ ] Nombres de variables en el dashboard (propuesta) o en la API.
+- [ ] Local "desconectado" en la nube tras 30 min sin datos (propuesta).
+
+### Hora sincronizada sin internet (ADR-10, propuesta)
+- La Raspberry Pi no tiene pila de reloj: tras un corte de luz sin internet arrancaría con la hora mal, y con ella todos los intervalos y alertas.
+- **Decisión (Abraham):** módulo **RTC DS3231** en cada Pi + `chrony`; la Pi es el **servidor NTP de la sede** y los ESP32 toman la hora desde ella. Así la planta tiene la hora correcta sin depender de internet.
+- Se permite UDP 123 desde la VLAN IoT hacia la Pi. En la demo con Wokwi no aplica.
+- Actualizados `CONTEXTO.md` §4.9, `decisiones-tecnicas.md` (ADR-10), `modo-offline.md` §3.1, `ciberseguridad.md` (hardening) y `api-dashboard.md` §2.
