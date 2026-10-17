@@ -28,7 +28,7 @@ VITE_API_URL=/api           # en planta: /api · en la nube: URL de API Gateway
 ## 2. Convenciones
 
 - **Formato:** JSON, campos en `snake_case`.
-- **Fechas:** ISO 8601 en **UTC** (`"2026-10-16T23:15:00Z"`). El dashboard las muestra en `America/Santiago`.
+- **Fechas:** ISO 8601 en **UTC** (`"2026-10-16T23:15:00Z"`). El dashboard las muestra siempre en `America/Santiago` (hora de Chile, con cambio de horario automático), sin importar la zona del equipo que lo abre. La hora del Edge se mantiene sin internet con RTC + NTP local (ADR-10).
 - **Números:** siempre `number`, nunca texto. Unidades fijas por variable (ver §4).
 - **Identificadores de local:** `"local1"` (planta) y `"local2"` (oficinas).
 - **Niveles:** `"normal"` · `"advertencia"` · `"critico"` → verde · amarillo · rojo.

@@ -265,3 +265,9 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - [ ] Polling cada 5 s (propuesta) o WebSocket.
 - [ ] Nombres de variables en el dashboard (propuesta) o en la API.
 - [ ] Local "desconectado" en la nube tras 30 min sin datos (propuesta).
+
+### Hora sincronizada sin internet (ADR-10, propuesta)
+- La Raspberry Pi no tiene pila de reloj: tras un corte de luz sin internet arrancaría con la hora mal, y con ella todos los intervalos y alertas.
+- **Decisión (Abraham):** módulo **RTC DS3231** en cada Pi + `chrony`; la Pi es el **servidor NTP de la sede** y los ESP32 toman la hora desde ella. Así la planta tiene la hora correcta sin depender de internet.
+- Se permite UDP 123 desde la VLAN IoT hacia la Pi. En la demo con Wokwi no aplica.
+- Actualizados `CONTEXTO.md` §4.9, `decisiones-tecnicas.md` (ADR-10), `modo-offline.md` §3.1, `ciberseguridad.md` (hardening) y `api-dashboard.md` §2.

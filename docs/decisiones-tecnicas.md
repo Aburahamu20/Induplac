@@ -15,6 +15,7 @@ Este documento recopila las decisiones técnicas y de arquitectura clave tomadas
 - [ADR-07: Dashboard de Planta Servido desde el Edge](#adr-07-dashboard-de-planta-servido-desde-el-edge)
 - [ADR-08: Autenticación con MFA para Roles con Permisos de Escritura](#adr-08-autenticación-con-mfa-para-roles-con-permisos-de-escritura)
 - [ADR-09: Login Obligatorio y Permisos por Usuario](#adr-09-login-obligatorio-y-permisos-por-usuario)
+- [ADR-10: Hora Sincronizada sin Internet (RTC + NTP local)](#adr-10-hora-sincronizada-sin-internet-rtc--ntp-local)
 
 ---
 
@@ -208,3 +209,29 @@ El dashboard muestra datos operacionales de la empresa, así que no debe verse s
 ### Consecuencias
 - **Positivas:** acceso mínimo necesario por persona; claves personales que ni el Administrador conoce.
 - **Negativas:** el Edge debe replicar el flujo de cambio de clave y MFA; como Cognito no exporta claves ni secretos TOTP, quien tenga MFA tendrá dos entradas en Microsoft Authenticator (nube y planta).
+
+---
+
+## ADR-10: Hora Sincronizada sin Internet (RTC + NTP local)
+
+### Estado: Propuesto (2026-10-16) — en revisión del equipo
+
+### Contexto
+Las lecturas, los intervalos de 15 min y las alertas dependen de una hora correcta: la llave de idempotencia es `local_id + inicio_intervalo` y la regla de energía compara contra la misma hora de semanas anteriores. La Raspberry Pi no tiene reloj con pila: si se reinicia sin internet (por ejemplo, tras un corte de luz que también reinicia el router), arranca con una hora equivocada.
+
+### Alternativas Evaluadas
+1. **Solo NTP público:** falla sin internet.
+2. **NTP desde el router de la planta:** el router tampoco tiene pila; tras un corte de luz vuelve sin hora hasta que haya internet.
+3. **Módulo RTC en la Pi + la Pi como servidor NTP local (elegida).**
+
+### Decisión
+- Módulo **RTC DS3231** (con pila, desvío de segundos al año) conectado por I²C a cada Raspberry Pi.
+- `chrony` en la Pi: con internet sincroniza con `pool.ntp.org` y corrige el RTC; sin internet arranca desde el RTC.
+- La Pi funciona como **servidor NTP de la sede**; los ESP32 sincronizan contra ella (UDP 123) al arrancar.
+- Firewall/ACL: permitir UDP 123 desde la VLAN IoT hacia la Pi (además de MQTTS 8883).
+- Todo se guarda y viaja en **UTC**; el dashboard muestra siempre `America/Santiago`.
+- En la demo (Wokwi) no aplica: el ESP32 simulado toma la hora de internet.
+
+### Consecuencias
+- **Positivas:** la planta mantiene una hora única y correcta aunque falten internet y luz; las marcas de tiempo offline son válidas al sincronizar.
+- **Negativas:** un componente más por sede (bajo costo) y configuración de `chrony` y del overlay del RTC en la Pi.

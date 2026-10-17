@@ -86,7 +86,7 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 
 ## 4. Decisiones de Arquitectura y Razones de Diseño
 
-> Registro formal en `docs/decisiones-tecnicas.md` (ADR-01 a ADR-09).
+> Registro formal en `docs/decisiones-tecnicas.md` (ADR-01 a ADR-10).
 
 ### 4.1. Arquitectura Híbrida vs. 100% Cloud Pura
 * **Idea descartada:** Enviar datos directamente de los ESP32 a endpoints públicos en la nube de AWS.
@@ -135,6 +135,16 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 * **Cuentas (2026-10-16):** el Administrador crea la cuenta con una clave temporal; en el primer login el usuario la cambia por una personal que nadie puede ver (solo hash). Si la olvida, el Administrador la resetea.
 * **Permisos por usuario (2026-10-16):** el rol es una plantilla; al crear la cuenta el Administrador marca o desmarca qué puede ver y modificar. Detalle en `docs/api-dashboard.md` §6.
 * **Sin internet (aprobado 2026-10-14):** la planta sigue viendo el dashboard y puede reconocer alertas con un login local en el Edge; los cambios de configuración (umbrales, usuarios) requieren conexión y MFA. Ver `docs/ciberseguridad.md`.
+
+### 4.9. Hora sincronizada sin depender de internet (2026-10-16)
+* **Problema:** la Raspberry Pi no tiene pila de reloj. Tras un corte de luz sin internet arranca con la hora equivocada y todas las lecturas, intervalos y alertas quedarían con fechas malas. El router de la planta tampoco guarda la hora.
+* **Decisión:** módulo **RTC DS3231** (reloj con pila) en cada Raspberry Pi + `chrony`:
+  - **Con internet:** la Pi sincroniza con NTP público (`pool.ntp.org`) y corrige el RTC.
+  - **Sin internet o tras un corte de luz:** la Pi arranca con la hora del RTC.
+  - **La Pi es el servidor NTP de la planta:** los ESP32 toman la hora desde la Pi (UDP 123), no desde internet. Todos los equipos de la sede comparten la misma hora aunque se caiga la fibra.
+* **Red:** permitir NTP (UDP 123) desde la VLAN IoT hacia la Pi.
+* **Demo:** no aplica (el ESP32 en Wokwi toma la hora de internet por `Wokwi-GUEST`). Queda como diseño, igual que la VPN.
+* **Dashboard:** guarda y recibe todo en UTC y muestra siempre la hora de Chile (`America/Santiago`), con el cambio de horario automático. Ver ADR-10.
 
 ---
 
