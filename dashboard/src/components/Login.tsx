@@ -3,7 +3,6 @@
 
 import QRCode from 'qrcode'
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
-import { usaSimulacion } from '../api'
 import { auth, authSimulada, NOMBRE_ROL, type Desafio, type RespuestaAuth, type Sesion } from '../auth'
 import { restablecerUsuariosDemo, USUARIOS_DEMO } from '../auth/simulada'
 
@@ -90,7 +89,7 @@ function PasoClave({ avanzar, error, cargando }: PropsPaso) {
       </form>
       <Error texto={error} />
 
-      {usaSimulacion && authSimulada && (
+      {authSimulada && (
         <div className="mt-6 border-t border-borde pt-4 text-xs text-tinta-2">
           <p className="mb-1 font-bold uppercase tracking-[0.12em]">Usuarios de demo</p>
           <p className="mb-2">Todos parten con clave temporal: en el primer ingreso se pide crear una personal.</p>
