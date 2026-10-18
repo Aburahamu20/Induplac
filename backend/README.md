@@ -103,6 +103,27 @@ VITE_DEMO=false
 ```
 y reiniciar `npm run dev`.
 
+### 7. Publicar el dashboard de gerencia en S3
+1. En `dashboard/`, con el `.env.local` del paso 6: `npm run build` (genera `dist/`).
+2. **S3 → Create bucket**: nombre único (ej. `induplac-dashboard-xxxx`), us-east-1, **desmarcar "Block all public access"**.
+3. **Permissions → Bucket policy**: lectura pública solo de objetos:
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [{
+       "Sid": "LecturaPublicaDashboard",
+       "Effect": "Allow",
+       "Principal": "*",
+       "Action": "s3:GetObject",
+       "Resource": "arn:aws:s3:::NOMBRE-DEL-BUCKET/*"
+     }]
+   }
+   ```
+4. **Upload**: el contenido de `dist/` (`index.html` y la carpeta `assets`), no la carpeta `dist`.
+5. Abrir **`https://NOMBRE-DEL-BUCKET.s3.us-east-1.amazonaws.com/index.html`**. Tiene que ser **HTTPS**: el login usa Web Crypto, que el navegador solo permite en contextos seguros (por eso no se usa el *static website hosting* de S3, que es HTTP).
+
+Cada vez que cambie el dashboard: `npm run build` y volver a subir `index.html` y `assets`.
+
 ## Costos y cuidado del crédito
 - DynamoDB on-demand, Lambda y HTTP API: centavos para la demo.
 - Las credenciales del Learner Lab vencen (~4 h) y el lab se detiene solo; las tablas, la Lambda y la API **quedan**, solo hay que volver a hacer *Start Lab*.
