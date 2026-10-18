@@ -55,6 +55,8 @@ En el diseño real el broker vive **dentro de la planta** (Mosquitto en la Raspb
 
 Probado el 2026-10-18: ESP32 → broker → Edge OK.
 
+> **Ojo con los espacios en el topic:** en la prueba, el topic copiado y pegado tenía espacios. El broker recibía el mensaje, pero no calzaba con `induplac/#` y nadie lo recibía (sin error visible). En el código, definir los topics como constantes y no armarlos a mano.
+
 > Nota: un cliente no recibe sus propios mensajes si se suscribe con *No Local* (MQTT 5). Por eso la prueba válida es entre dos clientes distintos.
 
 ## Pendientes
