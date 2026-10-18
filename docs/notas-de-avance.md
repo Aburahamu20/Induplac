@@ -271,3 +271,12 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - **Decisión (Abraham):** módulo **RTC DS3231** en cada Pi + `chrony`; la Pi es el **servidor NTP de la sede** y los ESP32 toman la hora desde ella. Así la planta tiene la hora correcta sin depender de internet.
 - Se permite UDP 123 desde la VLAN IoT hacia la Pi. En la demo con Wokwi no aplica.
 - Actualizados `CONTEXTO.md` §4.9, `decisiones-tecnicas.md` (ADR-10), `modo-offline.md` §3.1, `ciberseguridad.md` (hardening) y `api-dashboard.md` §2.
+
+## 2026-10-18 — Broker MQTT (EMQX Serverless) creado y probado
+
+- Broker `induplac-broker` en EMQX Serverless (North America / us-east-1), **spend limit 0**. Solo TLS: 8883 (MQTT) y 8084 (WebSocket).
+- Cuatro usuarios, uno por dispositivo: `esp32-local1`, `esp32-local2`, `edge-local1`, `edge-local2`. Contraseñas fuera del repo.
+- Prueba con MQTTX Web: `esp32-local1` publica en `induplac/local1/telemetria` y `edge-local1` (suscrito a `induplac/#`, QoS 1) lo recibe. ✅
+- **Lección 1:** el topic pegado tenía **espacios**: el broker recibía el mensaje pero no calzaba con ninguna suscripción y se perdía sin error. Topics como constantes en el código.
+- **Lección 2:** dos clientes con el mismo Client ID se desconectan entre sí y el primero pierde sus suscripciones sin aviso. Cada dispositivo debe tener su propio Client ID.
+- Datos de conexión, topics y formato en el nuevo `docs/broker-mqtt.md`. La tarea 3 (Wokwi, Sebastián) queda desbloqueada.
