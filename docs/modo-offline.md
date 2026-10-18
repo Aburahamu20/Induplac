@@ -62,7 +62,7 @@ flowchart TD
 ### 3.1. Nivel 1: Microcontrolador ESP32
 * **Hardware:** ESP32 con 520 KB de SRAM interna y 4 MB de Flash.
 * **Mecanismo:** **Ring Buffer en RAM** de hasta **1.500 mediciones** (≈ 2 horas a 1 muestra cada 5 s) para cubrir reinicios o mantención de la Raspberry Pi. Al llenarse aplica **FIFO**.
-* **Hora:** el ESP32 sincroniza su reloj por **NTP** al arrancar para que las lecturas del buffer lleguen con marca de tiempo válida.
+* **Hora:** el ESP32 sincroniza su reloj por **NTP contra la Raspberry Pi** al arrancar (no contra internet), para que las lecturas del buffer lleguen con marca de tiempo válida aunque no haya enlace. La Pi mantiene la hora con un **RTC DS3231** con pila (ADR-10).
 
 ### 3.2. Nivel 2: Pasarela Edge (Raspberry Pi con SQLite)
 * **Hardware:** Raspberry Pi 4 con MicroSD / SSD de **32 GB o 64 GB**.
