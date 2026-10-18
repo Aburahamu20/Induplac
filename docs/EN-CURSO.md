@@ -36,14 +36,12 @@ La pauta completa de la Nota 2 y los borradores de roles, RACI y Gantt están en
 | # | Tarea | Carpeta | Estado | Quién | Desde | Rama / PR | Notas |
 |---|---|---|---|---|---|---|---|
 | 1 | Dashboard React (monitor por sede, alertas, histórico, panel de simulación) con datos simulados | `dashboard/` | 🟡 En curso | Abraham (con Claude) | 2026-10-14 | `feature/dashboard` | Primero la simulación del dashboard con datos ficticios; no depende del broker. |
-| 2 | Crear y configurar broker MQTT de la simulación (EMQX Serverless) | — | 🔵 En revisión | Abraham (con Claude) | 2026-10-14 | [PR #9](https://github.com/Aburahamu20/Induplac/pull/9) | Broker elegido: EMQX Serverless, spend limit 0. Usuarios: esp32-local1/2, edge-local1/2. Credenciales fuera del repo. |
 | 3 | Sketch ESP32 en Wokwi (sensores virtuales, NTP, JSON por MQTT) | `simulation/` | 🟡 En curso | Sebastián Fuentes | 2026-10-16 | — | Necesita el broker (tarea 2) y acordar el JSON con quien haga el Edge (tarea 4). |
 | 4 | Agente Edge en Python (MQTT → SQLite → intervalos 15 min → alertas → sync) | `edge/` | 🟡 En curso | Abraham (con Claude) | 2026-10-17 | `feature/edge` | Broker listo y probado: ver `docs/broker-mqtt.md` (PR #9). Debe exponer la API de `docs/api-dashboard.md`. |
 | 5 | Backend AWS: Lambda de ingesta y alertas, DynamoDB, RDS, API | `backend/` | 🟡 En curso | Abraham y Felipe Murúa | 2026-10-17 | `feature/backend-aws` | Debe exponer la API de `docs/api-dashboard.md`. |
 | 6 | Cognito con MFA (probar primero que el Learner Lab lo permita) | `backend/` | 🟢 Libre | | | | |
 | 7 | Actualizar secciones 14 y 15 del `README.md` al diseño vigente | raíz | 🟢 Libre | | | | Hoy muestran el diseño anterior. |
 | 8 | Identificador por lectura (`device_id + seq`) entre ESP32 y Edge | `simulation/`, `edge/` | 🟢 Libre | | | | Definir junto con las tareas 3 y 4. |
-| 19 | Contrato de datos del dashboard (API, login, permisos por usuario) | `docs/` | 🔵 En revisión | Abraham (con Claude) | 2026-10-16 | [PR #8](https://github.com/Aburahamu20/Induplac/pull/8) | Lo usan las tareas 1, 4 y 5. Pide revisión de todo el equipo. |
 
 ---
 
@@ -77,3 +75,5 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 | Registrar EMQX Serverless como broker | Abraham (con Claude) | 2026-10-14 | PR #5 |
 | Base del dashboard (Vite + React + TS + Tailwind) | Abraham (con Claude) | 2026-10-14 | PR #6 |
 | Pauta de la Nota 2 y borradores de roles, RACI, PMI y Gantt | Abraham (con Claude) | 2026-10-14 | PR #7 |
+| Contrato de datos del dashboard, login, permisos y hora sin internet (tarea 19) | Abraham (con Claude) | 2026-10-18 | PR #8 |
+| Broker MQTT EMQX Serverless creado y probado (tarea 2) | Abraham (con Claude) | 2026-10-18 | PR #9 |
