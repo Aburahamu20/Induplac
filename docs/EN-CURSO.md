@@ -52,7 +52,7 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 |---|---|---|---|---|---|---|---|
 | 9 | Roles del equipo: rol principal/secundario, fortalezas y responsabilidades de cada integrante | 2 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-18 | PR #11 | En `docs/roles-raci-gantt.md` §1. **Falta:** que cada uno escriba su fortaleza y que Lisandra confirme su rol. Vale 15 %. |
 | 10 | Matriz RACI (6–10 actividades, cada una con R y un solo A) | 3 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-18 | PR #11 | En `docs/roles-raci-gantt.md` §2 (10 actividades). |
-| 11 | Modelo Cloud (híbrido + serverless/PaaS) y tabla de tecnologías con su aporte concreto | 6, 7 | 🟡 En curso | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-19 | `docs/cloud-tecnologias` | Justificar cada tecnología; no nombrar por nombrar. |
+| 11 | Modelo Cloud (híbrido + serverless/PaaS) y tabla de tecnologías con su aporte concreto | 6, 7 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-19 | PR #13 | En `docs/cloud-tecnologias.md`. |
 | 12 | Pipeline DevOps: diagrama + GitHub Actions que compile/pruebe en cada PR | 8 | 🟢 Libre | | | | Si se implementa de verdad, sirve como evidencia. |
 | 13 | Planificación: Scrum del MVP (backlog, sprints) + PMI con las 5 fases | 9 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #12 | En `docs/scrum-pmi.md`. **Falta:** definir Product Owner y Scrum Master, y si hubo reuniones fijas (§4). |
 | 14 | Carta Gantt hasta la puesta en marcha (responsables, duración, dependencias, hitos) | 10 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #11 | En `docs/roles-raci-gantt.md` §3. **Falta:** agregar RDS PostgreSQL (volvió al MVP el 19/10). |
@@ -79,3 +79,4 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 | README principal actualizado al diseño vigente (tarea 7) | Abraham (con Claude) | 2026-10-18 | PR #10 |
 | Roles, RACI y Carta Gantt (tareas 9, 10 y 14) | Bárbara Saavedra | 2026-10-19 | PR #11 |
 | Planificación Scrum del MVP + PMI (tarea 13) | Bárbara Saavedra (con Claude) | 2026-10-19 | PR #12 |
+| Modelo Cloud y tecnologías con su aporte (tarea 11) | Bárbara Saavedra (con Claude) | 2026-10-19 | PR #13 |
