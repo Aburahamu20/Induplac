@@ -50,12 +50,12 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 
 | # | Tarea | Pauta | Estado | Quién | Desde | Rama / PR | Notas |
 |---|---|---|---|---|---|---|---|
-| 9 | 🔥 Roles del equipo: rol principal/secundario, fortalezas y responsabilidades de cada integrante | 2 | 🔵 En revisión | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-18 | PR #11 | Lo decide todo el equipo. Somos 5: propuesta de 5 roles en NOTA-2.md. Vale 15 %. |
-| 10 | 🔥 Matriz RACI (6–10 actividades, cada una con R y un solo A) | 3 | 🔵 En revisión | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-18 | PR #11 | Depende de la 9. Hay un borrador en NOTA-2.md. |
+| 9 | Roles del equipo: rol principal/secundario, fortalezas y responsabilidades de cada integrante | 2 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-18 | PR #11 | En `docs/roles-raci-gantt.md` §1. **Falta:** que cada uno escriba su fortaleza y que Lisandra confirme su rol. Vale 15 %. |
+| 10 | Matriz RACI (6–10 actividades, cada una con R y un solo A) | 3 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-18 | PR #11 | En `docs/roles-raci-gantt.md` §2 (10 actividades). |
 | 11 | Modelo Cloud (híbrido + serverless/PaaS) y tabla de tecnologías con su aporte concreto | 6, 7 | 🟢 Libre | | | | Justificar cada tecnología; no nombrar por nombrar. |
 | 12 | Pipeline DevOps: diagrama + GitHub Actions que compile/pruebe en cada PR | 8 | 🟢 Libre | | | | Si se implementa de verdad, sirve como evidencia. |
-| 13 | Planificación: Scrum del MVP (backlog, sprints) + PMI con las 5 fases | 9 | 🟡 En curso | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | — | Vale 15 % junto con la Gantt. Reservada por Abraham a su nombre. |
-| 14 | Carta Gantt hasta la puesta en marcha (responsables, duración, dependencias, hitos) | 10 | 🔵 En revisión | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #11 | Necesita los roles (9) y la RACI (10) para asignar responsables. Hay un borrador en NOTA-2.md. Reservada por Abraham a su nombre. |
+| 13 | Planificación: Scrum del MVP (backlog, sprints) + PMI con las 5 fases | 9 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #12 | En `docs/scrum-pmi.md`. **Falta:** definir Product Owner y Scrum Master, y si hubo reuniones fijas (§4). |
+| 14 | Carta Gantt hasta la puesta en marcha (responsables, duración, dependencias, hitos) | 10 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #11 | En `docs/roles-raci-gantt.md` §3. **Falta:** agregar RDS PostgreSQL (volvió al MVP el 19/10). |
 | 15 | Conclusiones y defensa: problema, beneficios, limitaciones, siguientes pasos | 12 | 🟢 Libre | | | | Material en CONTEXTO.md y GUIA-EQUIPO.md. |
 | 16 | Informe del proyecto actualizado | 13 | 🟢 Libre | | | | Confirmar formato (¿Word?) y si existe el de la Nota 1. |
 | 17 | Presentación PowerPoint (consolida todo, en el orden que pide el profe) | 1 | 🟢 Libre | | | | Al final; depende de casi todo. |
@@ -77,3 +77,5 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 | Contrato de datos del dashboard, login, permisos y hora sin internet (tarea 19) | Abraham (con Claude) | 2026-10-18 | PR #8 |
 | Broker MQTT EMQX Serverless creado y probado (tarea 2) | Abraham (con Claude) | 2026-10-18 | PR #9 |
 | README principal actualizado al diseño vigente (tarea 7) | Abraham (con Claude) | 2026-10-18 | PR #10 |
+| Roles, RACI y Carta Gantt (tareas 9, 10 y 14) | Bárbara Saavedra | 2026-10-19 | PR #11 |
+| Planificación Scrum del MVP + PMI (tarea 13) | Bárbara Saavedra (con Claude) | 2026-10-19 | PR #12 |
