@@ -280,3 +280,12 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - **Lección 1:** el topic pegado tenía **espacios**: el broker recibía el mensaje pero no calzaba con ninguna suscripción y se perdía sin error. Topics como constantes en el código.
 - **Lección 2:** dos clientes con el mismo Client ID se desconectan entre sí y el primero pierde sus suscripciones sin aviso. Cada dispositivo debe tener su propio Client ID.
 - Datos de conexión, topics y formato en el nuevo `docs/broker-mqtt.md`. La tarea 3 (Wokwi, Sebastián) queda desbloqueada.
+
+---
+
+## 2026-10-18 — README principal actualizado al diseño vigente (tarea 7)
+
+- §14: Wokwi ya no es "propuesta"; broker EMQX, topics y formato de telemetría vigente (`device_id + seq`).
+- §15: arquitectura con intervalos de 15 min, alertas en dos niveles, servicios reales de AWS (API Gateway, Lambda, DynamoDB, S3) y VPN como diseño.
+- §8: umbrales de agua definidos y respaldo fijo de energía. §16: login, clave temporal, permisos por usuario y MFA.
+- §17, §18, §21, §22 y §25: estructura, tecnologías con su estado, alcance, roadmap y estado actual.

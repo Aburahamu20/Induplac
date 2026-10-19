@@ -39,7 +39,7 @@
 | **Datos utilizados** | Ficticios |
 | **Arquitectura** | IoT + Edge + Cloud |
 | **Conectividad** | Online + Offline |
-| **Simulación** | Wokwi *(propuesta)* |
+| **Simulación** | Wokwi (demo 100 % en Wokwi, decidido el 2026-10-14) |
 
 ### 👥 Equipo
 
@@ -276,7 +276,9 @@ Los datos de electricidad y agua están planteados con una frecuencia de medici�
 
 ## ⚡ Electricidad
 
-Se considera una condición de alerta cuando el consumo horario supera en más de un **20 %** el promedio correspondiente de las cuatro semanas anteriores.
+Se considera una condición de alerta cuando el consumo horario supera en más de un **20 %** el promedio correspondiente de las cuatro semanas anteriores **en el mismo horario**.
+
+Mientras no existan 4 semanas de historia se usa un umbral fijo de respaldo: normal < 45 kW, advertencia 45–55 kW, crítico > 55 kW.
 
 ```text
 Consumo actual
@@ -292,13 +294,18 @@ Normal    ⚠ ALERTA
 
 ## 💧 Agua
 
-Se contempla una alerta cuando el consumo diario supera un umbral establecido.
+Umbral diario por local (valores ficticios de referencia, definidos el 2026-10-14):
 
-> El valor definitivo del umbral de agua queda pendiente de definición.
+| Local | Normal (día hábil) | 🟡 Advertencia | 🔴 Alerta | Posible fuga (22:00–06:00 o fin de semana) |
+| :--- | :---: | :---: | :---: | :--- |
+| **Local 1 (Planta)** | ~10 m³/día | > 12 m³/día | > 14 m³/día | Caudal > 0,3 m³/h sostenido 1 hora |
+| **Local 2 (Oficinas)** | ~1,5 m³/día | > 2 m³/día | > 2,5 m³/día | Caudal > 0,05 m³/h sostenido 1 hora |
 
 ## ☀️ UV
 
-Un índice UV de **8 o superior** se considera una condición de riesgo para personal expuesto al exterior.
+Un índice UV de **8 o superior** se considera una condición de riesgo para personal expuesto al exterior. Entre 6 y 7,9 se muestra en amarillo como recomendación de protector y sombra.
+
+> Las alertas se evalúan en **dos niveles** (ADR-06): en el Edge, para que la planta reciba alertas también sin internet, y en AWS (Lambda). Cada alerta se identifica por `local + variable + inicio_intervalo`, así nunca se duplica.
 
 ---
 
@@ -506,106 +513,106 @@ Esto evita interpretar un dato antiguo como si fuera una medición actual.
 
 # 🧪 14. Simulación IoT con Wokwi y Flujo de Comunicación
 
-El proyecto utiliza **Wokwi** como entorno de simulación oficial para validar la captura y transmisión de datos IoT sin requerir hardware físico en la fase inicial.
+La **demo es 100 % en Wokwi** (sin hardware físico). Cada ESP32 simulado emula los sensores de su local, se conecta a internet por la red virtual de Wokwi (`WiFi.begin("Wokwi-GUEST", "")`) y publica su telemetría en el broker MQTT de la simulación.
 
-Cada ESP32 simulado emula los sensores del local asignado y se conecta a Internet mediante la red virtual de Wokwi (`WiFi.begin("Wokwi-GUEST", "")`), publicando métricas periódicas hacia un broker MQTT seguro.
+### Broker MQTT de la simulación
+
+| Dato | Valor |
+| :--- | :--- |
+| Servicio | **EMQX Serverless** (plan gratuito, *spend limit* 0) |
+| Puerto | **8883** (MQTT sobre TLS); 8084 (WebSocket TLS) para pruebas |
+| Usuarios | Uno por dispositivo: `esp32-local1`, `esp32-local2`, `edge-local1`, `edge-local2` |
+| Topics | `induplac/local1/telemetria` · `induplac/local2/telemetria` (QoS 1) |
+
+> En el diseño real el broker vive **dentro de la planta** (Mosquitto en la Raspberry Pi). En la simulación va en la nube porque Wokwi corre en el navegador y no alcanza una red local. Detalle completo en [`docs/broker-mqtt.md`](docs/broker-mqtt.md).
 
 ### Mapeo de Sensores en Wokwi
-- **Electricidad (kW):** Potenciómetro analógico que simula un transformador de corriente no invasivo (sensor CT SCT-013).
-- **Consumo de Agua (m³):** Generador de pulsos digitales que simula un caudalímetro de turbina tipo YF-S201.
-- **Radiación Solar (UV):** Sensor analógico que simula un fotodiodo UV con escala UVI 0–12.
+- **Electricidad (kW):** potenciómetro analógico que simula un transformador de corriente (sensor CT SCT-013).
+- **Consumo de agua (m³):** generador de pulsos que simula un caudalímetro de turbina tipo YF-S201.
+- **Radiación solar (UV):** sensor analógico que simula un fotodiodo UV con escala UVI 0–12.
 
 ### Formato de Telemetría (Payload JSON MQTT)
-El microcontrolador empaqueta las lecturas en un contrato estandarizado:
+
+Un mensaje por local cada 5 segundos. Ejemplo del Local 1:
 
 ```json
 {
   "device_id": "esp32-local-01",
-  "timestamp": 1727736000,
-  "metrics": {
-    "potencia_kw": 48.2,
-    "agua_m3": 12.4,
-    "indice_uv": 5.1,
-    "unidades_prod": 140,
-    "hh_activas": 8
-  }
+  "seq": 10452,
+  "ts": 1759874400,
+  "energia_kw": 42.7,
+  "agua_m3_acum": 1532.418,
+  "agua_m3h": 3.2,
+  "uv_index": 5.4,
+  "produccion_acum": 312,
+  "personal_activo": 18
 }
 ```
+
+- `device_id + seq` identifica cada lectura: el Edge descarta reenvíos duplicados.
+- `ts` en hora UTC, sincronizada por NTP.
+- El Local 2 no envía UV ni producción, y separa la energía en climatización e iluminación.
 
 ---
 
 # 📴 15. Arquitectura Híbrida y Sincronización Cloud (Edge ↔ AWS ↔ Dashboard)
 
-La plataforma implementa un modelo de resiliencia híbrido inspirado en la arquitectura probada de *Project You Shall Not Pass*, adaptado a la ingesta de telemetría continua:
+> Regla general: **el Edge filtra, guarda, agrega y alerta; AWS consolida, compara y decide.** Registro formal en [`docs/decisiones-tecnicas.md`](docs/decisiones-tecnicas.md) (ADR-01 a ADR-10).
 
 ```mermaid
 flowchart TD
-    subgraph WOKWI["Simulación Wokwi (Navegador)"]
-        ESP1["ESP32 Local 1<br/>(Potenciómetro = kW / Caudal = Agua)"]
-        ESP2["ESP32 Local 2<br/>(Sensor UV / Producción)"]
+    subgraph WOKWI["Simulación Wokwi (navegador)"]
+        ESP1["ESP32 Local 1<br/>(planta)"]
+        ESP2["ESP32 Local 2<br/>(oficinas)"]
     end
 
-    subgraph BROKER["Broker MQTT (HiveMQ Cloud / Mosquitto)"]
-        Topic1["topic: induplac/local1/telemetria"]
-        Topic2["topic: induplac/local2/telemetria"]
+    subgraph BROKER["Broker MQTT — EMQX Serverless (TLS 8883)"]
+        T1["induplac/local1/telemetria"]
+        T2["induplac/local2/telemetria"]
     end
 
-    subgraph EDGE["Edge Gateway (Raspberry Pi / Servicio Local)"]
-        ClientMQTT["Cliente MQTT (Suscripción)"]
-        DBLocal[("SQLite Local<br/>(telemetria, is_synced=0)")]
-        SyncService["Servicio de Sincronización"]
+    subgraph EDGE["Edge Gateway (Raspberry Pi)"]
+        MQ["Cliente MQTT"]
+        CRUDO[("SQLite<br/>lecturas crudas (30 días)")]
+        AGR["Agregador 15 min<br/>+ alertas locales"]
+        INT[("SQLite<br/>intervalos (is_synced)")]
+        DLOC["Dashboard de planta<br/>+ API local"]
     end
 
-    subgraph AWS["AWS Cloud (Learner Lab)"]
-        APIGW["API Gateway (HTTP POST /telemetria)"]
-        Lambda["AWS Lambda (Ingesta & Reglas de Alerta)"]
-        Dynamo[("DynamoDB<br/>(Tabla Histórica de Mediciones)")]
+    subgraph AWS["AWS (Learner Lab, us-east-1)"]
+        APIGW["API Gateway"]
+        LAMBDA["Lambda<br/>ingesta + alertas + consulta"]
+        DDB[("DynamoDB<br/>intervalos y alertas")]
+        S3["S3<br/>dashboard de gerencia"]
     end
 
-    subgraph DASHBOARD["Dashboard (React + TypeScript)"]
-        UI["Interfaz Web Induplac<br/>(Vistas: Local 1, Local 2, General)"]
-    end
-
-    %% Conexiones de datos
-    ESP1 -->|WiFi / MQTTS| Topic1
-    ESP2 -->|WiFi / MQTTS| Topic2
-    Topic1 --> ClientMQTT
-    Topic2 --> ClientMQTT
-
-    ClientMQTT -->|Almacenamiento persistente| DBLocal
-    DBLocal --> SyncService
-
-    %% Estados Online / Offline
-    SyncService -.->|Modo Online: Sincroniza lotes| APIGW
-    APIGW --> Lambda
-    Lambda --> Dynamo
-
-    Dynamo -->|Modo Online: Lectura global e históricos| UI
-    DBLocal -.->|Modo Offline: Lectura directa en planta| UI
+    ESP1 -->|MQTTS| T1
+    ESP2 -->|MQTTS| T2
+    T1 --> MQ
+    T2 --> MQ
+    MQ --> CRUDO --> AGR --> INT
+    INT --> DLOC
+    INT -->|"HTTPS · POST /intervalos (lotes de 50)"| APIGW
+    APIGW --> LAMBDA --> DDB
+    S3 -.->|"el navegador carga el dashboard"| USR["Gerencia"]
+    USR -->|"HTTPS · GET /api/..."| APIGW
 ```
+
+### Qué sube a la nube
+
+Solo **intervalos de 15 minutos agregados y validados**, nunca la lectura cruda (ADR-05): promedio de electricidad y agua, máximo de UV, producción y HH. Cada intervalo se identifica por `local + inicio_intervalo` y se guarda con *upsert*: reenviarlo no lo duplica.
 
 ### Estados Operacionales del Sistema
 
-1. **🟢 Modo Online (Funcionamiento Normal):**
-   - El Gateway Edge recibe las métricas de MQTT y las registra en SQLite con `is_synced = 0`.
-   - El servicio de sincronización envía inmediatamente la lectura hacia **AWS API Gateway**.
-   - Una función **AWS Lambda** valida el esquema y persiste en **Amazon DynamoDB**, tras lo cual el Edge actualiza el registro local a `is_synced = 1`.
-   - El Dashboard consume la API de AWS en tiempo real.
+1. **🟢 Online:** el Edge guarda, agrega y sube los intervalos casi de inmediato (pendientes ≈ 0). La planta lee el Edge; gerencia lee AWS.
+2. **🔴 Offline (cae el enlace a AWS):** el ESP32, el broker local, el Edge y el **dashboard de planta siguen funcionando igual**, con datos en tiempo real y alertas locales. Solo cambia el indicador a `🔴 OFFLINE`. Los intervalos se acumulan en SQLite con `is_synced = 0`. Gerencia ve el local como desconectado, con su último dato.
+3. **🟡 Sincronizando:** al volver la conexión, el Edge sube los pendientes en lotes de 50, en orden cronológico, y las alertas generadas offline se actualizan en la nube **sin duplicarse**. Con 0 pendientes vuelve a `🟢 ONLINE`.
 
-2. **🔴 Modo Offline (Corte de Internet o Caída Cloud):**
-   - El ESP32 continúa transmitiendo localmente hacia el Edge Gateway.
-   - El Gateway almacena todas las lecturas de forma ininterrumpida en **SQLite local** con `is_synced = 0`.
-   - El Dashboard en planta detecta la caída de red y conmuta su fuente de datos al Gateway local, informando al usuario en pantalla:
-     ```text
-     🔴 MODO OFFLINE — Operando sobre Gateway local (Sin conexión con AWS)
-     ```
-   - **Garantía:** Cero pérdida de información durante la contingencia.
+> **Conectividad:** en el diseño, el Edge llega a AWS por una **VPN Site-to-Site IPsec** hacia una API Gateway privada. En el MVP la VPN queda documentada y no se demuestra (2026-10-14): la demo usa HTTPS contra una API Gateway pública. Detalle en [`docs/modo-offline.md`](docs/modo-offline.md) e [`infrastructure/README.md`](infrastructure/README.md).
 
-3. **🟡 Modo Recuperación y Sincronización (Syncing):**
-   - El Gateway detecta el restablecimiento de Internet mediante un *healthcheck* periódico.
-   - El servicio de sincronización agrupa los registros pendientes (`is_synced = 0`) y los envía en lotes (*batches*) hacia AWS.
-   - Cada registro posee un identificador único (UUIDv4) y marca temporal UTC para asegurar **idempotencia** (evita duplicar métricas en caso de reconexión inestable).
-   - Una vez confirmada la recepción por AWS, los registros se marcan con `is_synced = 1` y el Dashboard retorna a estado `🟢 ONLINE`.
+### Contrato entre el dashboard y la API
+
+El dashboard usa la misma API en planta (Edge) y en la nube (AWS), definida en [`docs/api-dashboard.md`](docs/api-dashboard.md). Por eso **el mismo build** funciona en los dos lugares.
 
 ---
 
@@ -624,11 +631,11 @@ flowchart LR
     end
 
     subgraph C3["3. Enlace Híbrido"]
-        Edge -->|HTTPS / TLS 1.3<br/>UUIDv4 Anti-Replay| AWS[AWS Cloud]
+        Edge -->|HTTPS / TLS<br/>Idempotencia por intervalo| AWS[AWS Cloud]
     end
 
     subgraph C4["4. Gestión de Acceso"]
-        AWS -->|JWT / Cognito<br/>RBAC: Operario / Admin| Dash[Dashboard React]
+        AWS -->|Login + MFA<br/>Permisos por usuario| Dash[Dashboard React]
     end
 ```
 
@@ -641,20 +648,24 @@ flowchart LR
 
 2. **Capa 2 — Gateway Edge (Raspberry Pi & SQLite):**
    - **Zero Hardcoding:** Credenciales de AWS y broker almacenadas exclusivamente en `.env` (excluido de Git mediante `.gitignore`).
-   - **Mínimo privilegio en AWS IAM:** Permisos acotados estrictamente a la ingesta (`iot:Publish` o `execute-api:Invoke`), sin privilegios administrativos.
+   - **Mínimo privilegio:** en el diseño, credenciales IAM acotadas a la ingesta. En el MVP (el Learner Lab no permite crear usuarios IAM) la ingesta se protege con una clave compartida en la cabecera `x-induplac-key`.
    - **Integridad local:** Hashes de control para detectar adulteración manual de la base de datos SQLite mientras opera offline.
 
 3. **Capa 3 — Sincronización y Enlace Cloud:**
-   - **Prevención de Replay Attacks:** Uso de identificadores únicos (UUIDv4) por medición para garantizar idempotencia en AWS.
+   - **Idempotencia:** cada intervalo se identifica por `local + inicio_intervalo` y cada alerta por `local + variable + inicio_intervalo`; reenviar no duplica.
    - **Canal seguro:** Transporte exclusivo mediante HTTPS / TLS 1.3.
 
-4. **Capa 4 — Control de Acceso en Dashboard (RBAC):**
+4. **Capa 4 — Control de Acceso en Dashboard:**
+   - **Login obligatorio** para ver el dashboard, con o sin internet (ADR-09).
+   - **Clave temporal** creada por el Administrador y **cambio obligatorio** en el primer ingreso; nadie puede ver la clave personal.
+   - **Permisos por usuario:** el rol es una plantilla que el Administrador ajusta.
+   - **MFA (Microsoft Authenticator)** obligatorio para quien tenga permisos de modificación.
 
-| Rol | Dashboard Local 1 / 2 | Dashboard General | Modificar Umbrales | Simulación de Fallas |
-| :--- | :---: | :---: | :---: | :---: |
-| **Operario de Planta** | ✅ Solo lectura | ❌ Denegado | ❌ Denegado | ❌ Denegado |
-| **Jefe de Mantenimiento** | ✅ Lectura / Alertas | ✅ Lectura | ❌ Denegado | ❌ Denegado |
-| **Administrador / Gerencia** | ✅ Control total | ✅ Consolidado | ✅ Permitido | ✅ Permitido |
+| Rol (plantilla) | Ver su sede | Ver ambas sedes e histórico | Reconocer alertas | Umbrales y usuarios | MFA |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Operario** | ✅ | ❌ | ❌ | ❌ | No |
+| **Jefe de Mantenimiento/Operaciones** | ✅ | ✅ | ✅ | ❌ | Sí |
+| **Administrador** | ✅ | ✅ | ✅ | ✅ | Sí |
 
 5. **Capa 5 — Privacidad y Cumplimiento Normativo (Ley 19.628 - Chile):**
    - Las métricas de Horas Hombre (HH) son estrictamente agregadas y anónimas (ej. `trabajadores_activos: 12`, `hh_turno: 96`).
@@ -667,76 +678,55 @@ flowchart LR
 # 🗂️ 17. Estructura del repositorio
 
 ```text
-Induplac_IoT/
+Induplac/
 │
 ├── README.md
+├── AGENTS.md · CLAUDE.md · GEMINI.md   ← reglas para asistentes de IA
 ├── CONTRIBUTING.md
-├── .gitignore
 │
 ├── docs/
-│   ├── arquitectura.md
-│   ├── dashboard.md
-│   ├── modelo-datos.md
+│   ├── CONTEXTO.md            ← fuente de verdad de las decisiones
+│   ├── EN-CURSO.md            ← tablero: quién hace qué
+│   ├── notas-de-avance.md     ← bitácora de sesiones
+│   ├── GUIA-EQUIPO.md         ← el proyecto explicado en simple
+│   ├── NOTA-2.md              ← pauta y borradores de la Nota 2
+│   ├── api-dashboard.md       ← contrato entre el dashboard y la API
+│   ├── broker-mqtt.md         ← broker de la simulación
+│   ├── decisiones-tecnicas.md ← ADR-01 a ADR-10
 │   ├── modo-offline.md
-│   ├── sincronizacion.md
 │   ├── ciberseguridad.md
-│   ├── stack-tecnologico.md
-│   ├── casos-prueba.md
-│   ├── decisiones-tecnicas.md
-│   └── roadmap.md
+│   └── arquitectura.md
 │
-├── dashboard/
-│   ├── src/
-│   ├── public/
-│   ├── package.json
-│   └── README.md
-│
-├── edge/
-│   ├── src/
-│   ├── database/
-│   └── README.md
-│
+├── dashboard/        ← React + TypeScript + Vite + Tailwind
+├── backend/          ← Lambda de la API (Python) y simulador del Edge
+├── edge/             ← agente Edge en Python (pendiente)
+├── simulation/       ← sketches ESP32 para Wokwi
 ├── sensors/
-│   ├── local-1/
-│   ├── local-2/
-│   └── README.md
-│
-├── simulation/
-│   ├── local-1/
-│   ├── local-2/
-│   └── README.md
-│
-├── backend/
-│   ├── api/
-│   ├── functions/
-│   └── README.md
-│
-└── infrastructure/
-    └── README.md
+└── infrastructure/   ← redes, VPC, VPN y costos
 ```
-
-La carpeta `simulation/` podrá utilizarse para Wokwi si el equipo decide incorporarlo.
 
 ---
 
 # 🧩 18. Tecnologías
 
-| Área | Tecnología |
-|---|---|
-| **Microcontrolador** | ESP32 (sensores analógicos y digitales) |
-| **Simulación** | Wokwi (conectividad Wi-Fi virtual) |
-| **Protocolo IoT** | MQTTS sobre TLS (puerto 8883) |
-| **Redes en Planta** | VLANs segmentadas (`192.168.10.0/24` y `192.168.20.0/24`), *Zero Inbound Ports* |
-| **Conectividad Cloud** | VPN Site-to-Site (IPsec IKEv2 con cifrado AES-256) |
-| **Edge Gateway** | Raspberry Pi con buffer local SQLite (`is_synced`) |
-| **Cloud NoSQL** | Amazon DynamoDB (telemetría de alta frecuencia) |
-| **Cloud Relacional** | Amazon RDS PostgreSQL (`db.t3.micro` en subred privada para RBAC y analítica) |
-| **Cómputo Cloud** | AWS Lambda (Python / Node.js) con ENI en VPC |
-| **Dashboard** | React + TypeScript (Vite, Tailwind CSS) |
-| **Control de Versiones** | Git + GitHub (Flujo de ramas y Pull Requests) |
-| **Documentación** | Markdown + Diagramas nativos Mermaid |
-
-Las tecnologías pueden cambiar durante la implementación si existe una justificación técnica.
+| Área | Tecnología | Estado |
+|---|---|---|
+| **Microcontrolador** | ESP32 (sensores analógicos y digitales) | En curso (Wokwi) |
+| **Simulación** | Wokwi (Wi-Fi virtual `Wokwi-GUEST`) | En curso |
+| **Broker MQTT** | EMQX Serverless (MQTTS 8883) · diseño real: Mosquitto en la Raspberry Pi | ✅ Funcionando |
+| **Edge Gateway** | Raspberry Pi + Python + SQLite (`is_synced`) | Pendiente |
+| **API** | Amazon API Gateway (HTTP API) | ✅ Funcionando |
+| **Cómputo cloud** | AWS Lambda (Python 3.12) | ✅ Funcionando |
+| **Base de datos cloud** | Amazon DynamoDB on-demand (intervalos y alertas) | ✅ Funcionando |
+| **Base de datos relacional** | Amazon RDS PostgreSQL (usuarios, umbrales, reportes) | Diseño, fuera del MVP (costo por hora) |
+| **Autenticación** | Amazon Cognito con MFA TOTP | Pendiente (tarea 6) |
+| **Dashboard** | React + TypeScript (Vite, Tailwind CSS, Chart.js) | ✅ Funcionando |
+| **Hosting del dashboard** | Amazon S3 (HTTPS) | ✅ Funcionando |
+| **Conectividad cloud** | VPN Site-to-Site IPsec + API Gateway privada | Diseño, no se demuestra |
+| **Redes en planta** | VLANs segmentadas, *Zero Inbound Ports* | Diseño |
+| **Hora sin internet** | RTC DS3231 + la Pi como servidor NTP (ADR-10) | Diseño |
+| **Control de versiones** | Git + GitHub (ramas y Pull Requests) | En uso |
+| **Documentación** | Markdown + Mermaid | En uso |
 
 ---
 
@@ -872,29 +862,26 @@ ONLINE
 
 ## Incluido
 
-- [x] Dos locales.
-- [x] Datos ficticios.
-- [x] Electricidad.
-- [x] Agua.
-- [x] Producción.
-- [x] HH.
-- [x] UV.
-- [x] Diseño de dashboards.
-- [x] Alertas.
-- [x] Comparaciones históricas.
-- [ ] Arquitectura híbrida completa.
-- [ ] Almacenamiento local.
-- [ ] Sincronización.
-- [ ] Ciberseguridad.
-- [ ] Simulación Wokwi *(por definir)*.
+- [x] Dos locales con datos ficticios.
+- [x] Electricidad, agua, producción, HH y UV.
+- [x] Reglas de alerta definidas (energía, agua, UV).
+- [x] Dashboard con vistas por sede, resumen general, alertas e históricos.
+- [x] Login obligatorio, clave temporal, permisos por usuario y MFA (login simulado).
+- [x] Panel de demostración del corte de red (simulado en el dashboard).
+- [x] Broker MQTT con TLS y un usuario por dispositivo.
+- [x] Backend en AWS: API Gateway + Lambda + DynamoDB.
+- [x] Dashboard de gerencia publicado en S3.
+- [ ] ESP32 en Wokwi publicando al broker.
+- [ ] Edge en Python (SQLite, intervalos de 15 min, alertas locales, sincronización).
+- [ ] Login de la nube con Cognito.
+- [x] Ciberseguridad diseñada en 5 capas (implementación parcial).
 
 ## Fuera del alcance actual
 
-- Instalación eléctrica real.
-- Instalación hidráulica real.
-- Acceso a bases de datos reales de Induplac.
-- Uso de información personal real.
-- Certificación de gestión energética.
+- Instalación eléctrica e hidráulica real.
+- Acceso a sistemas o datos reales de Induplac.
+- Información personal real.
+- RDS y VPN funcionando (quedan documentados como diseño).
 - Implementación industrial definitiva.
 
 ---
@@ -902,28 +889,19 @@ ONLINE
 # 🗺️ 22. Roadmap
 
 ```text
-[✓] Definición del problema
-[✓] Propuesta de solución
-[✓] Definición de variables
-[✓] Arquitectura inicial
+[✓] Definición del problema, solución y variables
+[✓] Arquitectura híbrida y decisiones (ADR-01 a ADR-10)
+[✓] Contrato de datos del dashboard
+[✓] Dashboard (vistas, alertas, históricos, login, permisos, demo)
+[✓] Broker MQTT (EMQX Serverless)
+[✓] Backend AWS (API Gateway + Lambda + DynamoDB)
+[✓] Dashboard de gerencia en S3
 
-[ ] Diseño definitivo de dashboards
-[ ] Modelo de datos
-[ ] Implementación ESP32
-[ ] Comunicación MQTT
-[ ] Edge / SQLite
-[ ] Dashboard Local 1
-[ ] Dashboard Local 2
-[ ] Dashboard General
-[ ] Comparaciones históricas
-[ ] Sistema de alertas
-[ ] Modo Offline
-[ ] Sincronización
-[ ] Ciberseguridad
-[ ] Integración Cloud
-[ ] Simulación Wokwi
-[ ] Pruebas
-[ ] Demostración final
+[ ] ESP32 en Wokwi                       (tarea 3)
+[ ] Edge en Python                       (tarea 4)
+[ ] Cognito con MFA                      (tarea 6)
+[ ] Conectar Wokwi → Edge → AWS de punta a punta
+[ ] Pruebas y demostración final
 ```
 
 ---
@@ -971,13 +949,16 @@ feature/cybersecurity
 
 # ⚠️ 25. Estado actual
 
-> 🚧 **Proyecto en desarrollo**
+> 🚧 **MVP en desarrollo** · Última actualización: 2026-10-18
 
-Actualmente el proyecto se encuentra en etapa de definición y prototipado.
+**Funcionando:**
+- Dashboard con datos simulados y panel de demostración del corte de red.
+- Cadena en la nube: `simulador del Edge → API Gateway → Lambda → DynamoDB → dashboard en S3`.
+- Broker MQTT probado de dispositivo a Edge.
 
-La arquitectura, tecnologías y componentes pueden modificarse durante el desarrollo según las pruebas realizadas y las decisiones del equipo.
+**En curso:** ESP32 en Wokwi (Sebastián), Cognito y backend (Abraham y Felipe), Edge (Abraham).
 
-Los datos utilizados en esta etapa son ficticios.
+El estado de cada tarea está en [`docs/EN-CURSO.md`](docs/EN-CURSO.md) y el detalle de cada sesión en [`docs/notas-de-avance.md`](docs/notas-de-avance.md). Los datos son ficticios.
 
 ---
 
