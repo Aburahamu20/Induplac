@@ -52,6 +52,7 @@ Cabecera obligatoria: `x-induplac-key: <CLAVE_INGESTA>`. Lote de hasta 50 regist
 - Local 2 manda además `energia_climatizacion_kw` y `energia_iluminacion_kw`, y no manda UV ni producción.
 - Upsert por `local_id + inicio_intervalo`: reenviar el mismo intervalo **no lo duplica** (ADR-05).
 - `historico: true` guarda sin evaluar alertas (carga inicial de historia).
+- `alertas` (opcional): alertas que generó el Edge, también sin internet. Se guardan con `origen = edge` y el mismo id `local_id:variable:inicio_intervalo`, así no se duplican con las que evalúa la Lambda. Si llegan como `reconocida`, se respeta.
 - Cada intervalo nuevo se evalúa con las reglas de §8.2; las alertas se guardan con la llave `local_id:variable:inicio_intervalo` (ADR-06).
 
 ## Puesta en marcha en el Learner Lab (paso a paso)

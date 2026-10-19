@@ -194,6 +194,11 @@ def ingesta(evento):
         for r in registros:
             w.put_item(Item=a_decimal({**r, "local_id": local_id, "recibido_en": recibido}))
 
+    # Alertas generadas por el Edge (también sin internet): mismo id que usa la Lambda,
+    # así se actualiza la misma alerta en vez de duplicarla (ADR-06)
+    for a in cuerpo.get("alertas") or []:
+        guardar_alerta_edge(local_id, a)
+
     alertas = 0
     if not cuerpo.get("historico"):  # la carga histórica inicial no genera alertas
         for r in registros:
@@ -214,6 +219,28 @@ def guardar_alerta(local_id, variable, valor, umbral, regla, inicio):
             ":v": variable, ":n": "critico", ":x": float(valor), ":u": float(umbral), ":r": regla,
             ":i": inicio, ":e": "activa", ":o": "lambda",
         }),
+    )
+
+
+def guardar_alerta_edge(local_id, a):
+    """Upsert de una alerta que viene del Edge. origen=edge y, si se reconoció en planta, se respeta."""
+    if not str(a.get("id", "")).startswith(f"{local_id}:"):
+        return
+    valores = {
+        ":v": a.get("variable"), ":n": "critico", ":x": float(a.get("valor", 0)), ":u": float(a.get("umbral", 0)),
+        ":r": a.get("regla", ""), ":i": a.get("inicio_intervalo"), ":o": "edge",
+    }
+    expr = "SET #v=:v, #n=:n, #x=:x, #u=:u, #r=:r, #i=:i, #o=:o, #e=if_not_exists(#e, :e)"
+    valores[":e"] = "activa"
+    if a.get("estado") == "reconocida":
+        expr = expr.replace("#e=if_not_exists(#e, :e)", "#e=:e, reconocida_en=:t")
+        valores[":e"], valores[":t"] = "reconocida", a.get("reconocida_en")
+    T_ALE.update_item(
+        Key={"local_id": local_id, "id": a["id"]},
+        UpdateExpression=expr,
+        ExpressionAttributeNames={"#v": "variable", "#n": "nivel", "#x": "valor", "#u": "umbral", "#r": "regla",
+                                  "#i": "inicio_intervalo", "#e": "estado", "#o": "origen"},
+        ExpressionAttributeValues=a_decimal(valores),
     )
 
 
