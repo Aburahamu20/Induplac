@@ -40,7 +40,6 @@ La pauta completa de la Nota 2 y los borradores de roles, RACI y Gantt están en
 | 4 | Agente Edge en Python (MQTT → SQLite → intervalos 15 min → alertas → sync) | `edge/` | 🟡 En curso | Abraham (con Claude) | 2026-10-17 | `feature/edge` | Broker listo y probado: ver `docs/broker-mqtt.md` (PR #9). Debe exponer la API de `docs/api-dashboard.md`. |
 | 5 | Backend AWS: Lambda de ingesta y alertas, DynamoDB, RDS, API | `backend/` | 🟡 En curso | Abraham y Felipe Murúa | 2026-10-17 | `feature/backend-aws` | Debe exponer la API de `docs/api-dashboard.md`. |
 | 6 | Cognito con MFA (probar primero que el Learner Lab lo permita) | `backend/` | 🟢 Libre | | | | |
-| 7 | Actualizar el `README.md` al diseño vigente | raíz | 🔵 En revisión | Abraham (con Claude) | 2026-10-18 | [PR #10](https://github.com/Aburahamu20/Induplac/pull/10) | Hoy muestran el diseño anterior. |
 | 8 | Identificador por lectura (`device_id + seq`) entre ESP32 y Edge | `simulation/`, `edge/` | 🟢 Libre | | | | Definir junto con las tareas 3 y 4. |
 
 ---
@@ -77,3 +76,4 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 | Pauta de la Nota 2 y borradores de roles, RACI, PMI y Gantt | Abraham (con Claude) | 2026-10-14 | PR #7 |
 | Contrato de datos del dashboard, login, permisos y hora sin internet (tarea 19) | Abraham (con Claude) | 2026-10-18 | PR #8 |
 | Broker MQTT EMQX Serverless creado y probado (tarea 2) | Abraham (con Claude) | 2026-10-18 | PR #9 |
+| README principal actualizado al diseño vigente (tarea 7) | Abraham (con Claude) | 2026-10-18 | PR #10 |
