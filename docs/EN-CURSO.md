@@ -56,7 +56,7 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 | 12 | Pipeline DevOps: diagrama + GitHub Actions que compile/pruebe en cada PR | 8 | 🟢 Libre | | | | Si se implementa de verdad, sirve como evidencia. |
 | 13 | Planificación: Scrum del MVP (backlog, sprints) + PMI con las 5 fases | 9 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #12 | En `docs/scrum-pmi.md`. **Falta:** definir Product Owner y Scrum Master, y si hubo reuniones fijas (§4). |
 | 14 | Carta Gantt hasta la puesta en marcha (responsables, duración, dependencias, hitos) | 10 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #11 | En `docs/roles-raci-gantt.md` §3. **Falta:** agregar RDS PostgreSQL (volvió al MVP el 19/10). |
-| 15 | Conclusiones y defensa: problema, beneficios, limitaciones, siguientes pasos | 12 | 🟢 Libre | | | | Material en CONTEXTO.md y GUIA-EQUIPO.md. |
+| 15 | Conclusiones y defensa: problema, beneficios, limitaciones, siguientes pasos | 12 | 🟡 En curso | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-19 | `docs/conclusiones` | Material en CONTEXTO.md y GUIA-EQUIPO.md. |
 | 16 | Informe del proyecto actualizado | 13 | 🟢 Libre | | | | Confirmar formato (¿Word?) y si existe el de la Nota 1. |
 | 17 | Presentación PowerPoint (consolida todo, en el orden que pide el profe) | 1 | 🟢 Libre | | | | Al final; depende de casi todo. |
 | 18 | Guion y ensayo de la demo del prototipo | 11 | 🟢 Libre | | | | Depende de las tareas 1 a 4. |
