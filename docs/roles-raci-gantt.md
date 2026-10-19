@@ -24,6 +24,41 @@
 | Scrum Master | _Por definir_ | Cuida que el equipo avance, quita bloqueos y mantiene el tablero al día. |
 | Equipo de desarrollo | Los 5 integrantes | Construyen y prueban cada parte del MVP. |
 
+### Tareas por integrante
+
+| Integrante | Tarea | Sprint | Estado |
+|---|---|---|---|
+| Abraham | Coordinación del equipo, repositorio y Pull Requests | Todos | En curso |
+| Abraham | Broker MQTT EMQX (TLS, usuario y Client ID por dispositivo) | Sprint 2 | Listo (PR #9) |
+| Abraham | Dashboard React con datos simulados y conexión a la API | Sprint 2 y 3 | En curso |
+| Abraham | Edge Gateway en Python: SQLite, intervalos de 15 min, alertas y sincronización | Sprint 3 | En curso |
+| Abraham | Backend AWS y base RDS junto a Felipe | Sprint 2 y 3 | En curso |
+| Abraham | Casos de prueba y ensayo de la demo | Sprint 3 | Pendiente |
+| Sebastián | Sketch ESP32 en Wokwi (Local 1 y Local 2) | Sprint 2 y 3 | En curso |
+| Sebastián | Sensores simulados: CT (kW), caudalímetro (agua) y UV | Sprint 3 | En curso |
+| Sebastián | Publicación MQTT del JSON (device_id + seq + ts) en el broker | Sprint 3 | En curso |
+| Sebastián | NTP y buffer de lecturas sin conexión | Sprint 3 | Pendiente |
+| Sebastián | Escenarios de prueba de alertas (kW +20 %, UV ≥ 8, agua) | Sprint 3 | Pendiente |
+| Lisandra | Probar el Edge con el simulador y con Wokwi | Sprint 3 | Pendiente |
+| Lisandra | Simulación de corte de internet y evidencias del modo offline | Sprint 3 | Pendiente |
+| Lisandra | Verificar la sincronización al volver la conexión (sin duplicados) | Sprint 3 | Pendiente |
+| Lisandra | Despliegue del Edge en la Raspberry Pi | Implementación | Pendiente |
+| Felipe | API Gateway + Lambda de ingesta y consulta | Sprint 2 | Listo |
+| Felipe | Tablas en DynamoDB (intervalos) | Sprint 2 | Listo |
+| Felipe | Reglas de alerta (+20 % kW, UV ≥ 8, agua y fugas) | Sprint 2 | Listo |
+| Felipe | Dashboard publicado en S3 | Sprint 2 | Listo |
+| Felipe | RDS PostgreSQL: usuarios, permisos, umbrales y alertas (se enciende para la demo) | Sprint 3 | En curso |
+| Felipe | Re-deploy de la Lambda con alertas del Edge | Sprint 3 | Pendiente |
+| Felipe | Cognito con MFA | Sprint 3 | Pendiente |
+| Felipe | IAM, TLS, clave de ingesta y cumplimiento Ley 19.628 | Sprint 3 | En curso |
+| Bárbara | Roles y responsabilidades del equipo | Sprint 3 | Listo (PR #11) |
+| Bárbara | Matriz RACI | Sprint 3 | Listo (PR #11) |
+| Bárbara | Planificación Scrum y fases PMI | Sprint 3 | Listo (PR #12) |
+| Bárbara | Carta Gantt hasta la puesta en marcha | Sprint 3 | Listo (PR #11, actualizada PR #15) |
+| Bárbara | Modelo Cloud y tecnologías con su aporte | Sprint 3 | Listo (PR #13) |
+| Bárbara | Conclusiones y defensa | Sprint 3 | Listo (PR #14) |
+| Bárbara | Capacitación de usuarios del dashboard | Implementación | Pendiente |
+
 ---
 
 ## 2. Matriz RACI (tarea 10)
@@ -99,7 +134,7 @@ Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya e
 
 ## 4. Cómo editar
 
-1. Abrir `docs/nota-2/Induplac_Roles_Equipo.xlsx` en Excel. En la hoja **Carta Gantt**, cambiar la fecha de inicio (celda E2) o el **Inicio** y la **Duración** de cada tarea (en azul): las fechas de fin, las barras y sus colores por responsable se recalculan solos. En la hoja **RACI**, la columna *Control* y los totales también se calculan solos.
+1. Abrir `docs/nota-2/Induplac_Roles_Equipo.xlsx` en Excel. En la hoja **Carta Gantt**, cambiar la fecha de inicio (celda E2) o el **Inicio** y la **Duración** de cada tarea (en azul): las fechas de fin, las barras y sus colores por responsable se recalculan solos. En la hoja **RACI**, la columna *Control* y los totales también se calculan solos, igual que el resumen de la hoja **Tareas por integrante**.
 2. Las celdas amarillas (fortalezas, Product Owner, Scrum Master) las completa el equipo.
 3. Actualizar también las tablas de esta página.
 4. Entregar el cambio por Pull Request, como todo lo demás ([`CONTRIBUTING.md`](../CONTRIBUTING.md)).
@@ -117,9 +152,10 @@ Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya e
 
 **19/10/2026** — RDS PostgreSQL vuelve al MVP:
 1. Nueva tarea **3.3 RDS PostgreSQL** (Felipe, Sprint 3). Se mantiene apagado y se enciende para la demo del miércoles y para configuraciones.
-2. RDS agregado a la actividad 5 de la RACI, a las responsabilidades de Felipe y Abraham y a la tarea 4.5 de la implementación.
+2. RDS agregado a la actividad 5 de la RACI, a las responsabilidades y tareas de Felipe y Abraham y a la tarea 4.5 de la implementación.
 3. Tareas del Sprint 3 renumeradas (3.3 → 3.6); Cognito ahora depende también de RDS (usuarios y permisos).
 4. Agregada la tabla de **roles Scrum** (Product Owner y Scrum Master por definir).
+5. **Tareas por integrante** al día: estados de Bárbara actualizados (PR #11 a #15) y resumen automático por persona en el Excel.
 
 ### Falta que decida el equipo
 - [ ] Cada integrante escribe **su fortaleza**.

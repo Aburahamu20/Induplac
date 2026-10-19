@@ -25,7 +25,7 @@
 |---|---|---|
 | Sprint 1 (05–09/10) | Diseño y documentación | Contexto, arquitectura y decisiones técnicas en el repositorio. |
 | Sprint 2 (12–16/10) | Captura y visualización | Broker MQTT funcionando, backend en AWS y dashboard con datos simulados. |
-| Sprint 3 (19–23/10) | Integración híbrida y demo | ESP32 en Wokwi, Edge con modo offline, Cognito y **demo el miércoles 21/10**. |
+| Sprint 3 (19–23/10) | Integración híbrida y demo | ESP32 en Wokwi, Edge con modo offline, RDS PostgreSQL, Cognito y **demo el miércoles 21/10**. |
 
 ### Herramientas de seguimiento
 
@@ -59,4 +59,4 @@ Scrum entrega el **prototipo funcionando** (hito: demo del 21/10). Ese prototipo
 
 - [ ] Quién es **Product Owner** y quién **Scrum Master**.
 - [ ] Si hubo reuniones fijas (en clases o por el grupo) para nombrarlas como revisión de sprint o reunión diaria.
-- [ ] Agregar **RDS PostgreSQL** a la Gantt y a las tareas de Felipe y Abraham: volvió al MVP el 19/10/2026 (en `roles-raci-gantt.md` aparece como quitado).
+- [x] Agregar **RDS PostgreSQL** a la Gantt y a las tareas de Felipe y Abraham (hecho el 19/10/2026, PR #15).
