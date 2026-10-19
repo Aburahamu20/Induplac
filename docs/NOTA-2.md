@@ -3,7 +3,7 @@
 > Resumen de lo que pide el profesor Marco Antonio Perelli para la Nota 2, y borradores de roles, RACI y Gantt para que el equipo los ajuste.
 > **Las tareas para repartir están en [`docs/EN-CURSO.md`](EN-CURSO.md)** (tareas 9 a 18).
 >
-> ⚠️ Los roles, la RACI y la Gantt de este documento son **borradores**. Faltan los nombres y que el equipo los valide.
+> ⚠️ Los roles, la RACI y la Gantt de este documento son **borradores**. La propuesta con nombres de Bárbara está en [`roles-raci-gantt.md`](roles-raci-gantt.md) (Excel en `docs/nota-2/`); falta que el equipo la valide.
 
 ---
 
@@ -14,15 +14,15 @@
 | # | Entregable | Tarea | Estado |
 |---|---|---|---|
 | 1 | Presentación PowerPoint (problema, propuesta, alcance del MVP, funcionamiento) | 17 | ❌ |
-| 2 | Equipo y roles: fortalezas, responsabilidades y participación | 9 | ❌ |
-| 3 | Matriz RACI | 10 | ❌ (hay borrador) |
+| 2 | Equipo y roles: fortalezas, responsabilidades y participación | 9 | 🟡 Propuesta de Bárbara en `roles-raci-gantt.md`; faltan fortalezas |
+| 3 | Matriz RACI | 10 | 🟡 Propuesta de Bárbara (19 actividades; la pauta pide 6–10) |
 | 4 | Arquitectura técnica: recorrido del dato desde la captura hasta la visualización | — | ✅ `CONTEXTO.md`, `GUIA-EQUIPO.md` |
 | 5 | Comunicación IoT: dispositivos, gateway, redes y protocolos, justificados | — | ✅ `CONTEXTO.md`, `infrastructure/README.md` |
 | 6 | Cloud y Backend: recepción, procesamiento, almacenamiento, visualización y **modelo Cloud** | 11 | 🟡 Falta nombrar y justificar el modelo |
 | 7 | Tecnologías y su aporte concreto | 11 | 🟡 |
 | 8 | Pipeline DevOps básico (desarrollo → prueba → validación → despliegue) | 12 | ❌ |
 | 9 | Planificación: ágil (MVP) + gestión de proyectos (implementación) | 13 | 🟡 Hay sprints en el README |
-| 10 | Carta Gantt hasta pruebas, integración, seguridad, capacitación y puesta en marcha | 14 | ❌ (hay borrador) |
+| 10 | Carta Gantt hasta pruebas, integración, seguridad, capacitación y puesta en marcha | 14 | 🟡 Gantt de sprints de Bárbara + borrador de implementación (§5) |
 | 11 | Demostración del prototipo con datos ficticios | 1–4, 18 | ❌ **Mayor riesgo** |
 | 12 | Conclusiones y defensa: problema, beneficios, limitaciones, siguientes pasos | 15 | 🟡 |
 | 13 | Informe del proyecto actualizado | 16 | 🟡 |
@@ -41,6 +41,8 @@
 
 ## 2. Roles (borrador, tarea 9)
 
+> Propuesta con nombres: [`roles-raci-gantt.md`](roles-raci-gantt.md) §1.
+
 El profe sugiere 4 roles para equipos de 4. **Somos 5**, así que se propone un quinto rol, **Seguridad y DevOps**, porque la pauta pide seguridad y pipeline DevOps como puntos propios y así ambos tienen dueño.
 
 | Rol | Responsabilidades concretas | Integrante (principal / secundario) | Fortaleza |
@@ -56,6 +58,8 @@ El profe sugiere 4 roles para equipos de 4. **Somos 5**, así que se propone un 
 ---
 
 ## 3. Matriz RACI (borrador, tarea 10)
+
+> Propuesta con nombres: [`roles-raci-gantt.md`](roles-raci-gantt.md) §2.
 
 **R** = ejecuta · **A** = responde por el resultado (uno solo) · **C** = se consulta · **I** = se informa
 
@@ -92,6 +96,8 @@ Revisión: las 8 actividades tienen un R y un solo A. ✅
 
 ## 5. Carta Gantt (borrador, tarea 14)
 
+> Gantt de sprints con responsables y fechas: [`roles-raci-gantt.md`](roles-raci-gantt.md) §3.
+
 Implementación **hipotética** desde el prototipo actual hasta la puesta en marcha. Duraciones por ajustar.
 
 | # | Actividad | Fase PMI | Responsable (A) | Duración | Depende de | S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 |
@@ -112,5 +118,5 @@ Implementación **hipotética** desde el prototipo actual hasta la puesta en mar
 
 ## 6. Pendiente de confirmar
 - [ ] Fecha de entrega o presentación de la Nota 2.
-- [ ] Quién toma cada rol y su fortaleza.
+- [ ] Validar la propuesta de roles de Bárbara y agregar la fortaleza de cada uno.
 - [ ] Formato del informe (¿Word?) y si existe el de la Nota 1 para actualizarlo.
