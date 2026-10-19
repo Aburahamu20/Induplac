@@ -289,3 +289,12 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - §15: arquitectura con intervalos de 15 min, alertas en dos niveles, servicios reales de AWS (API Gateway, Lambda, DynamoDB, S3) y VPN como diseño.
 - §8: umbrales de agua definidos y respaldo fijo de energía. §16: login, clave temporal, permisos por usuario y MFA.
 - §17, §18, §21, §22 y §25: estructura, tecnologías con su estado, alcance, roadmap y estado actual.
+
+---
+
+## 2026-10-18 (noche) — Roles, RACI y Carta Gantt de Bárbara (tareas 9, 10 y 14)
+
+- Bárbara Saavedra hizo el Excel con roles, tareas por integrante, RACI y Carta Gantt; lo subió Abraham porque ella no sabía cómo hacer el commit.
+- Original en `docs/nota-2/Induplac_Roles_Equipo.xlsx` y copia en texto en `docs/roles-raci-gantt.md`.
+- Corregido según lo que está en GitHub: responsables de lo ya construido (broker, dashboard, Edge, backend), RACI de 19 a 10 actividades (la pauta pide 6–10), Gantt en dos partes (sprints del MVP S1–S3 desde el 05/10 + implementación PMI S4–S12 hasta la puesta en marcha), términos del Edge alineados con el código, sin RDS y con columna de fortalezas.
+- Falta: que cada uno escriba su fortaleza y que Lisandra y Bárbara confirmen sus roles (§5 del documento).
