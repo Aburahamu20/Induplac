@@ -289,3 +289,26 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - §15: arquitectura con intervalos de 15 min, alertas en dos niveles, servicios reales de AWS (API Gateway, Lambda, DynamoDB, S3) y VPN como diseño.
 - §8: umbrales de agua definidos y respaldo fijo de energía. §16: login, clave temporal, permisos por usuario y MFA.
 - §17, §18, §21, §22 y §25: estructura, tecnologías con su estado, alcance, roadmap y estado actual.
+
+---
+
+## 2026-10-19 — RDS vuelve al MVP con uso puntual
+
+- **Decisión (Abraham):** se implementa **RDS PostgreSQL** (antes había quedado fuera del MVP por costo). Se mantiene **apagado** y solo se enciende para configurar y para la demo del miércoles 2026-10-21; después, solo cuando haya que hacer configuraciones.
+- **Reparto de datos (propuesta para revisar con Felipe):**
+  - **DynamoDB** (sin cambios): intervalos de 15 min y alertas. La ingesta no depende de RDS.
+  - **RDS PostgreSQL:** permisos por usuario (enlazados al `sub` de Cognito), umbrales de alerta por local y catálogo de locales y dispositivos.
+  - **Cognito:** cuentas, claves temporales y MFA.
+- **Con RDS apagado:** los datos y las alertas siguen funcionando; solo no se pueden cambiar permisos ni umbrales. La Lambda usa umbrales por defecto (los de `CONTEXTO.md` §8.2) si no puede conectarse.
+- **Cuidados:**
+  - AWS **reinicia sola** una instancia RDS detenida a los **7 días**: apagarla de nuevo cada vez.
+  - El almacenamiento se cobra aunque esté apagada (poco con 20 GB).
+  - La Lambda que hable con RDS debe ir en la VPC: usar un **VPC Endpoint Gateway para DynamoDB** (gratis), **sin NAT Gateway**.
+  - Para la demo, encenderla 10–15 min antes (tarda en quedar *Available*) y apagarla al terminar.
+- **Estado del código (revisado hoy):** el Edge (`feature/edge`), el backend (`feature/backend-aws`) y el dashboard (`feature/dashboard`, `feat/dashboard`) están en sus ramas y **todavía no están en `main`**.
+
+### Siguen abiertos
+- [ ] Cognito con MFA en el Learner Lab (tarea 6), junto con RDS.
+- [ ] Dónde se guardan los permisos por usuario: confirmar RDS (propuesta) vs. atributos de Cognito.
+- [ ] Mergear a `main` las ramas del Edge, backend y dashboard.
+- [ ] Actualizar `CONTEXTO.md` y README (§18, §21) con RDS dentro del MVP.
