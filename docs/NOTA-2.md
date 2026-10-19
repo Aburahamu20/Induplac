@@ -15,14 +15,14 @@
 |---|---|---|---|
 | 1 | Presentación PowerPoint (problema, propuesta, alcance del MVP, funcionamiento) | 17 | ❌ |
 | 2 | Equipo y roles: fortalezas, responsabilidades y participación | 9 | 🟡 Propuesta de Bárbara en `roles-raci-gantt.md`; faltan fortalezas |
-| 3 | Matriz RACI | 10 | 🟡 Propuesta de Bárbara (19 actividades; la pauta pide 6–10) |
+| 3 | Matriz RACI | 10 | 🟡 Propuesta de Bárbara, ajustada a 10 actividades |
 | 4 | Arquitectura técnica: recorrido del dato desde la captura hasta la visualización | — | ✅ `CONTEXTO.md`, `GUIA-EQUIPO.md` |
 | 5 | Comunicación IoT: dispositivos, gateway, redes y protocolos, justificados | — | ✅ `CONTEXTO.md`, `infrastructure/README.md` |
 | 6 | Cloud y Backend: recepción, procesamiento, almacenamiento, visualización y **modelo Cloud** | 11 | 🟡 Falta nombrar y justificar el modelo |
 | 7 | Tecnologías y su aporte concreto | 11 | 🟡 |
 | 8 | Pipeline DevOps básico (desarrollo → prueba → validación → despliegue) | 12 | ❌ |
 | 9 | Planificación: ágil (MVP) + gestión de proyectos (implementación) | 13 | 🟡 Hay sprints en el README |
-| 10 | Carta Gantt hasta pruebas, integración, seguridad, capacitación y puesta en marcha | 14 | 🟡 Gantt de sprints de Bárbara + borrador de implementación (§5) |
+| 10 | Carta Gantt hasta pruebas, integración, seguridad, capacitación y puesta en marcha | 14 | 🟡 Gantt de Bárbara: sprints del MVP + implementación PMI hasta la puesta en marcha |
 | 11 | Demostración del prototipo con datos ficticios | 1–4, 18 | ❌ **Mayor riesgo** |
 | 12 | Conclusiones y defensa: problema, beneficios, limitaciones, siguientes pasos | 15 | 🟡 |
 | 13 | Informe del proyecto actualizado | 16 | 🟡 |
@@ -96,7 +96,7 @@ Revisión: las 8 actividades tienen un R y un solo A. ✅
 
 ## 5. Carta Gantt (borrador, tarea 14)
 
-> Gantt de sprints con responsables y fechas: [`roles-raci-gantt.md`](roles-raci-gantt.md) §3.
+> Versión con responsables y fechas: [`roles-raci-gantt.md`](roles-raci-gantt.md) §3.
 
 Implementación **hipotética** desde el prototipo actual hasta la puesta en marcha. Duraciones por ajustar.
 
