@@ -1,0 +1,60 @@
+# CI — Prueba y validación automáticas (docs/devops.md, pasos 2 y 3).
+# Corre en cada Pull Request hacia main y en cada push a main.
+# Si un job falla, el PR muestra ❌ y no se debe mergear.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  dashboard:
+    name: Dashboard (lint + tipos + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - run: npm ci
+      - name: Revisar el código (oxlint)
+        run: npm run lint
+      - name: Tipos y compilación (tsc + vite build)
+        run: npm run build
+
+  python:
+    name: Edge y Lambdas (sintaxis + pruebas de alertas)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Sintaxis de todo el Python
+        run: python -m py_compile edge/*.py backend/lambda_api/*.py backend/lambda_config/*.py backend/scripts/*.py
+      - name: Pruebas del Edge (validación, duplicados y reglas de alerta)
+        working-directory: edge
+        run: python -m unittest discover -s tests -v
+
+  secretos:
+    name: Sin claves en el repositorio
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Escanear secretos (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

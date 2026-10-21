@@ -699,6 +699,7 @@ Induplac/
 │   ├── api-dashboard.md       ← contrato entre el dashboard y la API
 │   ├── broker-mqtt.md         ← broker de la simulación
 │   ├── decisiones-tecnicas.md ← ADR-01 a ADR-10
+│   ├── devops.md              ← pipeline: CI con GitHub Actions y despliegue
 │   ├── modo-offline.md
 │   ├── ciberseguridad.md
 │   └── arquitectura.md

@@ -1,0 +1,101 @@
+# CD — Despliegue a AWS (docs/devops.md, paso 4).
+#
+# Se lanza A MANO (Actions → Deploy → Run workflow) porque las credenciales del
+# AWS Academy Learner Lab vencen cada ~4 horas y no se pueden crear usuarios IAM.
+# Antes de lanzarlo, pegar las credenciales del lab del momento como secretos
+# (AWS Details → AWS CLI en el Learner Lab). En producción se usaría un rol OIDC
+# y el despliegue correría solo al mergear a main.
+#
+# Secretos (Settings → Secrets and variables → Actions → Secrets):
+#   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
+# Variables (misma pantalla → Variables):
+#   S3_BUCKET               bucket del dashboard (ej. induplac-dashboard-xxxx)
+#   VITE_API_URL            https://<api-id>.execute-api.us-east-1.amazonaws.com/api
+#   VITE_COGNITO_CLIENT_ID  client id del app client induplac-dashboard
+
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      que:
+        description: "Qué desplegar"
+        type: choice
+        options: [todo, dashboard, lambdas]
+        default: todo
+      login:
+        description: "Login del dashboard"
+        type: choice
+        options: [cognito, simulada]
+        default: cognito
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy:
+    name: Desplegar en AWS (Learner Lab)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Credenciales del Learner Lab
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ---------- Dashboard → S3 ----------
+      - uses: actions/setup-node@v4
+        if: inputs.que != 'lambdas'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - name: Build del dashboard
+        if: inputs.que != 'lambdas'
+        working-directory: dashboard
+        env:
+          VITE_FUENTE: api
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_AUTH: ${{ inputs.login }}
+          VITE_COGNITO_REGION: ${{ env.AWS_REGION }}
+          VITE_COGNITO_CLIENT_ID: ${{ vars.VITE_COGNITO_CLIENT_ID }}
+          VITE_DEMO: "false"
+        run: |
+          npm ci
+          npm run build
+      - name: Subir a S3
+        if: inputs.que != 'lambdas'
+        run: aws s3 sync dashboard/dist "s3://${{ vars.S3_BUCKET }}" --delete
+
+      # ---------- Lambdas ----------
+      - uses: actions/setup-python@v5
+        if: inputs.que != 'dashboard'
+        with:
+          python-version: "3.12"
+      - name: Actualizar induplac-api
+        if: inputs.que != 'dashboard'
+        run: |
+          cd backend/lambda_api && zip -q ../../induplac-api.zip lambda_function.py && cd ../..
+          aws lambda update-function-code --function-name induplac-api --zip-file fileb://induplac-api.zip --query LastModified
+      - name: Actualizar induplac-config
+        if: inputs.que != 'dashboard'
+        run: |
+          mkdir -p pkg
+          pip install --quiet --target pkg -r backend/lambda_config/requirements.txt
+          cp backend/lambda_config/lambda_function.py pkg/
+          curl -sSfo pkg/global-bundle.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+          cd pkg && zip -qr ../induplac-config.zip . && cd ..
+          aws lambda update-function-code --function-name induplac-config --zip-file fileb://induplac-config.zip --query LastModified
+
+      - name: Probar la API
+        if: inputs.que != 'dashboard'
+        run: |
+          URL="${{ vars.VITE_API_URL }}"
+          curl -sSf "${URL%/api}/health"
