@@ -20,12 +20,13 @@
 
 ---
 
-## 🔥 Para hoy (2026-10-14)
+## 🔥 Para hoy (2026-10-21) — Demo
 
-1. **Tarea 9:** definir roles, fortalezas y responsabilidades. **Es lo primero:** sin roles no hay RACI ni Gantt.
-2. **Tarea 10:** matriz RACI con los roles definidos.
-3. **Tarea 2:** crear el broker EMQX (Abraham).
-4. Cada integrante **elige y reserva** al menos una tarea de la Nota 2 (tabla de abajo).
+1. **Felipe:** iniciar el Learner Lab temprano y revisar que RDS esté *Available*.
+2. **30 min antes:** Wokwi (Sebastián) + Edge (Abraham) corriendo para tener datos frescos. Plan B: `edge/simular_esp32.py`.
+3. Revisar: dashboard en S3, `/health` y `/config/umbrales`.
+4. Ensayar el showcase: corte de red → alerta → reconexión sin duplicados.
+5. Nota 2 pendiente: guion de la demo (18), PowerPoint (17), pipeline DevOps (12), informe (16), fortalezas y Product Owner / Scrum Master.
 
 La pauta completa de la Nota 2 y los borradores de roles, RACI y Gantt están en [`docs/NOTA-2.md`](NOTA-2.md).
 
@@ -35,12 +36,12 @@ La pauta completa de la Nota 2 y los borradores de roles, RACI y Gantt están en
 
 | # | Tarea | Carpeta | Estado | Quién | Desde | Rama / PR | Notas |
 |---|---|---|---|---|---|---|---|
-| 1 | Dashboard React (monitor por sede, alertas, histórico, panel de simulación) con datos simulados | `dashboard/` | 🟡 En curso | Abraham (con Claude) | 2026-10-14 | `feature/dashboard` | Primero la simulación del dashboard con datos ficticios; no depende del broker. |
-| 3 | Sketch ESP32 en Wokwi (sensores virtuales, NTP, JSON por MQTT) | `simulation/` | 🔵 En revisión | Sebastián Fuentes | 2026-10-16 | PR #16 | **20/10:** publica al broker EMQX y el Edge recibe sus lecturas (probado). Código en `simulation/wokwi-local1/`. |
-| 4 | Agente Edge en Python (MQTT → SQLite → intervalos 15 min → alertas → sync) | `edge/` | 🟡 En curso | Abraham (con Claude) | 2026-10-17 | `feature/edge` | Broker listo y probado: ver `docs/broker-mqtt.md` (PR #9). Debe exponer la API de `docs/api-dashboard.md`. |
-| 5 | Backend AWS: Lambda de ingesta y alertas, DynamoDB, RDS, API | `backend/` | 🟡 En curso | Abraham y Felipe Murúa | 2026-10-17 | `feature/backend-aws` | Debe exponer la API de `docs/api-dashboard.md`. **20/10:** Lambda re-desplegada, RDS creado con sus tablas y Lambda `induplac-config` (`/config/umbrales`). Falta mergear la rama. |
-| 6 | Cognito con MFA (probar primero que el Learner Lab lo permita) | `backend/` | 🟡 En curso | Abraham y Felipe Murúa | 2026-10-20 | — | **Funciona en el Learner Lab** (user pool, clave temporal y MFA TOTP probados). Falta conectarlo al dashboard. |
-| 8 | Identificador por lectura (`device_id + seq`) entre ESP32 y Edge | `simulation/`, `edge/` | 🟢 Libre | | | | Definir junto con las tareas 3 y 4. |
+| 1 | Dashboard React (monitor por sede, alertas, histórico, panel de simulación) con datos simulados | `dashboard/` | ✅ Listo | Abraham (con Claude) | 2026-10-14 | PR #18 | Publicado en S3 leyendo de AWS. Login con clave temporal, MFA TOTP y permisos por usuario. |
+| 3 | Sketch ESP32 en Wokwi (sensores virtuales, NTP, JSON por MQTT) | `simulation/` | ✅ Listo | Sebastián Fuentes | 2026-10-16 | PR #16 | Publica al broker EMQX y el Edge recibe sus lecturas (probado el 20/10). Código en `simulation/wokwi-local1/`. |
+| 4 | Agente Edge en Python (MQTT → SQLite → intervalos 15 min → alertas → sync) | `edge/` | ✅ Listo | Abraham (con Claude) | 2026-10-17 | PR #18 | Probado con Wokwi y con el simulador: alertas offline y cola de pendientes. Falta la API local para el dashboard de planta. |
+| 5 | Backend AWS: Lambda de ingesta y alertas, DynamoDB, RDS, API | `backend/` | ✅ Listo | Abraham y Felipe Murúa | 2026-10-17 | PR #16, #18 | `induplac-api` + DynamoDB + S3; RDS con la configuración y Lambda `induplac-config` (`/config/umbrales`). Pendiente: que `induplac-api` lea los umbrales desde RDS. |
+| 6 | Cognito con MFA (probar primero que el Learner Lab lo permita) | `backend/`, `dashboard/` | 🟡 En curso | Abraham y Felipe Murúa | 2026-10-20 | PR #16 | **Funciona en el Learner Lab** (user pool, clave temporal y MFA TOTP probados). Falta conectarlo al dashboard (después de la demo). |
+| 8 | Identificador por lectura (`device_id + seq`) entre ESP32 y Edge | `simulation/`, `edge/` | ✅ Listo | Abraham y Sebastián | 2026-10-20 | PR #16, #18 | El ESP32 manda `device_id + seq + ts`; el Edge descarta duplicados con esa llave, también tras reinicios. |
 
 ---
 
@@ -82,3 +83,6 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 | Modelo Cloud y tecnologías con su aporte (tarea 11) | Bárbara Saavedra (con Claude) | 2026-10-19 | PR #13 |
 | Conclusiones y defensa (tarea 15) | Bárbara Saavedra (con Claude) | 2026-10-19 | PR #14 |
 | Gantt, RACI y cargos actualizados con RDS + Excel con tareas por integrante | Bárbara Saavedra (con Claude) | 2026-10-19 | PR #15 |
+| RDS + Lambda `induplac-config`, Cognito probado y Wokwi conectado (tareas 3, 5 y 6) | Abraham y Felipe (con Claude), Sebastián | 2026-10-20 | PR #16 |
+| Corrección: alertas en DynamoDB, cuentas en Cognito y RDS solo configuración | Abraham (con Claude) | 2026-10-21 | PR #17 |
+| Código del Edge, dashboard y backend subido a `main` (tareas 1, 4 y 5) | Abraham (con Claude) | 2026-10-21 | PR #18 |
