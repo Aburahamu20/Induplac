@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "author": "Induplac IoT — Prototipo Wokwi",
+  "editor": "wokwi",
+  "parts": [
+    {"type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 200, "left": 320, "attrs": {}},
+
+    {"type": "wokwi-vcc", "id": "vcc1", "top": 0,   "left": 10,  "attrs": {}},
+    {"type": "wokwi-gnd", "id": "gnd1", "top": 40,  "left": 10,  "attrs": {}},
+    {"type": "wokwi-vcc", "id": "vcc2", "top": 0,   "left": 90,  "attrs": {}},
+    {"type": "wokwi-gnd", "id": "gnd2", "top": 40,  "left": 90,  "attrs": {}},
+    {"type": "wokwi-vcc", "id": "vcc3", "top": 0,   "left": 170, "attrs": {}},
+    {"type": "wokwi-gnd", "id": "gnd3", "top": 40,  "left": 170, "attrs": {}},
+    {"type": "wokwi-vcc", "id": "vcc4", "top": 0,   "left": 600, "attrs": {}},
+    {"type": "wokwi-gnd", "id": "gnd4", "top": 40,  "left": 600, "attrs": {}},
+    {"type": "wokwi-gnd", "id": "gnd5", "top": 470, "left": 100, "attrs": {}},
+    {"type": "wokwi-gnd", "id": "gnd6", "top": 470, "left": 240, "attrs": {}},
+    {"type": "wokwi-gnd", "id": "gnd7", "top": 500, "left": 580, "attrs": {}},
+    {"type": "wokwi-gnd", "id": "gnd8", "top": 550, "left": 580, "attrs": {}},
+
+    {"type": "wokwi-potentiometer", "id": "pot_energia", "top": 80, "left": 10,  "attrs": {"label": "Energia kW"}},
+    {"type": "wokwi-potentiometer", "id": "pot_agua",    "top": 80, "left": 90,  "attrs": {"label": "Agua m3/h"}},
+    {"type": "wokwi-potentiometer", "id": "pot_uv",      "top": 80, "left": 170, "attrs": {"label": "Indice UV"}},
+
+    {"type": "wokwi-pushbutton", "id": "btn_prod", "top": 430, "left": 100, "attrs": {"label": "Produccion +1", "color": "blue"}},
+    {"type": "wokwi-pushbutton", "id": "btn_hh",   "top": 430, "left": 240, "attrs": {"label": "HH activas",    "color": "green"}},
+
+    {"type": "wokwi-led", "id": "led_mqtt",    "top": 430, "left": 580, "attrs": {"color": "green", "label": "MQTT OK"}},
+    {"type": "wokwi-led", "id": "led_offline", "top": 480, "left": 580, "attrs": {"color": "red",   "label": "Offline"}},
+
+    {"type": "board-grove-oled-sh1107", "id": "oled", "top": 80, "left": 580, "attrs": {}}
+  ],
+  "connections": [
+    ["esp:3V3",   "vcc1:VCC", "red",   []],
+    ["esp:3V3",   "vcc2:VCC", "red",   []],
+    ["esp:3V3",   "vcc3:VCC", "red",   []],
+    ["esp:3V3",   "vcc4:VCC", "red",   []],
+    ["esp:GND.1", "gnd1:GND", "black", []],
+    ["esp:GND.1", "gnd2:GND", "black", []],
+    ["esp:GND.1", "gnd3:GND", "black", []],
+    ["esp:GND.1", "gnd4:GND", "black", []],
+    ["esp:GND.2", "gnd5:GND", "black", []],
+    ["esp:GND.2", "gnd6:GND", "black", []],
+    ["esp:GND.2", "gnd7:GND", "black", []],
+    ["esp:GND.2", "gnd8:GND", "black", []],
+
+    ["pot_energia:VCC", "vcc1:VCC", "red",    []],
+    ["pot_energia:GND", "gnd1:GND", "black",  []],
+    ["pot_energia:SIG", "esp:D34",  "yellow", []],
+
+    ["pot_agua:VCC", "vcc2:VCC", "red",    []],
+    ["pot_agua:GND", "gnd2:GND", "black",  []],
+    ["pot_agua:SIG", "esp:D35",  "yellow", []],
+
+    ["pot_uv:VCC", "vcc3:VCC", "red",    []],
+    ["pot_uv:GND", "gnd3:GND", "black",  []],
+    ["pot_uv:SIG", "esp:D32",  "yellow", []],
+
+    ["esp:D25",      "btn_prod:1.l", "blue",  []],
+    ["btn_prod:2.r", "gnd5:GND",    "black", []],
+
+    ["esp:D26",    "btn_hh:1.l", "green", []],
+    ["btn_hh:2.r", "gnd6:GND",  "black", []],
+
+    ["esp:D2",      "led_mqtt:A",    "green",  []],
+    ["led_mqtt:C",  "gnd7:GND",      "black",  []],
+
+    ["esp:D4",        "led_offline:A", "orange", []],
+    ["led_offline:C", "gnd8:GND",      "black",  []],
+
+    ["oled:VCC", "vcc4:VCC", "red",    []],
+    ["oled:GND", "gnd4:GND", "black",  []],
+    ["oled:SDA", "esp:D21",  "blue",   []],
+    ["oled:SCL", "esp:D22",  "yellow", []]
+  ]
+}

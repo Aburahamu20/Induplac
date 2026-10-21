@@ -341,11 +341,18 @@ Sesión de Abraham y Felipe en el Learner Lab de Felipe.
 - Lambda aparte, **dentro de la VPC**, que lee umbrales y catálogo desde RDS. `induplac-api` no se tocó.
 - Ruta `GET /config/{proxy+}` en API Gateway. `GET /config/umbrales` responde `{"fuente": "rds", ...}`.
 
+**6. Wokwi de Sebastián conectado** ✅ (tarea 3, `simulation/wokwi-local1/`)
+- Cadena probada: **Wokwi → EMQX → Edge**. Las lecturas de `esp32-local-01` llegan al Edge con energía, agua y UV.
+- Con el lab apagado (enlace OFFLINE), el Edge generó **alertas locales con datos de Wokwi**: *posible fuga* (caudal fuera de horario) y *energía sobre 55 kW*. Los intervalos y alertas quedaron en cola (`pendientes=7`) para subir al volver AWS.
+- Botones arreglados: el `delay(200)` del debounce bloqueaba `mqttClient.loop()`; ahora es por flanco con `millis()`.
+- Wokwi simuló lento por momentos (≈ 1 lectura cada 25 s en vez de 5 s; luego 83 lecturas por intervalo). No afecta: el `ts` viene de NTP.
+- El Edge ahora muestra el caudal de agua en el log de cada lectura (rama `feature/edge`).
+
 ### Siguen abiertos
+- [ ] Ajustar los rangos de los potenciómetros para la demo (energía 0–100 kW, agua 0–5 m³/h).
 - [ ] Conectar el dashboard a Cognito y validar el token en la API.
 - [ ] Reemplazar los `cognito_sub` de ejemplo por los reales.
 - [ ] Que `induplac-api` lea los umbrales desde RDS (con valores por defecto si RDS está apagado).
-- [ ] Wokwi (Sebastián) publicando al broker en vez del simulador.
 - [ ] Mergear a `main` las ramas `feature/edge`, `feature/backend-aws` y `feature/dashboard`.
 - [ ] Apagar RDS después de la demo del 21/10.
 
