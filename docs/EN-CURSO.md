@@ -26,7 +26,7 @@
 2. **30 min antes:** Wokwi (Sebastián) + Edge (Abraham) corriendo para tener datos frescos. Plan B: `edge/simular_esp32.py`.
 3. Revisar: dashboard en S3, `/health` y `/config/umbrales`.
 4. Ensayar el showcase: corte de red → alerta → reconexión sin duplicados.
-5. Nota 2 pendiente: guion de la demo (18), PowerPoint (17), pipeline DevOps (12), informe (16) y fortalezas de cada integrante.
+5. Nota 2 pendiente: guion de la demo (18), PowerPoint (17), pipeline DevOps (12), informe (16) y la fortaleza de Lisandra.
 
 La pauta completa de la Nota 2 y los borradores de roles, RACI y Gantt están en [`docs/NOTA-2.md`](NOTA-2.md).
 
@@ -51,7 +51,7 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 
 | # | Tarea | Pauta | Estado | Quién | Desde | Rama / PR | Notas |
 |---|---|---|---|---|---|---|---|
-| 9 | Roles del equipo: rol principal/secundario, fortalezas y responsabilidades de cada integrante | 2 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-18 | PR #11 | En `docs/roles-raci-gantt.md` §1. **Falta:** que cada uno escriba su fortaleza y que Lisandra confirme su rol. Vale 15 %. |
+| 9 | Roles del equipo: rol principal/secundario, fortalezas y responsabilidades de cada integrante | 2 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-18 | PR #11 | En `docs/roles-raci-gantt.md` §1. Fortalezas escritas (21/10). **Falta:** la fortaleza y el rol de Lisandra. Vale 15 %. |
 | 10 | Matriz RACI (6–10 actividades, cada una con R y un solo A) | 3 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-18 | PR #11 | En `docs/roles-raci-gantt.md` §2 (10 actividades). |
 | 11 | Modelo Cloud (híbrido + serverless/PaaS) y tabla de tecnologías con su aporte concreto | 6, 7 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-19 | PR #13 | En `docs/cloud-tecnologias.md`. |
 | 12 | Pipeline DevOps: diagrama + GitHub Actions que compile/pruebe en cada PR | 8 | 🔵 En revisión | Abraham (con Claude) | 2026-10-21 | `feature/pipeline-devops` | `docs/devops.md`, `ci.yml` (dashboard, Python + 15 pruebas del Edge, secretos) y `deploy.yml` (manual por el Learner Lab). |

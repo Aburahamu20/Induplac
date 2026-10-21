@@ -14,7 +14,7 @@
 | # | Entregable | Tarea | Estado |
 |---|---|---|---|
 | 1 | Presentación PowerPoint (problema, propuesta, alcance del MVP, funcionamiento) | 17 | ❌ |
-| 2 | Equipo y roles: fortalezas, responsabilidades y participación | 9 | 🟡 `roles-raci-gantt.md`; **faltan las fortalezas** de cada uno |
+| 2 | Equipo y roles: fortalezas, responsabilidades y participación | 9 | 🟡 `roles-raci-gantt.md`; **falta la fortaleza de Lisandra** |
 | 3 | Matriz RACI | 10 | ✅ `roles-raci-gantt.md` (10 actividades) |
 | 4 | Arquitectura técnica: recorrido del dato desde la captura hasta la visualización | — | ✅ `CONTEXTO.md`, `GUIA-EQUIPO.md` |
 | 5 | Comunicación IoT: dispositivos, gateway, redes y protocolos, justificados | — | ✅ `CONTEXTO.md`, `infrastructure/README.md` |

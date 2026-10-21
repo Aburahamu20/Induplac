@@ -10,11 +10,11 @@
 
 | Integrante | Rol | Responsabilidades principales | Carpeta | Mayor carga | Fortalezas |
 |---|---|---|---|---|---|
-| **Abraham Castro** | Jefe de proyecto, integración y desarrollo (broker, Edge y dashboard) | Coordina el equipo y el repositorio (README, docs/, ramas y Pull Requests). Creó el broker EMQX, el dashboard React y el Edge Gateway en Python; arma el backend AWS y la base RDS junto a Felipe. Prepara los casos de prueba y la demo. | `docs/, dashboard/, edge/` | Todos (transversal) | _Por completar_ |
-| **Sebastián Fuentes** | Ingeniero IoT y simulación | Sketch del ESP32 en Wokwi (Local 1 y Local 2): sensores simulados (CT, caudalímetro, UV), NTP, buffer de lecturas y publicación del JSON por MQTT (device_id + seq + ts). Escenarios de prueba de alertas. | `sensors/, simulation/` | Sprint 2 y 3 | _Por completar_ |
-| **Lisandra González** | Pruebas del Edge y modo offline | Prueba el Edge Gateway con el simulador y con Wokwi, ejecuta la simulación de corte de internet, verifica la sincronización al volver la conexión (sin duplicados) y documenta las evidencias. En la implementación, despliega el Edge en la Raspberry Pi. | `edge/` | Sprint 3 | _Por completar_ |
-| **Felipe Murúa** | Cloud, backend y ciberseguridad | AWS en el Learner Lab: API Gateway, Lambda (Python), DynamoDB, RDS PostgreSQL (permisos, umbrales y catálogo) y S3 para publicar el dashboard; reglas de alerta; Cognito con MFA; IAM, TLS y cumplimiento de la Ley 19.628. | `backend/, infrastructure/` | Sprint 2 y 3 | _Por completar_ |
-| **Bárbara Saavedra** | Planificación y frontend | Roles, matriz RACI, planificación Scrum y PMI, Carta Gantt, modelo Cloud, tecnologías y conclusiones. Apoya el dashboard (revisión de vistas) y la capacitación de usuarios en la implementación. | `docs/, dashboard/` | Sprint 3 e implementación | _Por completar_ |
+| **Abraham Castro** | Jefe de proyecto, integración y desarrollo (broker, Edge y dashboard) | Coordina el equipo y el repositorio (README, docs/, ramas y Pull Requests). Creó el broker EMQX, el dashboard React y el Edge Gateway en Python; arma el backend AWS y la base RDS junto a Felipe. Prepara los casos de prueba y la demo. | `docs/, dashboard/, edge/` | Todos (transversal) | Redes e integración de sistemas: diseña la arquitectura completa (red, broker, Edge y nube) y coordina el repositorio y el trabajo del equipo. |
+| **Sebastián Fuentes** | Ingeniero IoT y simulación | Sketch del ESP32 en Wokwi (Local 1 y Local 2): sensores simulados (CT, caudalímetro, UV), NTP, buffer de lecturas y publicación del JSON por MQTT (device_id + seq + ts). Escenarios de prueba de alertas. | `sensors/, simulation/` | Sprint 2 y 3 | Electrónica y prototipado IoT: arma el circuito y el firmware del ESP32 (sensores, MQTT con TLS, buffer offline) y resuelve problemas de hardware simulado. |
+| **Lisandra González** | Pruebas del Edge y modo offline | Prueba el Edge Gateway con el simulador y con Wokwi, ejecuta la simulación de corte de internet, verifica la sincronización al volver la conexión (sin duplicados) y documenta las evidencias. En la implementación, despliega el Edge en la Raspberry Pi. | `edge/` | Sprint 3 | _Pendiente (se define con ella el 21/10)_ |
+| **Felipe Murúa** | Cloud, backend y ciberseguridad | AWS en el Learner Lab: API Gateway, Lambda (Python), DynamoDB, RDS PostgreSQL (permisos, umbrales y catálogo) y S3 para publicar el dashboard; reglas de alerta; Cognito con MFA; IAM, TLS y cumplimiento de la Ley 19.628. | `backend/, infrastructure/` | Sprint 2 y 3 | Cloud y seguridad en AWS: configura y administra los servicios (Lambda, RDS, Cognito con MFA, security groups) cuidando el costo y el acceso mínimo. |
+| **Bárbara Saavedra** | Planificación y frontend | Roles, matriz RACI, planificación Scrum y PMI, Carta Gantt, modelo Cloud, tecnologías y conclusiones. Apoya el dashboard (revisión de vistas) y la capacitación de usuarios en la implementación. | `docs/, dashboard/` | Sprint 3 e implementación | Planificación y documentación: organiza el proyecto con RACI, Carta Gantt, Scrum y PMI, y traduce lo técnico a documentos claros. |
 
 ### Roles Scrum (MVP)
 
@@ -135,7 +135,7 @@ Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya e
 ## 4. Cómo editar
 
 1. Abrir `docs/nota-2/Induplac_Roles_Equipo.xlsx` en Excel. En la hoja **Carta Gantt**, cambiar la fecha de inicio (celda E2) o el **Inicio** y la **Duración** de cada tarea (en azul): las fechas de fin, las barras y sus colores por responsable se recalculan solos. En la hoja **RACI**, la columna *Control* y los totales también se calculan solos, igual que el resumen de la hoja **Tareas por integrante**.
-2. Las celdas amarillas (fortalezas, Product Owner, Scrum Master) las completa el equipo.
+2. Las celdas amarillas (fortalezas, Product Owner, Scrum Master) las completa el equipo. Al 21/10 solo falta la fortaleza de Lisandra.
 3. Actualizar también las tablas de esta página.
 4. Entregar el cambio por Pull Request, como todo lo demás ([`CONTRIBUTING.md`](../CONTRIBUTING.md)).
 
@@ -163,7 +163,7 @@ Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya e
 6. **Tareas por integrante** al día: estados de Bárbara actualizados (PR #11 a #15) y resumen automático por persona en el Excel.
 
 ### Falta que decida el equipo
-- [ ] Cada integrante escribe **su fortaleza**.
+- [x] Fortalezas escritas (21/10/2026). **Pendiente:** la de Lisandra.
 - [ ] **Lisandra:** confirmar el rol propuesto.
 - [x] **Product Owner:** Abraham · **Scrum Master:** Bárbara (21/10/2026).
 - [ ] Revisar las duraciones de la implementación (S4–S12).
