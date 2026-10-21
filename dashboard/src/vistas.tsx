@@ -1,0 +1,243 @@
+// Las cuatro pestañas del dashboard.
+
+import type { ReactNode } from 'react'
+import { fuente, type ActualRespuesta, type Alerta, type LocalId, type VariableId } from './api'
+import { VARIABLES, formatear } from './api/variables'
+import { SEDES } from './components/estilos'
+import { GraficoAgua, GraficoEnergia } from './components/graficos'
+import {
+  TarjetaAgua,
+  TarjetaCaudal,
+  TarjetaEnergia,
+  TarjetaHH,
+  TarjetaProduccion,
+  TarjetaSubconsumo,
+  TarjetaUv,
+} from './components/tarjetas'
+import { useState } from 'react'
+import { useSesion } from './auth/sesion'
+import { refrescarTodo, usePolling } from './hooks/usePolling'
+
+// Umbral de alerta de agua diaria por local (CONTEXTO §8.2), para la barra
+const UMBRAL_AGUA: Record<LocalId, number> = { local1: 14, local2: 2.5 }
+
+function useActual(local: LocalId) {
+  return usePolling(() => fuente.actual(local), 5_000, [local]).datos
+}
+
+const val = (a: ActualRespuesta | null, id: VariableId) => a?.variables.find((v) => v.id === id)
+
+function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) {
+  return (
+    <section className="mb-6">
+      <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-tinta-2">{titulo}</h2>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">{children}</div>
+    </section>
+  )
+}
+
+// Los gráficos históricos requieren el permiso ver_historico (contrato §6.4)
+function Graficos({ children }: { children: ReactNode }) {
+  const { puede } = useSesion()
+  if (!puede('ver_historico')) return null
+  return <div className="grid grid-cols-1 gap-3 xl:grid-cols-[2fr_1fr]">{children}</div>
+}
+
+function Cargando() {
+  return <p className="py-10 text-center text-tinta-3">Cargando datos…</p>
+}
+
+// ---------- Resumen general ----------
+
+export function VistaResumen() {
+  const of = useActual('local2')
+  const pl = useActual('local1')
+  if (!of || !pl) return <Cargando />
+
+  return (
+    <>
+      <Seccion titulo="Energía eléctrica y agua — ambas sedes">
+        <TarjetaEnergia titulo="Consumo actual — Oficinas" v={val(of, 'energia_kw')!} />
+        <TarjetaEnergia titulo="Consumo actual — Planta" v={val(pl, 'energia_kw')!} />
+        <TarjetaAgua titulo="Agua hoy — Oficinas" v={val(of, 'agua_m3_dia')!} umbral={UMBRAL_AGUA.local2} />
+        <TarjetaAgua titulo="Agua hoy — Planta" v={val(pl, 'agua_m3_dia')!} umbral={UMBRAL_AGUA.local1} />
+      </Seccion>
+      <Seccion titulo="Indicadores operacionales">
+        <TarjetaProduccion titulo="Tableros fabricados — mes" v={val(pl, 'produccion_mes')!} periodo="mensual" />
+        <TarjetaProduccion titulo="Tableros — acumulado año" v={val(pl, 'produccion_anual')!} periodo="anual" />
+        <TarjetaHH titulo="HH sin incidentes — Planta" hh={val(pl, 'hh_sin_incidentes')!} dias={val(pl, 'dias_sin_incidentes')} />
+        <TarjetaUv titulo="Índice UV — hoy" v={val(pl, 'uv_index')!} />
+      </Seccion>
+      <Graficos>
+        <GraficoEnergia locales={['local2', 'local1']} />
+        <GraficoAgua locales={['local2', 'local1']} />
+      </Graficos>
+    </>
+  )
+}
+
+// ---------- Oficinas (Local 2) ----------
+
+export function VistaOficinas() {
+  const a = useActual('local2')
+  if (!a) return <Cargando />
+  return (
+    <>
+      <Seccion titulo="Energía eléctrica">
+        <TarjetaEnergia titulo="Consumo actual" v={val(a, 'energia_kw')!} />
+        <TarjetaSubconsumo titulo="Climatización" v={val(a, 'energia_climatizacion_kw')!} />
+        <TarjetaSubconsumo titulo="Iluminación" v={val(a, 'energia_iluminacion_kw')!} />
+      </Seccion>
+      <Seccion titulo="Agua y seguridad">
+        <TarjetaAgua titulo="Agua consumida hoy" v={val(a, 'agua_m3_dia')!} umbral={UMBRAL_AGUA.local2} />
+        <TarjetaCaudal titulo="Caudal de agua" v={val(a, 'agua_m3h')!} />
+        <TarjetaHH titulo="HH sin incidentes" hh={val(a, 'hh_sin_incidentes')!} dias={val(a, 'dias_sin_incidentes')} />
+      </Seccion>
+      <Graficos>
+        <GraficoEnergia locales={['local2']} />
+        <GraficoAgua locales={['local2']} />
+      </Graficos>
+    </>
+  )
+}
+
+// ---------- Planta (Local 1) ----------
+
+export function VistaPlanta() {
+  const a = useActual('local1')
+  if (!a) return <Cargando />
+  return (
+    <>
+      <Seccion titulo="Energía, agua y ambiente">
+        <TarjetaEnergia titulo="Consumo actual" v={val(a, 'energia_kw')!} />
+        <TarjetaAgua titulo="Agua consumida hoy" v={val(a, 'agua_m3_dia')!} umbral={UMBRAL_AGUA.local1} />
+        <TarjetaCaudal titulo="Caudal de agua" v={val(a, 'agua_m3h')!} />
+        <TarjetaUv titulo="Índice UV — patio de carga" v={val(a, 'uv_index')!} />
+      </Seccion>
+      <Seccion titulo="Producción y seguridad">
+        <TarjetaProduccion titulo="Tableros fabricados — mes" v={val(a, 'produccion_mes')!} periodo="mensual" />
+        <TarjetaProduccion titulo="Tableros — acumulado año" v={val(a, 'produccion_anual')!} periodo="anual" />
+        <TarjetaHH titulo="HH sin incidentes" hh={val(a, 'hh_sin_incidentes')!} dias={val(a, 'dias_sin_incidentes')} />
+      </Seccion>
+      <Graficos>
+        <GraficoEnergia locales={['local1']} />
+        <GraficoAgua locales={['local1']} />
+      </Graficos>
+    </>
+  )
+}
+
+// ---------- Alertas ----------
+
+const fechaHora = (iso: string) =>
+  new Date(iso).toLocaleString('es-CL', {
+    timeZone: 'America/Santiago',
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+
+function TarjetaAlerta({ a, sincronizada }: { a: Alerta; sincronizada: boolean }) {
+  const v = VARIABLES[a.variable]
+  const { puede } = useSesion()
+  const [enviando, setEnviando] = useState(false)
+  const reconocida = a.estado !== 'activa'
+  const reconocer = async () => {
+    setEnviando(true)
+    try {
+      await fuente.reconocerAlerta(a.id)
+      refrescarTodo()
+    } finally {
+      setEnviando(false)
+    }
+  }
+  return (
+    <article
+      className={`rounded-lg border border-l-4 p-4 ${
+        reconocida ? 'border-borde border-l-tinta-3 bg-panel opacity-80' : 'border-critico/40 border-l-critico bg-critico/5'
+      }`}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h3 className={`font-bold ${reconocida ? 'text-tinta-2' : 'text-critico'}`}>
+            ▲ {v.nombre} — {SEDES[a.local_id].nombre}
+          </h3>
+          <p className="mt-1 text-sm text-tinta-2">{a.regla}</p>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <span className="rounded-full border border-borde px-2 py-0.5 text-xs text-tinta-2">
+            {a.origen === 'edge' ? 'Generada en planta (sin internet)' : 'Generada en la nube'}
+          </span>
+          {a.origen === 'edge' && (
+            <span
+              className={`rounded-full border px-2 py-0.5 text-xs ${
+                sincronizada ? 'border-ok/40 text-ok' : 'border-aviso/40 text-aviso'
+              }`}
+            >
+              {sincronizada ? '✓ Sincronizada con la nube' : 'Pendiente de subir'}
+            </span>
+          )}
+        </div>
+      </div>
+      <p className="mt-3 text-sm">
+        Valor <b className="tabular-nums">{formatear(a.variable, a.valor)} {v.unidad}</b> · umbral{' '}
+        <span className="tabular-nums">{formatear(a.variable, a.umbral)} {v.unidad}</span> · desde las{' '}
+        {fechaHora(a.inicio_intervalo)}
+      </p>
+      <div className="mt-3 flex items-center gap-3">
+        {reconocida ? (
+          <span className="text-sm text-tinta-2">✓ Reconocida {a.reconocida_en && `a las ${fechaHora(a.reconocida_en)}`}</span>
+        ) : puede('reconocer_alertas') ? (
+          <button
+            onClick={reconocer}
+            disabled={enviando}
+            className="rounded-md border border-borde bg-panel px-3 py-1.5 text-sm font-bold hover:border-tinta-3 disabled:opacity-50"
+          >
+            Reconocer alerta
+          </button>
+        ) : (
+          <span className="text-xs text-tinta-3">Avisa a tu jefatura para reconocerla.</span>
+        )}
+      </div>
+    </article>
+  )
+}
+
+export function VistaAlertas() {
+  const { ve } = useSesion()
+  const { datos: todas } = usePolling(() => fuente.alertas(), 5_000)
+  const { datos: estado } = usePolling(() => fuente.estado(), 2_000)
+  if (!todas) return <Cargando />
+  // Solo las sedes del usuario (la API real ya filtra; aquí es por la simulación)
+  const datos = todas.filter((a) => ve(a.local_id))
+  const enLinea = (l: LocalId) => estado?.locales.find((e) => e.local_id === l)?.enlace === 'online'
+  const activas = datos.filter((a) => a.estado === 'activa')
+  const otras = datos.filter((a) => a.estado !== 'activa')
+
+  return (
+    <>
+      <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-tinta-2">Alertas activas ({activas.length})</h2>
+      {activas.length === 0 ? (
+        <p className="rounded-lg border border-borde bg-panel p-6 text-center text-ok">✓ Sin alertas activas en ninguna sede</p>
+      ) : (
+        <div className="grid gap-3">
+          {activas.map((a) => (
+            <TarjetaAlerta key={a.id} a={a} sincronizada={enLinea(a.local_id)} />
+          ))}
+        </div>
+      )}
+      {otras.length > 0 && (
+        <>
+          <h2 className="mb-3 mt-6 text-xs font-bold uppercase tracking-[0.12em] text-tinta-2">Reconocidas ({otras.length})</h2>
+          <div className="grid gap-3">
+            {otras.map((a) => (
+              <TarjetaAlerta key={a.id} a={a} sincronizada={enLinea(a.local_id)} />
+            ))}
+          </div>
+        </>
+      )}
+    </>
+  )
+}
