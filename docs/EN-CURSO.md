@@ -59,8 +59,8 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 | 13 | Planificación: Scrum del MVP (backlog, sprints) + PMI con las 5 fases | 9 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #12 | En `docs/scrum-pmi.md`. PO: Abraham · SM: Bárbara (21/10). **Falta:** si hubo reuniones fijas (§4). |
 | 14 | Carta Gantt hasta la puesta en marcha (responsables, duración, dependencias, hitos) | 10 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #11 | En `docs/roles-raci-gantt.md` §3. RDS agregado el 19/10 (PR #15). Columna *Estado*, pipeline y MVP de punta a punta el 21/10 (PR #25). |
 | 15 | Conclusiones y defensa: problema, beneficios, limitaciones, siguientes pasos | 12 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-19 | PR #14 | En `docs/conclusiones.md` (incluye preguntas probables de la defensa). |
-| 16 | Informe del proyecto actualizado | 13 | 🟡 En curso | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-21 | Claude Docs | Borrador como documento de Claude (se descarga en Word o PDF). Falta confirmar el formato con el profe y si existe el de la Nota 1. |
-| 17 | Presentación PowerPoint (consolida todo, en el orden que pide el profe) | 1 | 🟢 Libre | | | | Al final; depende de casi todo. |
+| 16 | Informe del proyecto actualizado | 13 | 🔵 En revisión | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-21 | Claude Docs + Word | Borrador completo (14 secciones, diagrama de arquitectura y Carta Gantt), también en Word. Falta confirmar el formato con el profe y si existe el de la Nota 1. |
+| 17 | Presentación PowerPoint (consolida todo, en el orden que pide el profe) | 1 | 🔵 En revisión | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-21 | Claude Slides | 10 diapositivas con notas para quien presenta; se descarga en .pptx o PDF. Bárbara la comparte con el grupo. |
 | 18 | Guion y ensayo de la demo del prototipo | 11 | 🟢 Libre | | | | Depende de las tareas 1 a 4. |
 
 ---
