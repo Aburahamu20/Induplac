@@ -26,7 +26,7 @@
 2. **30 min antes:** Wokwi (Sebastián) + Edge (Abraham) corriendo para tener datos frescos. Plan B: `edge/simular_esp32.py`.
 3. Revisar: dashboard en S3, `/health` y `/config/umbrales`.
 4. Ensayar el showcase: corte de red → alerta → reconexión sin duplicados.
-5. **Bárbara (con Claude):** revisar la lista de la nota de avance *2026-10-21 (madrugada)*: qué falta de la Nota 2 y qué actualizar en sus documentos.
+5. ~~**Bárbara (con Claude):** revisar la lista de la nota de avance *2026-10-21 (madrugada)*~~ → hecho en el PR #25 (Gantt, RACI, tareas, Cloud, Scrum y conclusiones al día). Lo de Lisandra sigue pendiente.
 6. Nota 2 pendiente: guion de la demo (18), PowerPoint (17), pipeline DevOps (12), informe (16) y la fortaleza de Lisandra.
 
 La pauta completa de la Nota 2 y los borradores de roles, RACI y Gantt están en [`docs/NOTA-2.md`](NOTA-2.md).
@@ -57,7 +57,7 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 | 11 | Modelo Cloud (híbrido + serverless/PaaS) y tabla de tecnologías con su aporte concreto | 6, 7 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-19 | PR #13 | En `docs/cloud-tecnologias.md`. |
 | 12 | Pipeline DevOps: diagrama + GitHub Actions que compile/pruebe en cada PR | 8 | 🔵 En revisión | Abraham (con Claude) | 2026-10-21 | `feature/pipeline-devops` | `docs/devops.md`, `ci.yml` (dashboard, Python + 15 pruebas del Edge, secretos) y `deploy.yml` (manual por el Learner Lab). |
 | 13 | Planificación: Scrum del MVP (backlog, sprints) + PMI con las 5 fases | 9 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #12 | En `docs/scrum-pmi.md`. PO: Abraham · SM: Bárbara (21/10). **Falta:** si hubo reuniones fijas (§4). |
-| 14 | Carta Gantt hasta la puesta en marcha (responsables, duración, dependencias, hitos) | 10 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #11 | En `docs/roles-raci-gantt.md` §3. RDS agregado el 19/10 (PR #15). |
+| 14 | Carta Gantt hasta la puesta en marcha (responsables, duración, dependencias, hitos) | 10 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #11 | En `docs/roles-raci-gantt.md` §3. RDS agregado el 19/10 (PR #15). Columna *Estado*, pipeline y MVP de punta a punta el 21/10 (PR #25). |
 | 15 | Conclusiones y defensa: problema, beneficios, limitaciones, siguientes pasos | 12 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-19 | PR #14 | En `docs/conclusiones.md` (incluye preguntas probables de la defensa). |
 | 16 | Informe del proyecto actualizado | 13 | 🟢 Libre | | | | Confirmar formato (¿Word?) y si existe el de la Nota 1. |
 | 17 | Presentación PowerPoint (consolida todo, en el orden que pide el profe) | 1 | 🟢 Libre | | | | Al final; depende de casi todo. |

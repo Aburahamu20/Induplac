@@ -31,6 +31,7 @@
 
 - **Backlog y tablero:** [`docs/EN-CURSO.md`](EN-CURSO.md), cada tarea con dueño y estado (libre, en curso, en revisión, listo).
 - **Revisión del trabajo:** cada cambio entra por un Pull Request que revisa otro integrante.
+- **Chequeos automáticos (CI):** en cada Pull Request, GitHub Actions compila el dashboard y corre las pruebas del Edge antes de la revisión humana ([`devops.md`](devops.md)).
 - **Bitácora:** [`docs/notas-de-avance.md`](notas-de-avance.md) registra lo terminado en cada fecha.
 
 ---
