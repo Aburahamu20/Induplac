@@ -87,3 +87,4 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 | RDS + Lambda `induplac-config`, Cognito probado y Wokwi conectado (tareas 3, 5 y 6) | Abraham y Felipe (con Claude), Sebastián | 2026-10-20 | PR #16 |
 | Corrección: alertas en DynamoDB, cuentas en Cognito y RDS solo configuración | Abraham (con Claude) | 2026-10-21 | PR #17 |
 | Código del Edge, dashboard y backend subido a `main` (tareas 1, 4 y 5) | Abraham (con Claude) | 2026-10-21 | PR #18 |
+| Nota 2 al día con lo del 20/10: Gantt con Estado, RACI, tareas, Cloud, Scrum y conclusiones | Bárbara Saavedra (con Claude) | 2026-10-21 | PR #25 |
