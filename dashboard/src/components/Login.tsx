@@ -3,7 +3,7 @@
 
 import QRCode from 'qrcode'
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
-import { auth, authSimulada, NOMBRE_ROL, type Desafio, type RespuestaAuth, type Sesion } from '../auth'
+import { auth, authSimulada, usaCognito, NOMBRE_ROL, type Desafio, type RespuestaAuth, type Sesion } from '../auth'
 import { restablecerUsuariosDemo, USUARIOS_DEMO } from '../auth/simulada'
 
 const campo =
@@ -88,6 +88,12 @@ function PasoClave({ avanzar, error, cargando }: PropsPaso) {
         </button>
       </form>
       <Error texto={error} />
+
+      {usaCognito && (
+        <p className="mt-6 border-t border-borde pt-4 text-xs text-tinta-2">
+          🔐 Inicio de sesión con <span className="font-bold text-tinta">Amazon Cognito</span> y MFA (Microsoft Authenticator). Las cuentas las crea el administrador con clave temporal.
+        </p>
+      )}
 
       {authSimulada && (
         <div className="mt-6 border-t border-borde pt-4 text-xs text-tinta-2">
