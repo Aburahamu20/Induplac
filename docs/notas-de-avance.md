@@ -444,3 +444,16 @@ Abraham, con la cuenta del Learner Lab de Felipe.
 - [ ] Umbrales desde RDS en `induplac-api`.
 - [ ] Usuario `lisandra.gonzález` tiene tilde: escribirlo igual al iniciar sesión, o crear uno sin tilde.
 
+---
+
+## 2026-10-21 (mediodía) — Aviso de conexión más claro en el dashboard
+
+- **Problema:** el dashboard de la nube decía *"Sin conexión con la nube"* cuando el Edge solo estaba apagado o no mandaba datos, aunque la nube funcionaba bien. Confundía.
+- **Ahora el aviso distingue tres casos:**
+  - 🔴 **"Sin conexión con el servidor"**: el navegador no llega a la API (sin internet o lab apagado).
+  - 🟠 **"Sin datos de Planta desde las 22:30"** (solo en la nube): la API responde, pero una sede no manda datos hace más de 30 min. Desde la nube no se puede saber si el Edge está apagado, sin internet o sin sensores; solo que no llegan datos.
+  - 🔴 **"Sin conexión con la nube"** (solo en el dashboard de planta): el Edge no llega a AWS. Ahí sí es exacto.
+- Al pasar el mouse por el aviso se ve una explicación.
+- No cambia la API ni la Lambda: se usa el `origen` y el `ultimo_dato` que ya entrega `GET /api/estado`.
+- Requiere volver a publicar el dashboard en S3 (build + subir `index.html` y `assets`).
+

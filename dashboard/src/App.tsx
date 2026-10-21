@@ -6,7 +6,7 @@ import { fijarToken } from './auth/token'
 import { Encabezado } from './components/Encabezado'
 import { Login } from './components/Login'
 import { PanelDemo } from './components/PanelDemo'
-import { peorEstado } from './components/estadoEnlace'
+import { avisoEnlace } from './components/estadoEnlace'
 import { usePolling } from './hooks/usePolling'
 import { VistaAlertas, VistaOficinas, VistaPlanta, VistaResumen } from './vistas'
 
@@ -74,24 +74,24 @@ function Dashboard() {
   const pestana = visibles.find((p) => p.id === elegida)?.id ?? visibles[0]?.id
 
   // En simulación se consulta cada 1 s para que el showcase se vea fluido; contra la API, cada 5 s (contrato §2)
-  const { datos: estado } = usePolling(() => fuente.estado(), usaSimulacion ? 1_000 : 5_000)
+  const { datos: estado, error: errorEstado } = usePolling(() => fuente.estado(), usaSimulacion ? 1_000 : 5_000)
   const { datos: alertas } = usePolling(() => fuente.alertas({ estado: 'activa' }), 5_000)
   const misAlertas = alertas?.filter((a) => ctx.ve(a.local_id)) ?? []
   const misLocales = estado?.locales.filter((l) => ctx.ve(l.local_id)) ?? []
 
-  const enlace =
+  // En la pestaña de una sede, el aviso es de esa sede; en las demás, de todas las que ve el usuario
+  const localesAviso =
     pestana === 'oficinas'
-      ? misLocales.find((l) => l.local_id === 'local2')
+      ? misLocales.filter((l) => l.local_id === 'local2')
       : pestana === 'planta'
-        ? misLocales.find((l) => l.local_id === 'local1')
-        : misLocales.length
-          ? peorEstado(misLocales)
-          : undefined
+        ? misLocales.filter((l) => l.local_id === 'local1')
+        : misLocales
+  const aviso = avisoEnlace(localesAviso, estado?.origen, !!errorEstado)
 
   return (
     <div className="min-h-screen">
       <header className="border-b border-borde">
-        <Encabezado enlace={enlace} simulado={usaSimulacion} />
+        <Encabezado aviso={aviso} simulado={usaSimulacion} />
         <nav className="mx-auto flex max-w-[1400px] gap-1 overflow-x-auto overflow-y-hidden px-4 pt-1 [scrollbar-width:none]">
           {visibles.map((p) => (
             <button
