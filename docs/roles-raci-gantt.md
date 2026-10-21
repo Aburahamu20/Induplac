@@ -20,8 +20,8 @@
 
 | Rol Scrum | Integrante | Qué hace |
 |---|---|---|
-| Product Owner | _Por definir_ | Prioriza qué se hace primero según la pauta y las necesidades de la empresa. |
-| Scrum Master | _Por definir_ | Cuida que el equipo avance, quita bloqueos y mantiene el tablero al día. |
+| Product Owner | **Abraham Castro** | Prioriza qué se hace primero según la pauta y las necesidades de la empresa. |
+| Scrum Master | **Bárbara Saavedra** | Cuida que el equipo avance, quita bloqueos y mantiene el tablero al día. |
 | Equipo de desarrollo | Los 5 integrantes | Construyen y prueban cada parte del MVP. |
 
 ### Tareas por integrante
@@ -150,6 +150,8 @@ Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya e
 4. **Términos alineados con el código:** estados ONLINE / OFFLINE / SINCRONIZANDO, lotes con `batch_id` y upsert idempotente, identificador `device_id + seq + ts`.
 5. **Columna de fortalezas** en Roles (la pauta la pide; vale 15 %).
 
+**21/10/2026** — Roles Scrum definidos: **Product Owner** Abraham (decide qué entra al MVP y en qué orden) y **Scrum Master** Bárbara (planificación, seguimiento y quitar bloqueos).
+
 **21/10/2026** — Estados de *Tareas por integrante* al día tras la sesión del 20/10 (PR #16 y #18): dashboard, Edge, backend con RDS, Wokwi Local 1 y Cognito probado. Las tareas de Lisandra siguen pendientes.
 
 **19/10/2026** — RDS PostgreSQL vuelve al MVP:
@@ -163,5 +165,5 @@ Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya e
 ### Falta que decida el equipo
 - [ ] Cada integrante escribe **su fortaleza**.
 - [ ] **Lisandra:** confirmar el rol propuesto.
-- [ ] Definir **Product Owner** y **Scrum Master**.
+- [x] **Product Owner:** Abraham · **Scrum Master:** Bárbara (21/10/2026).
 - [ ] Revisar las duraciones de la implementación (S4–S12).

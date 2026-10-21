@@ -21,7 +21,7 @@
 | 6 | Cloud y Backend: recepción, procesamiento, almacenamiento, visualización y **modelo Cloud** | 11 | ✅ `cloud-tecnologias.md` + backend funcionando |
 | 7 | Tecnologías y su aporte concreto | 11 | ✅ `cloud-tecnologias.md` |
 | 8 | Pipeline DevOps básico (desarrollo → prueba → validación → despliegue) | 12 | ✅ `devops.md` + GitHub Actions (`ci.yml`, `deploy.yml`) |
-| 9 | Planificación: ágil (MVP) + gestión de proyectos (implementación) | 13 | 🟡 `scrum-pmi.md`; **faltan** Product Owner y Scrum Master |
+| 9 | Planificación: ágil (MVP) + gestión de proyectos (implementación) | 13 | ✅ `scrum-pmi.md` (PO: Abraham · SM: Bárbara) |
 | 10 | Carta Gantt hasta pruebas, integración, seguridad, capacitación y puesta en marcha | 14 | ✅ `roles-raci-gantt.md` + Excel |
 | 11 | Demostración del prototipo con datos ficticios | 1–4, 18 | 🟡 Prototipo funcionando de punta a punta (20/10); **falta el guion** |
 | 12 | Conclusiones y defensa: problema, beneficios, limitaciones, siguientes pasos | 15 | ✅ `conclusiones.md` |
