@@ -383,3 +383,28 @@ Sesión de Abraham y Felipe en el Learner Lab de Felipe.
 - [ ] Mergear a `main` las ramas `feature/edge`, `feature/backend-aws` y `feature/dashboard`.
 - [ ] Apagar RDS después de la demo del 21/10.
 
+---
+
+## 2026-10-21 (madrugada) — Revisión de la Nota 2 para Bárbara
+
+Abraham pidió que el 21/10 **Bárbara**, en su conversación con Claude, revise lo que falta de la Nota 2 y si sus documentos necesitan actualizarse con lo hecho el 20/10 (PR #16 a #23). Esta lista es el punto de partida.
+
+### Qué cambió desde que Bárbara escribió sus documentos
+- **Reparto de datos:** alertas en **DynamoDB**, cuentas y MFA en **Cognito**, **RDS solo configuración** (permisos, umbrales y catálogo). Ya corregido en todos los documentos (PR #17 y #19).
+- **Funcionando:** Wokwi → EMQX → Edge → AWS de punta a punta; RDS con sus tablas y Lambda `induplac-config`; Cognito con MFA probado en el Learner Lab. El login del dashboard con Cognito está en el **PR #20** (falta probarlo con Felipe).
+- **Pipeline DevOps** (entregable 8) listo: `docs/devops.md` + GitHub Actions con 15 pruebas del Edge (PR #21).
+- **Product Owner:** Abraham · **Scrum Master:** Bárbara · **fortalezas** escritas, salvo la de Lisandra (PR #22).
+- **README** al día con cómo probar el prototipo y el índice de documentos (PR #23).
+
+### Revisar en sus documentos (sugerencias)
+- [ ] `cloud-tecnologias.md`: DynamoDB guarda **intervalos y alertas** (hoy dice solo intervalos); agregar **GitHub Actions** (CI/CD) y la **Lambda `induplac-config`**; marcar **Nginx en el Edge** como diseño (en la demo el dashboard corre en el PC y en S3); ajustar Cognito según el PR #20.
+- [ ] `scrum-pmi.md` §1 *Herramientas de seguimiento*: agregar el **CI** (checks automáticos en cada PR). Sigue pendiente si hubo reuniones fijas.
+- [ ] `roles-raci-gantt.md` + Excel: agregar la tarea **Pipeline DevOps** (Abraham, Listo, PR #21) en *Tareas por integrante*; ver si la RACI nombra el pipeline (podría ir en la actividad 10); actualizar Cognito cuando se pruebe el PR #20; **fortaleza, rol y tareas de Lisandra** después de hablar con ella.
+- [ ] `conclusiones.md`: si Cognito queda conectado hoy, quitar esa limitación y ese siguiente paso; se puede sumar como beneficio que las reglas de alerta se prueban solas en cada PR.
+
+### Lo que falta de la Nota 2
+- [ ] **Guion de la demo** (tarea 18): orden, tiempos y quién muestra cada parte. Base: README §20 *Pruebas de demostración*.
+- [ ] **PowerPoint** (tarea 17), en el orden de la pauta (`NOTA-2.md`).
+- [ ] **Informe** (tarea 16): confirmar el formato con el profe.
+- [ ] **Fortaleza de Lisandra.**
+
