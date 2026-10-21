@@ -84,6 +84,7 @@ flowchart TD
    IPSEC_PSK=****************
    ```
 2. **Mínimo Privilegio (IAM):** el Edge solo puede invocar `POST /intervalos`, `POST /alertas`, `GET /umbrales` y `GET /health`. Sin permisos sobre DynamoDB, Lambda, RDS ni facturación.
+   *En la demo (Learner Lab, sin usuarios IAM propios): clave de ingesta compartida en la cabecera `x-induplac-key`. RDS solo acepta conexiones desde el security group de la Lambda `induplac-config`.*
 3. **Hardening:** SSH solo con llaves Ed25519, sin login de root por contraseña; `ufw` permite solo 443 desde la VLAN de operarios, y 8883 (MQTTS) y 123/UDP (NTP, ADR-10) desde la VLAN IoT.
 
 ---

@@ -154,8 +154,8 @@ ONLINE ──3 fallos──▶ OFFLINE ──healthcheck OK──▶ SINCRONIZAN
    ORDER BY inicio_intervalo ASC
    LIMIT 50;
    ```
-3. Envía el lote a `POST /intervalos`. Lambda hace *upsert* en DynamoDB con la llave `local_id + inicio_intervalo`, evalúa las reglas de alerta y registra en RDS.
-4. Las alertas generadas offline se envían a `POST /alertas`. RDS hace *upsert* con la llave `local_id + variable + inicio_intervalo`, de modo que la misma alerta **no se duplica** aunque Lambda también la detecte.
+3. Envía el lote a `POST /intervalos`. Lambda hace *upsert* en DynamoDB con la llave `local_id + inicio_intervalo`, evalúa las reglas de alerta y las registra en DynamoDB.
+4. Las alertas generadas offline se envían a `POST /alertas`. La Lambda hace *upsert* en DynamoDB con la llave `local_id + variable + inicio_intervalo`, de modo que la misma alerta **no se duplica** aunque Lambda también la detecte.
 5. Tras la confirmación de AWS:
    ```sql
    UPDATE intervalos_15min SET is_synced = 1

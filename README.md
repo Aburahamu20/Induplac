@@ -581,8 +581,11 @@ flowchart TD
 
     subgraph AWS["AWS (Learner Lab, us-east-1)"]
         APIGW["API Gateway"]
-        LAMBDA["Lambda<br/>ingesta + alertas + consulta"]
+        LAMBDA["Lambda induplac-api<br/>ingesta + alertas + consulta"]
         DDB[("DynamoDB<br/>intervalos y alertas")]
+        LCFG["Lambda induplac-config<br/>(en la VPC)"]
+        RDS[("RDS PostgreSQL<br/>permisos, umbrales, catálogo")]
+        COG["Cognito<br/>cuentas + MFA"]
         S3["S3<br/>dashboard de gerencia"]
     end
 
@@ -594,6 +597,7 @@ flowchart TD
     INT --> DLOC
     INT -->|"HTTPS · POST /intervalos (lotes de 50)"| APIGW
     APIGW --> LAMBDA --> DDB
+    APIGW -->|"GET /config/..."| LCFG --> RDS
     S3 -.->|"el navegador carga el dashboard"| USR["Gerencia"]
     USR -->|"HTTPS · GET /api/..."| APIGW
 ```
@@ -689,7 +693,9 @@ Induplac/
 │   ├── EN-CURSO.md            ← tablero: quién hace qué
 │   ├── notas-de-avance.md     ← bitácora de sesiones
 │   ├── GUIA-EQUIPO.md         ← el proyecto explicado en simple
-│   ├── NOTA-2.md              ← pauta y borradores de la Nota 2
+│   ├── NOTA-2.md              ← pauta de la Nota 2
+│   ├── roles-raci-gantt.md    ← roles, RACI y Carta Gantt (+ Excel en nota-2/)
+│   ├── scrum-pmi.md · cloud-tecnologias.md · conclusiones.md
 │   ├── api-dashboard.md       ← contrato entre el dashboard y la API
 │   ├── broker-mqtt.md         ← broker de la simulación
 │   ├── decisiones-tecnicas.md ← ADR-01 a ADR-10
@@ -698,9 +704,9 @@ Induplac/
 │   └── arquitectura.md
 │
 ├── dashboard/        ← React + TypeScript + Vite + Tailwind
-├── backend/          ← Lambda de la API (Python) y simulador del Edge
-├── edge/             ← agente Edge en Python (pendiente)
-├── simulation/       ← sketches ESP32 para Wokwi
+├── backend/          ← Lambdas (API y configuración), simulador del Edge y script de RDS
+├── edge/             ← agente Edge en Python (SQLite, 15 min, alertas, sync)
+├── simulation/       ← ESP32 en Wokwi (wokwi-local1/)
 ├── sensors/
 └── infrastructure/   ← redes, VPC, VPN y costos
 ```
@@ -711,15 +717,15 @@ Induplac/
 
 | Área | Tecnología | Estado |
 |---|---|---|
-| **Microcontrolador** | ESP32 (sensores analógicos y digitales) | En curso (Wokwi) |
-| **Simulación** | Wokwi (Wi-Fi virtual `Wokwi-GUEST`) | En curso |
+| **Microcontrolador** | ESP32 (sensores analógicos y digitales) | ✅ Funcionando (Wokwi) |
+| **Simulación** | Wokwi (Wi-Fi virtual `Wokwi-GUEST`) | ✅ Funcionando |
 | **Broker MQTT** | EMQX Serverless (MQTTS 8883) · diseño real: Mosquitto en la Raspberry Pi | ✅ Funcionando |
-| **Edge Gateway** | Raspberry Pi + Python + SQLite (`is_synced`) | Pendiente |
+| **Edge Gateway** | Raspberry Pi + Python + SQLite (`is_synced`) | ✅ Funcionando (en PC para la demo) |
 | **API** | Amazon API Gateway (HTTP API) | ✅ Funcionando |
-| **Cómputo cloud** | AWS Lambda (Python 3.12) | ✅ Funcionando |
+| **Cómputo cloud** | AWS Lambda (Python 3.12): `induplac-api` y `induplac-config` | ✅ Funcionando |
 | **Base de datos cloud** | Amazon DynamoDB on-demand (intervalos y alertas) | ✅ Funcionando |
-| **Base de datos relacional** | Amazon RDS PostgreSQL (usuarios, umbrales, reportes) | Diseño, fuera del MVP (costo por hora) |
-| **Autenticación** | Amazon Cognito con MFA TOTP | Pendiente (tarea 6) |
+| **Base de datos relacional** | Amazon RDS PostgreSQL (permisos, umbrales, catálogo), solo accesible desde la Lambda | ✅ Funcionando (se enciende para configurar y para la demo) |
+| **Autenticación** | Amazon Cognito con MFA TOTP | ✅ Probado en el Learner Lab · falta conectarlo al dashboard |
 | **Dashboard** | React + TypeScript (Vite, Tailwind CSS, Chart.js) | ✅ Funcionando |
 | **Hosting del dashboard** | Amazon S3 (HTTPS) | ✅ Funcionando |
 | **Conectividad cloud** | VPN Site-to-Site IPsec + API Gateway privada | Diseño, no se demuestra |
@@ -871,9 +877,11 @@ ONLINE
 - [x] Broker MQTT con TLS y un usuario por dispositivo.
 - [x] Backend en AWS: API Gateway + Lambda + DynamoDB.
 - [x] Dashboard de gerencia publicado en S3.
-- [ ] ESP32 en Wokwi publicando al broker.
-- [ ] Edge en Python (SQLite, intervalos de 15 min, alertas locales, sincronización).
-- [ ] Login de la nube con Cognito.
+- [x] ESP32 en Wokwi publicando al broker.
+- [x] Edge en Python (SQLite, intervalos de 15 min, alertas locales, sincronización).
+- [x] RDS PostgreSQL con la configuración, leída por la Lambda `induplac-config`.
+- [x] Cognito con MFA probado en el Learner Lab.
+- [ ] Login del dashboard con Cognito (hoy usa su login propio con las mismas reglas).
 - [x] Ciberseguridad diseñada en 5 capas (implementación parcial).
 
 ## Fuera del alcance actual
@@ -881,7 +889,7 @@ ONLINE
 - Instalación eléctrica e hidráulica real.
 - Acceso a sistemas o datos reales de Induplac.
 - Información personal real.
-- RDS y VPN funcionando (quedan documentados como diseño).
+- VPN, VLANs y RTC funcionando (quedan documentados como diseño).
 - Implementación industrial definitiva.
 
 ---
@@ -897,11 +905,13 @@ ONLINE
 [✓] Backend AWS (API Gateway + Lambda + DynamoDB)
 [✓] Dashboard de gerencia en S3
 
-[ ] ESP32 en Wokwi                       (tarea 3)
-[ ] Edge en Python                       (tarea 4)
-[ ] Cognito con MFA                      (tarea 6)
-[ ] Conectar Wokwi → Edge → AWS de punta a punta
-[ ] Pruebas y demostración final
+[✓] ESP32 en Wokwi                       (tarea 3)
+[✓] Edge en Python                       (tarea 4)
+[✓] RDS + Lambda de configuración
+[✓] Cognito con MFA (probado)            (tarea 6)
+[✓] Wokwi → Edge → AWS de punta a punta
+[ ] Demostración final                   (21/10)
+[ ] Cognito en el dashboard y umbrales desde RDS
 ```
 
 ---
@@ -949,14 +959,15 @@ feature/cybersecurity
 
 # ⚠️ 25. Estado actual
 
-> 🚧 **MVP en desarrollo** · Última actualización: 2026-10-18
+> ✅ **MVP funcionando para la demo** · Última actualización: 2026-10-21
 
 **Funcionando:**
-- Dashboard con datos simulados y panel de demostración del corte de red.
-- Cadena en la nube: `simulador del Edge → API Gateway → Lambda → DynamoDB → dashboard en S3`.
-- Broker MQTT probado de dispositivo a Edge.
+- Cadena completa: `Wokwi (ESP32) → EMQX → Edge (SQLite, 15 min, alertas offline) → API Gateway → Lambda → DynamoDB → dashboard en S3`.
+- Dashboard con login, clave temporal, MFA TOTP, permisos por usuario y panel de demostración del corte de red.
+- RDS PostgreSQL con la configuración, leído por la Lambda `induplac-config` (`GET /config/umbrales`).
+- Cognito con MFA probado en el Learner Lab.
 
-**En curso:** ESP32 en Wokwi (Sebastián), Cognito y backend (Abraham y Felipe), Edge (Abraham).
+**Siguiente:** conectar el dashboard a Cognito y que `induplac-api` lea los umbrales desde RDS.
 
 El estado de cada tarea está en [`docs/EN-CURSO.md`](docs/EN-CURSO.md) y el detalle de cada sesión en [`docs/notas-de-avance.md`](docs/notas-de-avance.md). Los datos son ficticios.
 

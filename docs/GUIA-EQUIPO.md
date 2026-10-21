@@ -73,9 +73,9 @@ Hoy, en muchas empresas, el consumo se ve **tarde**: llega la boleta a fin de me
 | **AWS** | La nube de Amazon. Usamos el **Learner Lab** (cuenta educativa con USD 100). | Junta las dos sedes, guarda el histórico, administra usuarios. |
 | **API Gateway** | La "puerta de entrada" a la nube: recibe pedidos por HTTPS. | Recibe los resúmenes del Edge y las consultas del dashboard. |
 | **Lambda** | Código que corre en la nube solo cuando se necesita (sin servidor encendido). | Procesa lo que llega, revisa alertas y guarda en las bases. |
-| **DynamoDB** | Base de datos de AWS sin tablas relacionadas (NoSQL), muy barata. | Guarda la serie de tiempo: los resúmenes cada 15 min. |
-| **RDS PostgreSQL** | Base de datos relacional clásica (con tablas y relaciones). | Usuarios, roles, sedes, dispositivos, umbrales, alertas, reportes. |
-| **Cognito** | Servicio de AWS para inicio de sesión. | Login del dashboard y **MFA**. |
+| **DynamoDB** | Base de datos de AWS sin tablas relacionadas (NoSQL), muy barata. | Guarda la serie de tiempo (los resúmenes cada 15 min) y las alertas. |
+| **RDS PostgreSQL** | Base de datos relacional clásica (con tablas y relaciones). | Configuración: permisos de cada usuario, umbrales, sedes y dispositivos. |
+| **Cognito** | Servicio de AWS para inicio de sesión. | Cuentas, claves temporales y **MFA**. |
 | **MFA** | Segundo factor: además de la contraseña, un código que cambia cada 30 s en el celular. | Obligatorio para quienes pueden cambiar cosas (Admin y Jefe). Se usa con Microsoft Authenticator. |
 | **VPN Site-to-Site** | Un "túnel" cifrado entre la red de la sede y la red en AWS. | Por ahí viajan los datos del Edge a la nube, sin pasar expuestos por internet. |
 | **VLAN** | Dividir una red física en varias redes separadas. | Separa los sensores de los computadores de la oficina. |
@@ -94,8 +94,8 @@ flowchart LR
     C --> D["4️⃣ Resumen<br/>cada 15 min"]
     C --> E["Dashboard de planta<br/>(tiempo real)"]
     D -->|VPN + HTTPS| F["5️⃣ AWS<br/>API Gateway + Lambda"]
-    F --> G[("DynamoDB<br/>serie de tiempo")]
-    F --> H[("RDS<br/>alertas, usuarios")]
+    F --> G[("DynamoDB<br/>serie de tiempo y alertas")]
+    F --> H[("RDS<br/>configuración")]
     G --> I["6️⃣ Dashboard de gerencia<br/>(ambas sedes)"]
     H --> I
 ```
@@ -106,7 +106,7 @@ Paso a paso:
 2. **El broker** recibe el mensaje y lo entrega a la Raspberry Pi.
 3. **La Raspberry Pi valida** que el valor tenga sentido (por ejemplo, que no diga 9.999 kW). Si es válido, lo **guarda en SQLite** y lo muestra en el **dashboard de planta** al instante.
 4. **Cada 15 minutos** la Pi calcula un **resumen** (promedio de electricidad y agua, máximo de UV, etc.) y revisa si hay que lanzar una **alerta**.
-5. **Envía el resumen a AWS** por la VPN. La Lambda lo guarda en DynamoDB, vuelve a revisar las alertas y las registra en RDS.
+5. **Envía el resumen a AWS** (en el diseño, por la VPN; en la demo, por HTTPS). La Lambda lo guarda en DynamoDB, vuelve a revisar las alertas y también las guarda en DynamoDB.
 6. **El dashboard de gerencia** (en la nube) muestra ambas sedes juntas, el histórico y las comparaciones.
 
 ---
@@ -165,10 +165,10 @@ El sistema tiene tres estados:
 | Base | Dónde | Qué guarda | Por qué esa |
 |---|---|---|---|
 | **SQLite** | Raspberry Pi | Lecturas crudas, resúmenes pendientes, alertas locales | Es liviana, vive en un archivo, no necesita servidor. Ideal para el Edge. |
-| **DynamoDB** | AWS | La serie de tiempo (resúmenes de 15 min) | Casi gratis, siempre encendida y Lambda escribe sin problemas de conexiones. |
-| **RDS PostgreSQL** | AWS | Usuarios, roles, sedes, umbrales, alertas, reportes | Necesitamos relaciones entre tablas (quién tiene qué rol) y consultas SQL para comparar períodos. |
+| **DynamoDB** | AWS | La serie de tiempo (resúmenes de 15 min) y las alertas | Casi gratis, siempre encendida y Lambda escribe sin problemas de conexiones. |
+| **RDS PostgreSQL** | AWS | Configuración: permisos de cada usuario, umbrales, sedes y dispositivos | Necesitamos relaciones entre tablas y SQL. Se enciende solo para configurar y para la demo. |
 
-**La explicación corta para el profe:** *"Usamos cada base para lo que hace mejor. DynamoDB recibe los datos de los sensores y es casi gratis y siempre está disponible; así podemos apagar RDS para ahorrar crédito sin cortar la recepción de datos. RDS guarda lo que necesita relaciones, como usuarios y roles, y permite hacer reportes con SQL."*
+**La explicación corta para el profe:** *"Usamos cada base para lo que hace mejor. DynamoDB recibe los datos de los sensores y es casi gratis y siempre está disponible; así podemos apagar RDS para ahorrar crédito sin cortar la recepción de datos. RDS guarda la configuración, que necesita relaciones (qué puede hacer cada usuario, los umbrales de cada sede). Las cuentas y el MFA los maneja Cognito."*
 
 > ⚠️ **No digas** que usamos DynamoDB "porque son demasiados datos". Con resúmenes cada 15 minutos el volumen es bajo. Las razones reales son **costo, disponibilidad y que Lambda no tiene que manejar conexiones**.
 
@@ -353,7 +353,7 @@ Pruebas de seguridad que también se pueden mostrar:
 > Para reportes, comparaciones y alertas por hora o por día, cada 15 minutos es suficiente. El detalle de cada 5 segundos se queda 30 días en la Pi. Así subimos menos datos, gastamos menos y exponemos menos información.
 
 **¿Por qué dos bases de datos en la nube? ¿No basta con una?**
-> Podría ser una sola, pero perderíamos dos ventajas. DynamoDB es casi gratis y siempre está disponible, así que podemos apagar RDS para ahorrar crédito sin cortar la recepción de datos. Además, Lambda escribe en DynamoDB sin manejar conexiones. RDS lo usamos para lo que necesita relaciones: usuarios, roles y reportes con SQL.
+> Podría ser una sola, pero perderíamos dos ventajas. DynamoDB es casi gratis y siempre está disponible, así que podemos apagar RDS para ahorrar crédito sin cortar la recepción de datos. Además, Lambda escribe en DynamoDB sin manejar conexiones. RDS lo usamos para lo que necesita relaciones: la configuración (permisos de cada usuario, umbrales, sedes y dispositivos). Las cuentas y el MFA van en Cognito.
 
 **¿Por qué MQTT en los sensores y HTTPS hacia la nube?**
 > MQTT es muy liviano y está hecho para dispositivos pequeños como el ESP32. Hacia la nube usamos HTTPS porque es el estándar de las APIs y AWS lo maneja directamente.

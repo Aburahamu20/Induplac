@@ -3,7 +3,7 @@
 > **Documento de transferencia de contexto para asistentes y desarrolladores:**  
 > Este documento condensa la visión, la filosofía de diseño, los requisitos, las discusiones de ingeniería y el estado del proyecto **Induplac IoT**. Si eres una IA o un desarrollador que retoma este repositorio, este archivo te otorga todo el contexto conversacional previo sin necesidad de acceder al historial de chats.
 >
-> **Última actualización:** 2026-10-16 — contrato de datos del dashboard (`docs/api-dashboard.md`), login obligatorio y permisos por usuario. El detalle de la discusión está en `docs/notas-de-avance.md`.
+> **Última actualización:** 2026-10-21 — MVP funcionando de punta a punta para la demo: Wokwi → EMQX → Edge (SQLite) → AWS (API Gateway, Lambda, DynamoDB, RDS) → dashboard en S3, y Cognito con MFA probado. Reparto de datos: alertas en DynamoDB, cuentas en Cognito y RDS solo configuración. El detalle está en `docs/notas-de-avance.md`.
 
 ---
 
@@ -35,13 +35,13 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 - [x] **Arquitectura híbrida completa:** Wokwi (ESP32) ➔ Broker MQTT ➔ Edge Gateway (Raspberry Pi + SQLite, agregación de 15 min, alertas locales, dashboard de planta) ➔ VPN IPsec ➔ AWS (API Gateway privada + Lambda + DynamoDB + RDS) ➔ Dashboard de gerencia.
 - [x] **Diseño de ciberseguridad en 5 capas (`docs/ciberseguridad.md`):** MQTTS con TLS (8883), validación de límites físicos, SQLite con checksum, idempotencia por intervalo, VPN IPsec, RBAC con MFA para roles con permisos de escritura y cumplimiento con la Ley 19.628 de Chile.
 - [x] **Infraestructura de red y conectividad segura (`infrastructure/README.md`):** VLANs IoT (`192.168.10.0/24` y `192.168.20.0/24`), VLAN de operarios con acceso solo HTTPS al Edge, *Zero Inbound Ports*, VPN Site-to-Site IPsec IKEv2 AES-256 hacia AWS VPC, API Gateway privada para ingesta y Security Groups referenciados (`SG-Lambda` ➔ `SG-RDS`).
-- [x] **Persistencia políglota documentada (`docs/decisiones-tecnicas.md`):** DynamoDB para la serie de tiempo de intervalos de 15 min + RDS PostgreSQL para usuarios/RBAC, catálogo, umbrales, alertas e históricos agregados.
+- [x] **Persistencia políglota documentada (`docs/decisiones-tecnicas.md`):** DynamoDB para los intervalos de 15 min y las alertas + RDS PostgreSQL para la configuración (permisos por usuario, umbrales y catálogo).
 - [x] **Especificación del modo offline y retención (`docs/modo-offline.md`).**
 - [x] **Decisiones Cloud del equipo** (documento entregado 2026-10-07), integradas en este archivo.
 - [x] **Estructura base del repositorio:** Carpetas `dashboard/`, `edge/`, `sensors/`, `simulation/`, `backend/`, `docs/`, `infrastructure/`, `.gitignore` y `CONTRIBUTING.md`.
 
-### 2.2. Funcionalidades En Curso / Inmediatas (MVP de Código)
-- [ ] **Dashboard Web (React + TypeScript + Tailwind):**
+### 2.2. MVP de Código (funcionando al 2026-10-21)
+- [x] **Dashboard Web (React + TypeScript + Tailwind):**
   - Monitor por sede (Local 1, Local 2) y vista consolidada para gerencia.
   - Consumo actual de electricidad y agua comparado contra el promedio histórico.
   - Producción (tableros del mes y acumulado anual), HH sin incidentes e índice UV del día.
@@ -52,16 +52,17 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
   - **Contrato de datos:** endpoints y formato JSON en `docs/api-dashboard.md`; el Edge y el backend AWS deben respetarlo.
   - **Login obligatorio para ver**, con o sin internet.
   - **Panel de Control de Demostración (Simulador de Fallas):** Botón para simular corte de red y botones para inyectar alertas de sobreconsumo o UV alto en vivo frente al docente.
-- [ ] **Agente Edge Gateway (Python):**
+- [x] **Agente Edge Gateway (Python):**
   - Escucha el broker MQTT local, valida rangos y guarda las lecturas crudas en SQLite.
   - Calcula **promedios cada 15 minutos** y los encola con `is_synced = 0`.
   - **Motor de alertas local** con las mismas reglas que la Lambda.
-  - API local + servidor del dashboard de planta.
-  - Hilo de sincronización en lotes hacia AWS por la VPN.
-- [ ] **Simulador ESP32 en Wokwi (C++):**
+  - API local + servidor del dashboard de planta *(pendiente: en la demo el dashboard corre en la nube y en el PC)*.
+  - Hilo de sincronización en lotes hacia AWS (en la demo por HTTPS; en el diseño, por la VPN).
+- [x] **Simulador ESP32 en Wokwi (C++):** (`simulation/wokwi-local1/`)
   - Conexión a red virtual `Wokwi-GUEST`, hora por NTP. **La demo es 100 % en Wokwi.**
-  - Publicación periódica de telemetría JSON vía MQTT.
-- [ ] **Backend AWS:** Lambda de ingesta y alertas, API de consulta para el dashboard, Cognito con MFA.
+  - Publicación periódica de telemetría JSON vía MQTT (TLS 8883), ring buffer de 50 lecturas, OLED y botones de producción y HH.
+- [x] **Backend AWS:** Lambda de ingesta y alertas (`induplac-api`), API de consulta para el dashboard, DynamoDB, dashboard en S3, RDS con la configuración y Lambda `induplac-config` (`GET /config/...`).
+- [x] **Cognito con MFA:** probado en el Learner Lab (clave temporal y MFA TOTP). *Pendiente: conectarlo al dashboard, que hoy usa su login propio con clave temporal y MFA TOTP.*
 
 ### 2.3. Funcionalidades Futuras (Post-MVP)
 - [ ] Despliegue en microcontroladores físicos reales con sensores SCT-013 (corriente) y caudalímetros.
@@ -111,12 +112,14 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 
 ### 4.4. Persistencia Políglota (SQLite + DynamoDB + RDS)
 * **SQLite (Edge):** crudo reciente, intervalos pendientes de sincronizar, alertas locales y réplica de intervalos para el dashboard offline.
-* **DynamoDB:** serie de tiempo de intervalos de 15 min por local y variable.
-* **RDS PostgreSQL:** usuarios, roles, catálogo de locales/dispositivos, umbrales, **alertas** e históricos agregados para reportes.
+* **DynamoDB:** serie de tiempo de intervalos de 15 min por local y variable, y **alertas**.
+* **RDS PostgreSQL:** **configuración**: permisos por usuario (enlazados al usuario de Cognito), umbrales y catálogo de locales/dispositivos. Históricos agregados para reportes, a futuro.
+* **Cognito:** cuentas, claves temporales y MFA.
+* **Cambio del 2026-10-19:** las alertas pasaron de RDS a DynamoDB para que se sigan guardando aunque RDS esté apagado (RDS se enciende solo para configurar y para la demo).
 * **Por qué dos bases en la nube (no por volumen):** DynamoDB on-demand cuesta ~\$0 y está siempre disponible, por lo que se puede **apagar RDS sin cortar la ingesta**; además, Lambda escribe en DynamoDB por API HTTP sin agotar conexiones, mientras que RDS necesita JOINs e integridad para RBAC y reportes. Alternativa evaluada: solo PostgreSQL (+ TimescaleDB), más simple pero pierde esas dos ventajas.
 
 ### 4.5. Alertas en Dos Niveles
-* **Lambda (AWS):** evalúa cada intervalo nuevo, registra la alerta en RDS y el dashboard la destaca en rojo.
+* **Lambda (AWS):** evalúa cada intervalo nuevo, registra la alerta en DynamoDB y el dashboard la destaca en rojo.
 * **Edge (local):** evalúa las mismas reglas sobre los mismos intervalos para que la planta tenga alertas **también sin internet**.
 * **Sin duplicados:** cada alerta se identifica por `local + variable + inicio_intervalo`; si el Edge la generó offline y luego Lambda evalúa el mismo intervalo, se actualiza la misma alerta en vez de crear otra.
 
@@ -127,13 +130,14 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 ### 4.7. VPN Site-to-Site Real
 * **Decisión:** Túnel **VPN Site-to-Site (IPsec IKEv2, AES-256)** real entre cada Edge (strongSwan como Customer Gateway) y el Virtual Private Gateway de la VPC. La ingesta usa una **API Gateway privada** alcanzable solo desde la VPC mediante un **VPC Interface Endpoint (execute-api)**, de modo que el tráfico del Edge nunca sale por Internet público.
 * **Costo:** la conexión VPN y el endpoint de interfaz se cobran por hora (detalle en `infrastructure/README.md`).
-* **Alcance en el MVP (2026-10-14):** la VPN queda **documentada como diseño y no se demuestra**, porque no hay certeza de que el Learner Lab la permita. En la demo, el Edge sincroniza por **HTTPS contra una API Gateway pública** con credenciales IAM de mínimo privilegio.
+* **Alcance en el MVP (2026-10-14):** la VPN queda **documentada como diseño y no se demuestra**, porque no hay certeza de que el Learner Lab la permita. En la demo, el Edge sincroniza por **HTTPS contra una API Gateway pública** con una **clave de ingesta** compartida (cabecera `x-induplac-key`), porque el Learner Lab no permite crear usuarios ni roles IAM.
 
 ### 4.8. Autenticación con MFA y permisos por usuario
 * **Decisión:** Amazon Cognito con **MFA TOTP** (compatible con Microsoft Authenticator), **obligatorio para todo usuario con algún permiso de modificación** (reconocer alertas, umbrales o usuarios). Quien solo consulta inicia sesión sin MFA.
 * **Login obligatorio para ver (2026-10-16):** el dashboard siempre pide usuario y contraseña, con o sin internet.
 * **Cuentas (2026-10-16):** el Administrador crea la cuenta con una clave temporal; en el primer login el usuario la cambia por una personal que nadie puede ver (solo hash). Si la olvida, el Administrador la resetea.
 * **Permisos por usuario (2026-10-16):** el rol es una plantilla; al crear la cuenta el Administrador marca o desmarca qué puede ver y modificar. Detalle en `docs/api-dashboard.md` §6.
+* **Estado (2026-10-20):** Cognito con MFA TOTP **probado en el Learner Lab** (user pool sin auto-registro, clave temporal y QR de Microsoft Authenticator). El dashboard todavía usa su login propio con las mismas reglas; conectarlo a Cognito es el siguiente paso.
 * **Sin internet (aprobado 2026-10-14):** la planta sigue viendo el dashboard y puede reconocer alertas con un login local en el Edge; los cambios de configuración (umbrales, usuarios) requieren conexión y MFA. Ver `docs/ciberseguridad.md`.
 
 ### 4.9. Hora sincronizada sin depender de internet (2026-10-16)
@@ -151,7 +155,8 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 ## 5. Puntos Discutidos Pendientes de Decisión Definitiva
 
 1. **Broker MQTT para la simulación: EMQX Serverless (decidido 2026-10-14).** HiveMQ Cloud se descartó porque su plan gratuito permanente fue retirado (solo prueba de 15 días). EMQX Serverless es gratis, usa TLS (8883 MQTT, 8084 WebSocket) y se configura con *spend limit* 0 para no generar cobros. En el diseño real el broker vive en la Raspberry Pi (Mosquitto); en la simulación va en la nube porque el ESP32 en Wokwi web sale por `Wokwi-GUEST` y no alcanza la red local.
-2. **Verificar Cognito con MFA en el Learner Lab** (se implementa; hay que probar que el Learner Lab lo permita).
+2. ~~Verificar Cognito con MFA en el Learner Lab~~ **Resuelto el 2026-10-20:** funciona (solo MFA por app; SMS no disponible en el Learner Lab).
+3. **RDS vuelve al MVP (2026-10-19):** solo con configuración y encendido para configurar y para la demo; las alertas quedan en DynamoDB.
 
 > Resueltos el 2026-10-14: demo **100 % en Wokwi**; acciones offline aprobadas (reconocer alertas con login local; umbrales y usuarios solo online con MFA); umbrales de agua definidos (§8.2); **VPN solo como diseño**: no se demuestra y la ingesta de la demo va por HTTPS a una API Gateway pública con credenciales de mínimo privilegio.
 > Resueltos el 2026-10-08: proveedor de autenticación (Cognito + MFA para roles con escritura), comportamiento offline del dashboard (igual que online), alertas offline (Edge + Lambda) y VPN (real).
@@ -161,7 +166,7 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 ## 6. Estado Actual vs. Lo que Falta para la Versión 1.0 (MVP)
 
 ```text
-ESTADO ACTUAL (Diseñado y Documentado):
+DISEÑADO Y DOCUMENTADO:
 ├── [OK] Arquitectura Híbrida y Modelo de Estados
 ├── [OK] Decisiones Cloud del equipo (agregación 15 min, alertas, RBAC + MFA)
 ├── [OK] Estrategia de Ciberseguridad en 5 Capas (STRIDE + RBAC + MFA + Ley 19.628)
@@ -170,17 +175,22 @@ ESTADO ACTUAL (Diseñado y Documentado):
 ├── [OK] Especificación del Modo Offline y Retención
 └── [OK] Estructura limpia del repositorio Git con convenciones profesionales
 
-LO QUE FALTA PARA EL MVP EJECUTABLE (En orden):
-├── [PENDIENTE] Código del Dashboard en 'dashboard/' (React + Vite + Tailwind)
-├── [PENDIENTE] Código C++ para ESP32 en 'simulation/' (Wokwi)
-├── [PENDIENTE] Agente Edge en 'edge/' (Python: MQTT -> SQLite -> Agregación 15 min -> Alertas -> Sync)
-├── [PENDIENTE] Backend AWS en 'backend/' (Lambda ingesta/alertas, API consulta, Cognito MFA)
-└── [DISEÑO] VPN Site-to-Site + API Gateway privada (documentada, no se demuestra en el MVP)
+MVP EJECUTABLE (al 2026-10-21):
+├── [OK] Dashboard en 'dashboard/' (React + Vite + Tailwind), publicado en S3
+├── [OK] ESP32 en Wokwi en 'simulation/wokwi-local1/' publicando al broker EMQX
+├── [OK] Agente Edge en 'edge/' (MQTT -> SQLite -> 15 min -> alertas offline -> sync)
+├── [OK] Backend AWS en 'backend/' (API Gateway, Lambdas, DynamoDB, RDS)
+├── [OK] Cognito con MFA probado en el Learner Lab
+├── [PENDIENTE] Conectar el dashboard a Cognito y validar el token en la API
+├── [PENDIENTE] Que induplac-api lea los umbrales desde RDS (con valores por defecto si RDS está apagado)
+└── [DISEÑO] VPN Site-to-Site + API Gateway privada, VLANs y RTC (documentados, no se demuestran)
 ```
 
 ---
 
 ## 7. Roadmap y Próximos Pasos Priorizados
+
+> **Estado al 2026-10-21:** pasos 1 a 4 funcionando (demo del 21/10). El paso 5 queda como diseño. Siguientes: Cognito en el dashboard y umbrales desde RDS en `induplac-api`.
 
 ```mermaid
 flowchart LR
@@ -208,7 +218,7 @@ La evaluación se gana demostrando la **resiliencia híbrida en vivo**:
 > 3. Se inyecta un UV alto: **la alerta aparece igual**, generada por el Edge.
 > 4. Los intervalos de 15 min y las alertas se acumulan en SQLite (`is_synced = 0`).
 > 5. Se reconecta la red: la interfaz muestra `🟡 SINCRONIZANDO (XX pendientes)`.
-> 6. Los intervalos suben a AWS por la VPN, la alerta generada offline aparece en el dashboard de gerencia **sin duplicarse** y la interfaz vuelve a `🟢 ONLINE` **sin haber perdido ni un solo dato**.
+> 6. Los intervalos suben a AWS (en la demo por HTTPS; en el diseño, por la VPN), la alerta generada offline aparece en el dashboard de gerencia **sin duplicarse** y la interfaz vuelve a `🟢 ONLINE` **sin haber perdido ni un solo dato**.
 
 ### 8.2. Variables, Reglas de Alerta y Colores
 - **Energía Eléctrica (kW / kWh):**

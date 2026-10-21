@@ -39,6 +39,8 @@ El sistema maneja dos tipos de datos con comportamientos distintos:
 - **Amazon DynamoDB:** serie de tiempo de intervalos de 15 min (llave: `local_id` + `inicio_intervalo`).
 - **Amazon RDS PostgreSQL:** `usuarios`, `roles`, `permisos`, `usuario_roles`, `locales`, `dispositivos`, `umbrales_alerta`, `alertas`, `metricas_agregadas_diarias`.
 
+> **Actualización 2026-10-19 (implementado el 2026-10-20):** las **alertas** pasan a **DynamoDB** (tabla `induplac-alertas`) para que se sigan guardando con RDS apagado, y las **cuentas y el MFA** quedan en **Cognito**. RDS guarda solo configuración: `locales`, `dispositivos`, `umbrales` y `permisos_usuario` (enlazados al `sub` de Cognito). RDS solo es alcanzable desde la Lambda `induplac-config`, dentro de la VPC.
+
 ### Justificación
 1. **Costo y disponibilidad en Learner Lab:** DynamoDB on-demand cuesta prácticamente \$0 y está siempre encendido; RDS puede apagarse fuera de las sesiones de prueba **sin cortar la ingesta**.
 2. **Lambda sin conexiones:** cada invocación de Lambda abre conexiones a una base relacional y puede agotar el límite de una instancia pequeña (RDS Proxy tiene costo). DynamoDB se accede por API HTTP.
@@ -46,7 +48,7 @@ El sistema maneja dos tipos de datos con comportamientos distintos:
 
 ### Consecuencias
 - **Positivas:** modelo relacional limpio para seguridad y reportes; ingesta resiliente y de costo mínimo.
-- **Negativas:** dos motores que administrar; la Lambda de alertas necesita leer de DynamoDB (historia) y escribir en RDS (alerta).
+- **Negativas:** dos motores que administrar; leer la configuración de RDS requiere una Lambda dentro de la VPC (`induplac-config`), separada de la de ingesta.
 
 ---
 

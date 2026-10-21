@@ -1,7 +1,7 @@
 # 👥 Roles, RACI y Carta Gantt — Nota 2
 
 > **Autora:** Bárbara Saavedra (`barbaraantoniaa`). Tareas 9, 10 y 14 de [`EN-CURSO.md`](EN-CURSO.md).
-> **Actualizado el 19/10/2026:** RDS PostgreSQL vuelve al MVP (ver §5).
+> **Actualizado el 21/10/2026:** estados de las tareas al día tras la sesión del 20/10 (ver §5).
 > **Archivo original (con fórmulas y colores):** [`docs/nota-2/Induplac_Roles_Equipo.xlsx`](nota-2/Induplac_Roles_Equipo.xlsx). Esta página es una copia en texto para leerla en GitHub; si cambian algo, cámbienlo en los dos.
 
 ---
@@ -30,15 +30,15 @@
 |---|---|---|---|
 | Abraham | Coordinación del equipo, repositorio y Pull Requests | Todos | En curso |
 | Abraham | Broker MQTT EMQX (TLS, usuario y Client ID por dispositivo) | Sprint 2 | Listo (PR #9) |
-| Abraham | Dashboard React con datos simulados y conexión a la API | Sprint 2 y 3 | En curso |
-| Abraham | Edge Gateway en Python: SQLite, intervalos de 15 min, alertas y sincronización | Sprint 3 | En curso |
-| Abraham | Backend AWS y base RDS junto a Felipe | Sprint 2 y 3 | En curso |
-| Abraham | Casos de prueba y ensayo de la demo | Sprint 3 | Pendiente |
-| Sebastián | Sketch ESP32 en Wokwi (Local 1 y Local 2) | Sprint 2 y 3 | En curso |
-| Sebastián | Sensores simulados: CT (kW), caudalímetro (agua) y UV | Sprint 3 | En curso |
-| Sebastián | Publicación MQTT del JSON (device_id + seq + ts) en el broker | Sprint 3 | En curso |
-| Sebastián | NTP y buffer de lecturas sin conexión | Sprint 3 | Pendiente |
-| Sebastián | Escenarios de prueba de alertas (kW +20 %, UV ≥ 8, agua) | Sprint 3 | Pendiente |
+| Abraham | Dashboard React con datos simulados y conexión a la API | Sprint 2 y 3 | Listo (PR #18) |
+| Abraham | Edge Gateway en Python: SQLite, intervalos de 15 min, alertas y sincronización | Sprint 3 | Listo (PR #18) |
+| Abraham | Backend AWS y base RDS junto a Felipe | Sprint 2 y 3 | Listo (PR #16) |
+| Abraham | Casos de prueba y ensayo de la demo | Sprint 3 | En curso |
+| Sebastián | Sketch ESP32 en Wokwi (Local 1 y Local 2) | Sprint 2 y 3 | Listo Local 1 (PR #16) |
+| Sebastián | Sensores simulados: CT (kW), caudalímetro (agua) y UV | Sprint 3 | Listo (PR #16) |
+| Sebastián | Publicación MQTT del JSON (device_id + seq + ts) en el broker | Sprint 3 | Listo (PR #16) |
+| Sebastián | NTP y buffer de lecturas sin conexión | Sprint 3 | Listo (PR #16) |
+| Sebastián | Escenarios de prueba de alertas (kW +20 %, UV ≥ 8, agua) | Sprint 3 | En curso |
 | Lisandra | Probar el Edge con el simulador y con Wokwi | Sprint 3 | Pendiente |
 | Lisandra | Simulación de corte de internet y evidencias del modo offline | Sprint 3 | Pendiente |
 | Lisandra | Verificar la sincronización al volver la conexión (sin duplicados) | Sprint 3 | Pendiente |
@@ -47,9 +47,9 @@
 | Felipe | Tablas en DynamoDB (intervalos y alertas) | Sprint 2 | Listo |
 | Felipe | Reglas de alerta (+20 % kW, UV ≥ 8, agua y fugas) | Sprint 2 | Listo |
 | Felipe | Dashboard publicado en S3 | Sprint 2 | Listo |
-| Felipe | RDS PostgreSQL: permisos, umbrales y catálogo (se enciende para la demo) | Sprint 3 | En curso |
-| Felipe | Re-deploy de la Lambda con alertas del Edge | Sprint 3 | Pendiente |
-| Felipe | Cognito con MFA | Sprint 3 | Pendiente |
+| Felipe | RDS PostgreSQL: permisos, umbrales y catálogo (se enciende para la demo) | Sprint 3 | Listo (PR #16) |
+| Felipe | Re-deploy de la Lambda con alertas del Edge | Sprint 3 | Listo (20/10) |
+| Felipe | Cognito con MFA | Sprint 3 | Listo: probado en AWS (falta conectarlo al dashboard) |
 | Felipe | IAM, TLS, clave de ingesta y cumplimiento Ley 19.628 | Sprint 3 | En curso |
 | Bárbara | Roles y responsabilidades del equipo | Sprint 3 | Listo (PR #11) |
 | Bárbara | Matriz RACI | Sprint 3 | Listo (PR #11) |
@@ -149,6 +149,8 @@ Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya e
 3. **Gantt en dos partes:** sprints del MVP (S1–S3) e implementación con fases PMI (S4–S12).
 4. **Términos alineados con el código:** estados ONLINE / OFFLINE / SINCRONIZANDO, lotes con `batch_id` y upsert idempotente, identificador `device_id + seq + ts`.
 5. **Columna de fortalezas** en Roles (la pauta la pide; vale 15 %).
+
+**21/10/2026** — Estados de *Tareas por integrante* al día tras la sesión del 20/10 (PR #16 y #18): dashboard, Edge, backend con RDS, Wokwi Local 1 y Cognito probado. Las tareas de Lisandra siguen pendientes.
 
 **19/10/2026** — RDS PostgreSQL vuelve al MVP:
 1. Nueva tarea **3.3 RDS PostgreSQL** (Felipe, Sprint 3). Se mantiene apagado y se enciende para la demo del miércoles y para configuraciones.

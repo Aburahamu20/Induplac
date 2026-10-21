@@ -31,18 +31,20 @@ Una **plataforma IoT híbrida**: sensores que envían datos por MQTT a una Raspb
 ## 4. Limitaciones
 
 - **Datos simulados:** el prototipo usa sensores virtuales en Wokwi, no sensores reales.
-- **La VPN queda solo como diseño:** en la demo la conexión va por HTTPS con credenciales de mínimo privilegio, por el costo y las restricciones del Learner Lab.
+- **La VPN queda solo como diseño:** en la demo la conexión va por HTTPS con una clave de ingesta, por el costo y las restricciones del Learner Lab (no permite crear usuarios IAM).
 - **Hora sin internet (RTC):** también queda como diseño; no aplica en Wokwi.
 - **Dependencia del Learner Lab:** presupuesto de USD 100 y servicios que hay que encender para las pruebas.
 - **Las alertas solo se ven en el dashboard:** todavía no llegan por correo ni por celular.
+- **Cognito probado pero no conectado:** el login con Cognito y MFA funciona en AWS, pero el dashboard aún usa su propio login (con las mismas reglas de clave temporal y MFA).
 
 ## 5. Siguientes pasos
 
 1. **Piloto real** en el Local 1 con sensores físicos (corriente y caudalímetros) y una Raspberry Pi.
-2. **Activar la VPN** Site-to-Site en una cuenta AWS de producción.
-3. **Notificaciones** por correo o Telegram (Amazon SNS).
-4. **Históricos comparables** (por ejemplo, este invierno contra el anterior).
-5. **Predicción de consumo** con modelos simples de machine learning.
+2. **Conectar el dashboard a Cognito** y que la Lambda lea los umbrales desde RDS.
+3. **Activar la VPN** Site-to-Site en una cuenta AWS de producción.
+4. **Notificaciones** por correo o Telegram (Amazon SNS).
+5. **Históricos comparables** (por ejemplo, este invierno contra el anterior).
+6. **Predicción de consumo** con modelos simples de machine learning.
 
 ---
 
@@ -51,7 +53,7 @@ Una **plataforma IoT híbrida**: sensores que envían datos por MQTT a una Raspb
 | Pregunta | Respuesta corta |
 |---|---|
 | ¿Por qué no todo en la nube? | Porque si se corta internet la planta quedaría ciega; el Edge asegura que siga funcionando. |
-| ¿Por qué dos bases de datos en AWS? | DynamoDB es casi gratis y siempre está encendida para recibir datos; RDS guarda usuarios y permisos, y se puede apagar sin cortar nada. |
+| ¿Por qué dos bases de datos en AWS? | DynamoDB es casi gratis y siempre está encendida para recibir datos y alertas; RDS guarda la configuración (permisos, umbrales y catálogo) y se puede apagar sin cortar nada. Las cuentas y el MFA los maneja Cognito. |
 | ¿Qué pasa si se corta internet en la demo? | El dashboard sigue igual, cambia a OFFLINE, y al volver sincroniza todo sin duplicados. |
 | ¿Cómo protegen los datos de los trabajadores? | No se guardan nombres ni RUT; las horas hombre son solo contadores. |
 | ¿Por qué la VPN no está en la demo? | Por costo y porque el Learner Lab no garantiza permitirla. Está diseñada y documentada para producción. |
