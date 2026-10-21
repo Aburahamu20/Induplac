@@ -137,7 +137,7 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 * **Login obligatorio para ver (2026-10-16):** el dashboard siempre pide usuario y contraseña, con o sin internet.
 * **Cuentas (2026-10-16):** el Administrador crea la cuenta con una clave temporal; en el primer login el usuario la cambia por una personal que nadie puede ver (solo hash). Si la olvida, el Administrador la resetea.
 * **Permisos por usuario (2026-10-16):** el rol es una plantilla; al crear la cuenta el Administrador marca o desmarca qué puede ver y modificar. Detalle en `docs/api-dashboard.md` §6.
-* **Estado (2026-10-20):** Cognito con MFA TOTP **probado en el Learner Lab** (user pool sin auto-registro, clave temporal y QR de Microsoft Authenticator). El dashboard todavía usa su login propio con las mismas reglas; conectarlo a Cognito es el siguiente paso.
+* **Estado (2026-10-21):** el dashboard en la nube **usa Cognito** (`VITE_AUTH=cognito`): clave temporal, cambio obligatorio y MFA TOTP con Microsoft Authenticator, probados con las cuentas del equipo. Los permisos salen del **grupo de Cognito** (`administrador`, `jefe`, `operario`) con las mismas plantillas de §8.3. En Cognito el MFA quedó **obligatorio para todos** (configuración del user pool). Pendiente: que la API valide el token.
 * **Sin internet (aprobado 2026-10-14):** la planta sigue viendo el dashboard y puede reconocer alertas con un login local en el Edge; los cambios de configuración (umbrales, usuarios) requieren conexión y MFA. Ver `docs/ciberseguridad.md`.
 
 ### 4.9. Hora sincronizada sin depender de internet (2026-10-16)
@@ -181,7 +181,8 @@ MVP EJECUTABLE (al 2026-10-21):
 ├── [OK] Agente Edge en 'edge/' (MQTT -> SQLite -> 15 min -> alertas offline -> sync)
 ├── [OK] Backend AWS en 'backend/' (API Gateway, Lambdas, DynamoDB, RDS)
 ├── [OK] Cognito con MFA probado en el Learner Lab
-├── [PENDIENTE] Conectar el dashboard a Cognito y validar el token en la API
+├── [OK] Dashboard con login de Cognito y MFA (publicado en S3)
+├── [PENDIENTE] Validar el token de Cognito en la API
 ├── [PENDIENTE] Que induplac-api lea los umbrales desde RDS (con valores por defecto si RDS está apagado)
 └── [DISEÑO] VPN Site-to-Site + API Gateway privada, VLANs y RTC (documentados, no se demuestran)
 ```
@@ -190,7 +191,7 @@ MVP EJECUTABLE (al 2026-10-21):
 
 ## 7. Roadmap y Próximos Pasos Priorizados
 
-> **Estado al 2026-10-21:** pasos 1 a 4 funcionando (demo del 21/10). El paso 5 queda como diseño. Siguientes: Cognito en el dashboard y umbrales desde RDS en `induplac-api`.
+> **Estado al 2026-10-21:** pasos 1 a 4 funcionando (demo del 21/10). El paso 5 queda como diseño. Siguientes: umbrales desde RDS en `induplac-api` y validar el token de Cognito en la API.
 
 ```mermaid
 flowchart LR

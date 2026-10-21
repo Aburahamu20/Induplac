@@ -36,12 +36,11 @@ Una **plataforma IoT híbrida**: sensores que envían datos por MQTT a una Raspb
 - **Hora sin internet (RTC):** también queda como diseño; no aplica en Wokwi.
 - **Dependencia del Learner Lab:** presupuesto de USD 100 y servicios que hay que encender para las pruebas.
 - **Las alertas solo se ven en el dashboard:** todavía no llegan por correo ni por celular.
-- **Login con Cognito por terminar de probar:** Cognito con MFA funciona en AWS y el dashboard ya tiene el login con Cognito (PR #20), pero falta probarlo de punta a punta; mientras, la demo puede usar el login propio del dashboard (mismas reglas de clave temporal y MFA).
 
 ## 5. Siguientes pasos
 
 1. **Piloto real** en el Local 1 con sensores físicos (corriente y caudalímetros) y una Raspberry Pi.
-2. **Terminar de probar el login con Cognito** y que la Lambda de ingesta lea los umbrales desde RDS.
+2. **Que la Lambda de ingesta lea los umbrales desde RDS** y que la API valide el token de Cognito.
 3. **Activar la VPN** Site-to-Site en una cuenta AWS de producción.
 4. **Notificaciones** por correo o Telegram (Amazon SNS).
 5. **Históricos comparables** (por ejemplo, este invierno contra el anterior).

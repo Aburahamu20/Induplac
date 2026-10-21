@@ -425,3 +425,22 @@ Se revisó la lista de la madrugada y se actualizaron los documentos de Bárbara
 - [ ] Si hubo **reuniones fijas** (punto de Scrum).
 - [ ] **Guion de la demo** (18), **PowerPoint** (17) e **informe** (16, confirmar formato).
 
+---
+
+## 2026-10-21 (mañana) — Dashboard conectado a Cognito
+
+Abraham, con la cuenta del Learner Lab de Felipe.
+
+- **App client `induplac-dashboard`:** se habilitó **ALLOW_USER_PASSWORD_AUTH** (público, sin secreto). Client ID en `dashboard/.env.local` (no se sube al repo).
+- **Grupos de Cognito** (permisos del dashboard): `administrador` → Abraham y Felipe · `jefe` → Bárbara y Sebastián · `operario` → Lisandra. Las cuentas son las del equipo, creadas por Felipe con clave temporal.
+- **Probado en local y en S3:** clave temporal → cambio obligatorio → QR de MFA en Microsoft Authenticator → dentro como *Administrador*. En los siguientes ingresos pide solo el código de 6 dígitos.
+- **Dashboard publicado en S3** con `VITE_AUTH=cognito`: [induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html](https://induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html).
+- **MFA obligatorio para todos** en Cognito (configuración del user pool). En el login propio del dashboard solo lo llevaban quienes pueden modificar; para la nube queda así.
+- **Mensaje de error:** un intento mostró "no tiene habilitado ALLOW_USER_PASSWORD_AUTH" aunque sí lo estaba (al reintentar, entró). El mensaje ahora incluye el texto original de Cognito para saber la causa si se repite.
+- *"Sin conexión con la nube"* en el dashboard = el Edge no está enviando datos; se va al prender el Edge.
+
+### Siguen abiertos
+- [ ] Validar el token de Cognito en la API (hoy la API de consulta no lo revisa).
+- [ ] Umbrales desde RDS en `induplac-api`.
+- [ ] Usuario `lisandra.gonzález` tiene tilde: escribirlo igual al iniciar sesión, o crear uno sin tilde.
+
