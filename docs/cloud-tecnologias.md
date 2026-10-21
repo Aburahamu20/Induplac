@@ -51,7 +51,7 @@
 | **Nube** | **DynamoDB** | Guarda los intervalos de consumo **y las alertas**; siempre encendida y casi gratis. |
 | **Nube** | **RDS PostgreSQL** | Guarda la configuración: permisos por usuario, umbrales y catálogo de locales y dispositivos (datos con relaciones). Se apaga cuando no se usa; las alertas van en DynamoDB y las cuentas en Cognito. |
 | **Nube** | **S3** | Publica el dashboard para gerencia. |
-| **Seguridad** | **Cognito con MFA** | Cuentas con clave temporal y código del celular (TOTP) para quien puede modificar algo. Probado en el Learner Lab; el login del dashboard con Cognito está en el PR #20. |
+| **Seguridad** | **Cognito con MFA** | Cuentas con clave temporal y código del celular (TOTP) para quien puede modificar algo. El dashboard en la nube inicia sesión con Cognito; los permisos salen del grupo del usuario (administrador, jefe u operario). |
 | **Visualización** | **React** + Vite + TypeScript + Tailwind | Un mismo dashboard para la planta y la nube. |
 | **Trabajo en equipo** | **GitHub** (ramas, Pull Requests, tablero) | Ordena quién hace qué y deja registro de cada cambio y su revisión. |
 | **DevOps** | **GitHub Actions** (CI/CD) | En cada Pull Request compila el dashboard y corre las pruebas del Edge (reglas de alerta); el despliegue a AWS se lanza a mano por las restricciones del Learner Lab. Ver [`devops.md`](devops.md). |

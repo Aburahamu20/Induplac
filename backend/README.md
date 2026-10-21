@@ -19,7 +19,7 @@ Dashboard (VITE_FUENTE=api) ──GET /api/...───►                      
 | :--- | :--- | :--- |
 | Alertas, usuarios y umbrales en **RDS** | Alertas en la tabla DynamoDB `induplac-alertas`; umbrales en el código. **Desde el 20/10:** RDS existe con la configuración (permisos, umbrales y catálogo) y se lee con la Lambda `induplac-config` (ver `lambda_config/`) | Las alertas quedan en DynamoDB para que funcionen con RDS apagado |
 | Ingesta autenticada con **IAM de mínimo privilegio** | Clave compartida en la cabecera `x-induplac-key` (variable `CLAVE_INGESTA`) | El Learner Lab no permite crear usuarios ni roles IAM; solo existe `LabRole` |
-| Login de gerencia con **Cognito + MFA** | El dashboard usa el login simulado (`VITE_AUTH=simulada`) y la API de consulta aún no valida el token | **20/10:** Cognito con MFA probado en el Learner Lab; falta conectarlo al dashboard |
+| Login de gerencia con **Cognito + MFA** | El dashboard usa el login simulado (`VITE_AUTH=simulada`) y la API de consulta aún no valida el token | **21/10:** el dashboard ya usa **Cognito con MFA** (`VITE_AUTH=cognito`); permisos según el grupo de Cognito. Falta que la API valide el token |
 | **VPN + API Gateway privada** | API Gateway pública con HTTPS | Decisión del 2026-10-14 (ADR-02) |
 
 ## Formato de la ingesta (`POST /intervalos`)

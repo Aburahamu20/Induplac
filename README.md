@@ -768,7 +768,7 @@ Induplac/
 | **Cómputo cloud** | AWS Lambda (Python 3.12): `induplac-api` y `induplac-config` | ✅ Funcionando |
 | **Base de datos cloud** | Amazon DynamoDB on-demand (intervalos y alertas) | ✅ Funcionando |
 | **Base de datos relacional** | Amazon RDS PostgreSQL (permisos, umbrales, catálogo), solo accesible desde la Lambda | ✅ Funcionando (se enciende para configurar y para la demo) |
-| **Autenticación** | Amazon Cognito con MFA TOTP | ✅ Probado en el Learner Lab · falta conectarlo al dashboard |
+| **Autenticación** | Amazon Cognito con MFA TOTP (grupos administrador / jefe / operario) | ✅ Conectado al dashboard |
 | **Dashboard** | React + TypeScript (Vite, Tailwind CSS, Chart.js) | ✅ Funcionando |
 | **Hosting del dashboard** | Amazon S3 (HTTPS) | ✅ Funcionando |
 | **Conectividad cloud** | VPN Site-to-Site IPsec + API Gateway privada | Diseño, no se demuestra |
@@ -859,7 +859,8 @@ Las reglas de las pruebas 2, 3 y 4 también se prueban solas en cada Pull Reques
 [✓] Cognito con MFA (probado)            (tarea 6)
 [✓] Wokwi → Edge → AWS de punta a punta
 [ ] Demostración final                   (21/10)
-[ ] Cognito en el dashboard y umbrales desde RDS
+[✓] Cognito en el dashboard (21/10)
+[ ] Umbrales desde RDS en induplac-api
 ```
 
 ---
@@ -913,9 +914,11 @@ feature/cybersecurity
 - Cadena completa: `Wokwi (ESP32) → EMQX → Edge (SQLite, 15 min, alertas offline) → API Gateway → Lambda → DynamoDB → dashboard en S3`.
 - Dashboard con login, clave temporal, MFA TOTP, permisos por usuario y panel de demostración del corte de red.
 - RDS PostgreSQL con la configuración, leído por la Lambda `induplac-config` (`GET /config/umbrales`).
-- Cognito con MFA probado en el Learner Lab.
+- **Login del dashboard con Cognito y MFA** (cuentas del equipo, permisos por grupo).
 
-**Siguiente:** conectar el dashboard a Cognito y que `induplac-api` lea los umbrales desde RDS.
+**Dashboard en la nube:** [induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html](https://induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html) (login con Cognito y MFA).
+
+**Siguiente:** que `induplac-api` lea los umbrales desde RDS y valide el token de Cognito.
 
 El estado de cada tarea está en [`docs/EN-CURSO.md`](docs/EN-CURSO.md) y el detalle de cada sesión en [`docs/notas-de-avance.md`](docs/notas-de-avance.md). Los datos son ficticios.
 

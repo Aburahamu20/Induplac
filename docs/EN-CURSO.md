@@ -41,7 +41,7 @@ La pauta completa de la Nota 2 y los borradores de roles, RACI y Gantt están en
 | 3 | Sketch ESP32 en Wokwi (sensores virtuales, NTP, JSON por MQTT) | `simulation/` | ✅ Listo | Sebastián Fuentes | 2026-10-16 | PR #16 | Publica al broker EMQX y el Edge recibe sus lecturas (probado el 20/10). Código en `simulation/wokwi-local1/`. |
 | 4 | Agente Edge en Python (MQTT → SQLite → intervalos 15 min → alertas → sync) | `edge/` | ✅ Listo | Abraham (con Claude) | 2026-10-17 | PR #18 | Probado con Wokwi y con el simulador: alertas offline y cola de pendientes. Falta la API local para el dashboard de planta. |
 | 5 | Backend AWS: Lambda de ingesta y alertas, DynamoDB, RDS, API | `backend/` | ✅ Listo | Abraham y Felipe Murúa | 2026-10-17 | PR #16, #18 | `induplac-api` + DynamoDB + S3; RDS con la configuración y Lambda `induplac-config` (`/config/umbrales`). Pendiente: que `induplac-api` lea los umbrales desde RDS. |
-| 6 | Cognito con MFA (probar primero que el Learner Lab lo permita) | `backend/`, `dashboard/` | 🟡 En curso | Abraham y Felipe Murúa | 2026-10-20 | PR #16 | **Funciona en el Learner Lab** (user pool, clave temporal y MFA TOTP probados). Falta conectarlo al dashboard (después de la demo). |
+| 6 | Cognito con MFA (probar primero que el Learner Lab lo permita) | `backend/`, `dashboard/` | ✅ Listo | Abraham y Felipe Murúa | 2026-10-20 | PR #16, #20 | Dashboard en S3 con login de Cognito y MFA (21/10). Grupos `administrador`, `jefe` y `operario` con las cuentas del equipo. |
 | 8 | Identificador por lectura (`device_id + seq`) entre ESP32 y Edge | `simulation/`, `edge/` | ✅ Listo | Abraham y Sebastián | 2026-10-20 | PR #16, #18 | El ESP32 manda `device_id + seq + ts`; el Edge descarta duplicados con esa llave, también tras reinicios. |
 
 ---

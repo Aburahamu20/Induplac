@@ -33,7 +33,7 @@
 | Abraham | Dashboard React con datos simulados y conexión a la API | Sprint 2 y 3 | Listo (PR #18) |
 | Abraham | Edge Gateway en Python: SQLite, intervalos de 15 min, alertas y sincronización | Sprint 3 | Listo (PR #18) |
 | Abraham | Backend AWS y base RDS junto a Felipe | Sprint 2 y 3 | Listo (PR #16) |
-| Abraham | Login del dashboard con Cognito y MFA | Sprint 3 | En curso (PR #20, falta probar con Felipe) |
+| Abraham | Login del dashboard con Cognito y MFA | Sprint 3 | Listo (PR #20, probado el 21/10) |
 | Abraham | Pipeline DevOps: GitHub Actions (CI en cada PR y despliegue a AWS) | Sprint 3 | Listo (PR #21) |
 | Abraham | Casos de prueba y ensayo de la demo | Sprint 3 | En curso |
 | Sebastián | Sketch ESP32 en Wokwi: Local 1 | Sprint 2 y 3 | Listo (PR #16) |
@@ -108,7 +108,7 @@ Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya e
 | 3.1 | ESP32 en Wokwi publicando por MQTT (Local 1 listo; Local 2 pendiente) | Sebastián | Sprint 2 y 3 | 12/10 | 23/10 | 2.2 | En curso |  | ■ | ■ |  |  |  |  |  |  |  |  |  |
 | 3.2 | Edge Gateway: SQLite, intervalos, alertas y sincronización | Abraham | Sprint 2 y 3 | 12/10 | 23/10 | 2.2, 2.4 | Listo |  | ■ | ■ |  |  |  |  |  |  |  |  |  |
 | 3.3 | RDS PostgreSQL: permisos, umbrales y catálogo + Lambda induplac-config | Felipe y Abraham | Sprint 3 | 19/10 | 23/10 | 2.4 | Listo |  |  | ■ |  |  |  |  |  |  |  |  |  |
-| 3.4 | Cognito con MFA (probado en AWS; login del dashboard en PR #20) | Felipe y Abraham | Sprint 3 | 19/10 | 23/10 | 2.4, 3.3 | En curso |  |  | ■ |  |  |  |  |  |  |  |  |  |
+| 3.4 | Cognito con MFA y login del dashboard | Felipe y Abraham | Sprint 3 | 19/10 | 23/10 | 2.4, 3.3 | Listo |  |  | ■ |  |  |  |  |  |  |  |  |  |
 | 3.5 | Pruebas del Edge y simulación de corte de internet | Lisandra | Sprint 3 | 19/10 | 23/10 | 3.2 | Pendiente |  |  | ■ |  |  |  |  |  |  |  |  |  |
 | 3.6 | Casos de prueba y ensayo de la demo | Abraham | Sprint 3 | 19/10 | 23/10 | 3.1, 3.2, 3.3 | En curso |  |  | ■ |  |  |  |  |  |  |  |  |  |
 | 3.7 | Pipeline DevOps: GitHub Actions (CI en cada PR y despliegue a AWS) | Abraham | Sprint 3 | 19/10 | 23/10 | 2.3, 3.2 | Listo |  |  | ■ |  |  |  |  |  |  |  |  |  |

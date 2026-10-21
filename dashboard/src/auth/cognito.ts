@@ -112,7 +112,7 @@ export class AuthCognito implements ProveedorAuth {
       const tipo = String(datos.__type ?? '').split('#').pop() ?? ''
       console.warn('[Cognito]', accion, tipo, datos.message)
       if (tipo === 'InvalidParameterException' && String(datos.message).includes('USER_PASSWORD_AUTH'))
-        throw new Error('El app client de Cognito no tiene habilitado ALLOW_USER_PASSWORD_AUTH.')
+        throw new Error(`Cognito rechazó el inicio de sesión: ${datos.message}. Revisa que el app client tenga ALLOW_USER_PASSWORD_AUTH.`)
       throw new Error(MENSAJES[tipo] ?? datos.message ?? 'Error al iniciar sesión.')
     }
     return datos
