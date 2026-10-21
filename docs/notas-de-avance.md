@@ -272,6 +272,33 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - Se permite UDP 123 desde la VLAN IoT hacia la Pi. En la demo con Wokwi no aplica.
 - Actualizados `CONTEXTO.md` §4.9, `decisiones-tecnicas.md` (ADR-10), `modo-offline.md` §3.1, `ciberseguridad.md` (hardening) y `api-dashboard.md` §2.
 
+## 2026-10-17 (noche) — Backend en AWS funcionando de punta a punta
+
+Abraham y Felipe (tarea 5), con el Learner Lab de Felipe en us-east-1.
+
+### Qué quedó funcionando
+- **DynamoDB:** tablas `induplac-intervalos` (`local_id` + `inicio_intervalo`) y `induplac-alertas` (`local_id` + `id`), on-demand.
+- **Lambda `induplac-api`** (Python 3.12, `LabRole`): ingesta `POST /intervalos` con clave compartida, reglas de alerta de §8.2 y los endpoints del contrato del dashboard.
+- **API Gateway HTTP API** con ruta `ANY /{proxy+}`, stage `$default` con auto-deploy y CORS. `/health` responde `{"ok": true}`.
+- **Simulador del Edge** (`backend/scripts/simular_edge.py`): cargó 29 días de historia y manda el intervalo actual cada 20 s.
+- **Dashboard de gerencia publicado en S3** (HTTPS), leyendo los datos de AWS con `VITE_FUENTE=api`.
+
+Cadena demostrada: `simulador → API Gateway → Lambda → DynamoDB → Lambda → API Gateway → dashboard en S3`.
+
+### Simplificaciones del MVP (documentadas en `backend/README.md`)
+- Alertas en DynamoDB en vez de RDS (RDS cobra por hora).
+- Ingesta con clave compartida (`x-induplac-key`) en vez de IAM: el Learner Lab no permite crear usuarios ni roles.
+- El dashboard en la nube usa el **login simulado** (`VITE_AUTH=simulada`); la API de consulta aún no valida el token. **Cognito es el siguiente paso** (tarea 6).
+- El dashboard en S3 es público (datos ficticios); con Cognito quedará protegido.
+
+### Pendientes
+- [ ] Probar Cognito en el Learner Lab y conectar el dashboard (`VITE_AUTH=cognito`).
+- [ ] Validar el token de Cognito en la Lambda de consulta.
+- [ ] Antes de la demo: Start Lab y probar `/health`; verificar si la API responde con el lab detenido.
+- [ ] El Edge real (tarea 4) debe mandar el mismo formato de ingesta que el simulador.
+
+---
+
 ## 2026-10-18 — Broker MQTT (EMQX Serverless) creado y probado
 
 - Broker `induplac-broker` en EMQX Serverless (North America / us-east-1), **spend limit 0**. Solo TLS: 8883 (MQTT) y 8084 (WebSocket).

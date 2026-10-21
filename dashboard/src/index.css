@@ -1,1 +1,36 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --font-display: "Barlow Semi Condensed", system-ui, sans-serif;
+
+  /* Superficies (tema oscuro del diseño aprobado por el profe) */
+  --color-fondo: #111318;
+  --color-panel: #1a1d24;
+  --color-borde: #2a2f39;
+  --color-tinta: #e8eaee;
+  --color-tinta-2: #a3aab6;
+  --color-tinta-3: #6f7785;
+
+  /* Estados (reservados: no se usan para series) */
+  --color-ok: #34c26b;
+  --color-aviso: #e5a823;
+  --color-critico: #ef4f4f;
+
+  /* Identidad de cada sede en los gráficos (validados para fondo oscuro) */
+  --color-oficinas: #4f8ef7;
+  --color-planta: #e8663a;
+}
+
+body {
+  @apply bg-fondo text-tinta font-sans antialiased;
+}
+
+@keyframes latido {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.latido {
+  animation: latido 1.6s ease-in-out infinite;
+}
