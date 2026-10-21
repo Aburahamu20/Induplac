@@ -48,7 +48,7 @@
 | **Nube** | **API Gateway** | Puerta de entrada única y controlada para los datos que llegan desde el Edge. |
 | **Nube** | **AWS Lambda** (Python) | Recibe los datos y evalúa las alertas con las mismas reglas que el Edge. |
 | **Nube** | **DynamoDB** | Guarda los intervalos de consumo; siempre encendida y casi gratis. |
-| **Nube** | **RDS PostgreSQL** | Guarda usuarios, permisos, umbrales y alertas (datos con relaciones). Se apaga cuando no se usa. |
+| **Nube** | **RDS PostgreSQL** | Guarda la configuración: permisos por usuario, umbrales y catálogo de locales y dispositivos (datos con relaciones). Se apaga cuando no se usa; las alertas van en DynamoDB y las cuentas en Cognito. |
 | **Nube** | **S3** | Publica el dashboard para gerencia. |
 | **Seguridad** | **Cognito con MFA** | Login con clave y código del celular para quien puede modificar algo. |
 | **Visualización** | **React** + Vite + TypeScript + Tailwind | Un mismo dashboard para la planta y la nube. |

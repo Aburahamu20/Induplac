@@ -13,7 +13,7 @@
 | **Abraham Castro** | Jefe de proyecto, integración y desarrollo (broker, Edge y dashboard) | Coordina el equipo y el repositorio (README, docs/, ramas y Pull Requests). Creó el broker EMQX, el dashboard React y el Edge Gateway en Python; arma el backend AWS y la base RDS junto a Felipe. Prepara los casos de prueba y la demo. | `docs/, dashboard/, edge/` | Todos (transversal) | _Por completar_ |
 | **Sebastián Fuentes** | Ingeniero IoT y simulación | Sketch del ESP32 en Wokwi (Local 1 y Local 2): sensores simulados (CT, caudalímetro, UV), NTP, buffer de lecturas y publicación del JSON por MQTT (device_id + seq + ts). Escenarios de prueba de alertas. | `sensors/, simulation/` | Sprint 2 y 3 | _Por completar_ |
 | **Lisandra González** | Pruebas del Edge y modo offline | Prueba el Edge Gateway con el simulador y con Wokwi, ejecuta la simulación de corte de internet, verifica la sincronización al volver la conexión (sin duplicados) y documenta las evidencias. En la implementación, despliega el Edge en la Raspberry Pi. | `edge/` | Sprint 3 | _Por completar_ |
-| **Felipe Murúa** | Cloud, backend y ciberseguridad | AWS en el Learner Lab: API Gateway, Lambda (Python), DynamoDB, RDS PostgreSQL (usuarios, permisos, umbrales y alertas) y S3 para publicar el dashboard; reglas de alerta; Cognito con MFA; IAM, TLS y cumplimiento de la Ley 19.628. | `backend/, infrastructure/` | Sprint 2 y 3 | _Por completar_ |
+| **Felipe Murúa** | Cloud, backend y ciberseguridad | AWS en el Learner Lab: API Gateway, Lambda (Python), DynamoDB, RDS PostgreSQL (permisos, umbrales y catálogo) y S3 para publicar el dashboard; reglas de alerta; Cognito con MFA; IAM, TLS y cumplimiento de la Ley 19.628. | `backend/, infrastructure/` | Sprint 2 y 3 | _Por completar_ |
 | **Bárbara Saavedra** | Planificación y frontend | Roles, matriz RACI, planificación Scrum y PMI, Carta Gantt, modelo Cloud, tecnologías y conclusiones. Apoya el dashboard (revisión de vistas) y la capacitación de usuarios en la implementación. | `docs/, dashboard/` | Sprint 3 e implementación | _Por completar_ |
 
 ### Roles Scrum (MVP)
@@ -44,10 +44,10 @@
 | Lisandra | Verificar la sincronización al volver la conexión (sin duplicados) | Sprint 3 | Pendiente |
 | Lisandra | Despliegue del Edge en la Raspberry Pi | Implementación | Pendiente |
 | Felipe | API Gateway + Lambda de ingesta y consulta | Sprint 2 | Listo |
-| Felipe | Tablas en DynamoDB (intervalos) | Sprint 2 | Listo |
+| Felipe | Tablas en DynamoDB (intervalos y alertas) | Sprint 2 | Listo |
 | Felipe | Reglas de alerta (+20 % kW, UV ≥ 8, agua y fugas) | Sprint 2 | Listo |
 | Felipe | Dashboard publicado en S3 | Sprint 2 | Listo |
-| Felipe | RDS PostgreSQL: usuarios, permisos, umbrales y alertas (se enciende para la demo) | Sprint 3 | En curso |
+| Felipe | RDS PostgreSQL: permisos, umbrales y catálogo (se enciende para la demo) | Sprint 3 | En curso |
 | Felipe | Re-deploy de la Lambda con alertas del Edge | Sprint 3 | Pendiente |
 | Felipe | Cognito con MFA | Sprint 3 | Pendiente |
 | Felipe | IAM, TLS, clave de ingesta y cumplimiento Ley 19.628 | Sprint 3 | En curso |
@@ -104,7 +104,7 @@ Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya e
 | **3** | **Sprint 3 – Integración híbrida y demo** | | Sprint 3 | | | | | | | | | | | | | | | |
 | 3.1 | ESP32 en Wokwi publicando por MQTT | Sebastián | Sprint 2 y 3 | 12/10 | 23/10 | 2.2 | | ■ | ■ | | | | | | | | | |
 | 3.2 | Edge Gateway: SQLite, intervalos, alertas y sincronización | Abraham | Sprint 2 y 3 | 12/10 | 23/10 | 2.2, 2.4 | | ■ | ■ | | | | | | | | | |
-| 3.3 | **RDS PostgreSQL:** usuarios, permisos, umbrales y alertas (se enciende para la demo) | Felipe | Sprint 3 | 19/10 | 23/10 | 2.4 | | | ■ | | | | | | | | | |
+| 3.3 | **RDS PostgreSQL:** permisos, umbrales y catálogo (se enciende para la demo) | Felipe | Sprint 3 | 19/10 | 23/10 | 2.4 | | | ■ | | | | | | | | | |
 | 3.4 | Cognito con MFA | Felipe | Sprint 3 | 19/10 | 23/10 | 2.4, 3.3 | | | ■ | | | | | | | | | |
 | 3.5 | Pruebas del Edge y simulación de corte de internet | Lisandra | Sprint 3 | 19/10 | 23/10 | 3.2 | | | ■ | | | | | | | | | |
 | 3.6 | Casos de prueba y ensayo de la demo | Abraham | Sprint 3 | 19/10 | 23/10 | 3.1, 3.2, 3.3 | | | ■ | | | | | | | | | |
@@ -153,9 +153,10 @@ Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya e
 **19/10/2026** — RDS PostgreSQL vuelve al MVP:
 1. Nueva tarea **3.3 RDS PostgreSQL** (Felipe, Sprint 3). Se mantiene apagado y se enciende para la demo del miércoles y para configuraciones.
 2. RDS agregado a la actividad 5 de la RACI, a las responsabilidades y tareas de Felipe y Abraham y a la tarea 4.5 de la implementación.
-3. Tareas del Sprint 3 renumeradas (3.3 → 3.6); Cognito ahora depende también de RDS (usuarios y permisos).
-4. Agregada la tabla de **roles Scrum** (Product Owner y Scrum Master por definir).
-5. **Tareas por integrante** al día: estados de Bárbara actualizados (PR #11 a #15) y resumen automático por persona en el Excel.
+3. Tareas del Sprint 3 renumeradas (3.3 → 3.6); Cognito ahora depende también de RDS (permisos por usuario).
+4. Reparto de datos: **alertas en DynamoDB** (siempre encendido, así funcionan con RDS apagado), **cuentas en Cognito** y en **RDS solo configuración** (permisos, umbrales y catálogo).
+5. Agregada la tabla de **roles Scrum** (Product Owner y Scrum Master por definir).
+6. **Tareas por integrante** al día: estados de Bárbara actualizados (PR #11 a #15) y resumen automático por persona en el Excel.
 
 ### Falta que decida el equipo
 - [ ] Cada integrante escribe **su fortaleza**.
