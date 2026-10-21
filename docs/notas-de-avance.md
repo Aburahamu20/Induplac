@@ -298,3 +298,61 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 - Original en `docs/nota-2/Induplac_Roles_Equipo.xlsx` y copia en texto en `docs/roles-raci-gantt.md`.
 - Corregido según lo que está en GitHub: responsables de lo ya construido (broker, dashboard, Edge, backend), RACI de 19 a 10 actividades (la pauta pide 6–10), Gantt en dos partes (sprints del MVP S1–S3 desde el 05/10 + implementación PMI S4–S12 hasta la puesta en marcha), términos del Edge alineados con el código, sin RDS y con columna de fortalezas.
 - Falta: que cada uno escriba su fortaleza y que Lisandra y Bárbara confirmen sus roles (§5 del documento).
+
+---
+
+## 2026-10-19 — RDS vuelve al MVP con uso puntual
+
+- **Decisión (Abraham):** se implementa **RDS PostgreSQL** (antes había quedado fuera del MVP por costo). Se mantiene **apagado** y se enciende para configurar y para la demo; después, solo cuando haya que hacer configuraciones.
+- **Reparto de datos:**
+  - **DynamoDB** (sin cambios): intervalos de 15 min y **alertas**. Siempre encendido: la ingesta y las alertas no dependen de RDS.
+  - **RDS PostgreSQL:** solo configuración: permisos por usuario (enlazados al `sub` de Cognito), umbrales por local y catálogo de locales y dispositivos.
+  - **Cognito:** cuentas, claves temporales y MFA.
+- **Cuidados:** AWS reinicia sola una instancia RDS detenida a los **7 días** (apagarla de nuevo); el almacenamiento se cobra aunque esté apagada; sin NAT Gateway.
+- Roles, RACI y Gantt actualizados con RDS en el PR #15 (Bárbara).
+
+---
+
+## 2026-10-20 (noche) — Backend en AWS completo: Cognito, RDS y Lambda de configuración
+
+Sesión de Abraham y Felipe en el Learner Lab de Felipe.
+
+**1. Lambda `induplac-api` actualizada**
+- Re-deploy con el código de `feature/backend-aws`: la ingesta acepta las **alertas generadas por el Edge** (`origen = edge`, sin duplicar). `/health` OK.
+
+**2. Prueba de punta a punta** ✅
+- `simular_esp32.py` → broker EMQX → `edge_gateway.py` (SQLite) → API Gateway → Lambda → DynamoDB.
+- El Edge pasó de 🔴 OFFLINE a 🟡 SINCRONIZANDO a 🟢 ONLINE; a las 22:30 cerró el intervalo de 22:15 (134 lecturas por local) y lo sincronizó con `pendientes=0`.
+- De noche el UV marca 0,0 (el simulador sigue la hora real); para la demo, inyectar UV alto.
+
+**3. Cognito con MFA** ✅ (tarea 6)
+- **Funciona en el Learner Lab.** User pool con app client `induplac-dashboard` (SPA), **sin auto-registro** (solo el administrador crea cuentas).
+- MFA solo con **app autenticadora** (TOTP, Microsoft Authenticator); SMS no disponible en el Learner Lab (el aviso de `AccessDenied` de SMS en la consola no afecta).
+- Probado con el login administrado de Cognito: `jefe.prueba` (clave temporal → cambio obligatorio) y `admin.prueba` (clave temporal → cambio → **QR de MFA** → código de 6 dígitos). MFA quedó en **Require**.
+- **Pendiente:** conectar el dashboard a Cognito (hoy usa su login propio con clave temporal y MFA TOTP). No se hizo antes de la demo para no arriesgar el login.
+
+**4. RDS PostgreSQL** ✅
+- `induplac-db`: PostgreSQL 18, `db.t3.micro`, Single-AZ, 20 GB sin autoescalado, **cifrado** (KMS `aws/rds`), sin backups automáticos, base `induplac`.
+- Tablas creadas con `backend/scripts/crear_tablas_rds.py`: `locales` (2), `dispositivos` (4), `umbrales` (5, valores de `CONTEXTO.md` §8.2) y `permisos_usuario` (2; los `cognito_sub` son de ejemplo y se reemplazan al integrar Cognito).
+- Para crear las tablas desde el PC hubo que abrir temporalmente la regla a `0.0.0.0/0` (la IP de Abraham no funcionó, probablemente por CGNAT del proveedor). **Se cerró apenas terminó.**
+- **Security group final:** una sola regla de entrada, PostgreSQL desde el security group de la Lambda. La base solo es alcanzable desde el backend.
+
+**5. Lambda `induplac-config`** ✅ (`backend/lambda_config/`)
+- Lambda aparte, **dentro de la VPC**, que lee umbrales y catálogo desde RDS. `induplac-api` no se tocó.
+- Ruta `GET /config/{proxy+}` en API Gateway. `GET /config/umbrales` responde `{"fuente": "rds", ...}`.
+
+**6. Wokwi de Sebastián conectado** ✅ (tarea 3, `simulation/wokwi-local1/`)
+- Cadena probada: **Wokwi → EMQX → Edge**. Las lecturas de `esp32-local-01` llegan al Edge con energía, agua y UV.
+- Con el lab apagado (enlace OFFLINE), el Edge generó **alertas locales con datos de Wokwi**: *posible fuga* (caudal fuera de horario) y *energía sobre 55 kW*. Los intervalos y alertas quedaron en cola (`pendientes=7`) para subir al volver AWS.
+- Botones arreglados: el `delay(200)` del debounce bloqueaba `mqttClient.loop()`; ahora es por flanco con `millis()`.
+- Wokwi simuló lento por momentos (≈ 1 lectura cada 25 s en vez de 5 s; luego 83 lecturas por intervalo). No afecta: el `ts` viene de NTP.
+- El Edge ahora muestra el caudal de agua en el log de cada lectura (rama `feature/edge`).
+- **Decisión (Abraham):** los rangos de los potenciómetros se mantienen (0–250 kW, 0–50 m³/h); lo importante para la demo es que se generen las alertas, y se logra con las perillas bajas.
+
+### Siguen abiertos
+- [ ] Conectar el dashboard a Cognito y validar el token en la API.
+- [ ] Reemplazar los `cognito_sub` de ejemplo por los reales.
+- [ ] Que `induplac-api` lea los umbrales desde RDS (con valores por defecto si RDS está apagado).
+- [ ] Mergear a `main` las ramas `feature/edge`, `feature/backend-aws` y `feature/dashboard`.
+- [ ] Apagar RDS después de la demo del 21/10.
+
