@@ -47,5 +47,5 @@ Wokwi (ESP32) ──MQTTS 8883──► EMQX ──► Edge (SQLite, intervalos,
 - Wokwi puede simular más lento que el tiempo real con WiFi + TLS + OLED (se vio ~1 lectura cada 25 s). El Edge funciona igual.
 - **Plan B:** si Wokwi falla, detenerlo y correr `edge/simular_esp32.py` (nunca los dos a la vez: usan el mismo `device_id`).
 
-### Mejora sugerida (pendiente)
-Rangos más finos para la demo, en `leerSensores()`: energía `* 100.0` (0–100 kW) y agua `* 5.0` (0–5 m³/h). Siguen dentro de los rangos que valida el Edge.
+### Mejora opcional (no necesaria para la demo)
+Rangos más finos, en `leerSensores()`: energía `* 100.0` (0–100 kW) y agua `* 5.0` (0–5 m³/h). Siguen dentro de los rangos que valida el Edge.

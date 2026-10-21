@@ -347,9 +347,9 @@ Sesión de Abraham y Felipe en el Learner Lab de Felipe.
 - Botones arreglados: el `delay(200)` del debounce bloqueaba `mqttClient.loop()`; ahora es por flanco con `millis()`.
 - Wokwi simuló lento por momentos (≈ 1 lectura cada 25 s en vez de 5 s; luego 83 lecturas por intervalo). No afecta: el `ts` viene de NTP.
 - El Edge ahora muestra el caudal de agua en el log de cada lectura (rama `feature/edge`).
+- **Decisión (Abraham):** los rangos de los potenciómetros se mantienen (0–250 kW, 0–50 m³/h); lo importante para la demo es que se generen las alertas, y se logra con las perillas bajas.
 
 ### Siguen abiertos
-- [ ] Ajustar los rangos de los potenciómetros para la demo (energía 0–100 kW, agua 0–5 m³/h).
 - [ ] Conectar el dashboard a Cognito y validar el token en la API.
 - [ ] Reemplazar los `cognito_sub` de ejemplo por los reales.
 - [ ] Que `induplac-api` lea los umbrales desde RDS (con valores por defecto si RDS está apagado).
