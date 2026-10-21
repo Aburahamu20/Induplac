@@ -26,7 +26,8 @@
 2. **30 min antes:** Wokwi (Sebastián) + Edge (Abraham) corriendo para tener datos frescos. Plan B: `edge/simular_esp32.py`.
 3. Revisar: dashboard en S3, `/health` y `/config/umbrales`.
 4. Ensayar el showcase: corte de red → alerta → reconexión sin duplicados.
-5. Nota 2 pendiente: guion de la demo (18), PowerPoint (17), pipeline DevOps (12), informe (16) y la fortaleza de Lisandra.
+5. **Bárbara (con Claude):** revisar la lista de la nota de avance *2026-10-21 (madrugada)*: qué falta de la Nota 2 y qué actualizar en sus documentos.
+6. Nota 2 pendiente: guion de la demo (18), PowerPoint (17), pipeline DevOps (12), informe (16) y la fortaleza de Lisandra.
 
 La pauta completa de la Nota 2 y los borradores de roles, RACI y Gantt están en [`docs/NOTA-2.md`](NOTA-2.md).
 
