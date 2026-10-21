@@ -15,8 +15,8 @@
 
 | Rol Scrum | Quién | Qué hace |
 |---|---|---|
-| Product Owner | _Por definir (equipo)_ | Prioriza qué se hace primero según la pauta y las necesidades de la empresa. |
-| Scrum Master | _Por definir (equipo)_ | Cuida que el equipo avance, quita bloqueos y mantiene el tablero al día. |
+| Product Owner | **Abraham Castro** | Prioriza qué se hace primero según la pauta y las necesidades de la empresa. En el proyecto decidió qué entra al MVP y qué queda como diseño (RDS de uso puntual, VPN y VLANs solo diseño, Cognito para la demo). |
+| Scrum Master | **Bárbara Saavedra** | Cuida que el equipo avance, quita bloqueos y mantiene el tablero al día. En el proyecto llevó la planificación (Scrum, PMI, Gantt) y el seguimiento de las tareas. |
 | Equipo de desarrollo | Abraham, Sebastián, Lisandra, Felipe y Bárbara | Construyen y prueban cada parte del MVP. |
 
 ### Sprints (05/10 – 23/10/2026)
@@ -57,6 +57,6 @@ Scrum entrega el **prototipo funcionando** (hito: demo del 21/10). Ese prototipo
 
 ## 4. Falta que decida el equipo
 
-- [ ] Quién es **Product Owner** y quién **Scrum Master**.
+- [x] **Product Owner:** Abraham · **Scrum Master:** Bárbara (definido el 21/10/2026). Son personas distintas, como pide Scrum.
 - [ ] Si hubo reuniones fijas (en clases o por el grupo) para nombrarlas como revisión de sprint o reunión diaria.
 - [x] Agregar **RDS PostgreSQL** a la Gantt y a las tareas de Felipe y Abraham (hecho el 19/10/2026, PR #15).
