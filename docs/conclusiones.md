@@ -27,6 +27,7 @@ Una **plataforma IoT híbrida**: sensores que envían datos por MQTT a una Raspb
 | **Costo casi cero** | Servicios serverless que se pagan por uso; RDS se apaga cuando no se usa. |
 | **Seguridad y privacidad** | Login obligatorio, MFA para quien modifica, VLANs separadas y ningún dato personal de los operarios (Ley 19.628). |
 | **Crece fácilmente** | Agregar un local nuevo es replicar el mismo Edge. |
+| **Cambios sin romper lo que funciona** | En cada cambio, GitHub Actions prueba solo las reglas de alerta y compila el dashboard antes de aceptarlo. |
 
 ## 4. Limitaciones
 
@@ -35,12 +36,12 @@ Una **plataforma IoT híbrida**: sensores que envían datos por MQTT a una Raspb
 - **Hora sin internet (RTC):** también queda como diseño; no aplica en Wokwi.
 - **Dependencia del Learner Lab:** presupuesto de USD 100 y servicios que hay que encender para las pruebas.
 - **Las alertas solo se ven en el dashboard:** todavía no llegan por correo ni por celular.
-- **Cognito probado pero no conectado:** el login con Cognito y MFA funciona en AWS, pero el dashboard aún usa su propio login (con las mismas reglas de clave temporal y MFA).
+- **Login con Cognito por terminar de probar:** Cognito con MFA funciona en AWS y el dashboard ya tiene el login con Cognito (PR #20), pero falta probarlo de punta a punta; mientras, la demo puede usar el login propio del dashboard (mismas reglas de clave temporal y MFA).
 
 ## 5. Siguientes pasos
 
 1. **Piloto real** en el Local 1 con sensores físicos (corriente y caudalímetros) y una Raspberry Pi.
-2. **Conectar el dashboard a Cognito** y que la Lambda lea los umbrales desde RDS.
+2. **Terminar de probar el login con Cognito** y que la Lambda de ingesta lea los umbrales desde RDS.
 3. **Activar la VPN** Site-to-Site en una cuenta AWS de producción.
 4. **Notificaciones** por correo o Telegram (Amazon SNS).
 5. **Históricos comparables** (por ejemplo, este invierno contra el anterior).

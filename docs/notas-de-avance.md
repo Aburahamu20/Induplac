@@ -408,3 +408,20 @@ Abraham pidió que el 21/10 **Bárbara**, en su conversación con Claude, revise
 - [ ] **Informe** (tarea 16): confirmar el formato con el profe.
 - [ ] **Fortaleza de Lisandra.**
 
+---
+
+## 2026-10-21 (mañana) — Nota 2 al día con lo construido el 20/10 (Bárbara, con Claude)
+
+Se revisó la lista de la madrugada y se actualizaron los documentos de Bárbara (PR #25):
+- **Carta Gantt (Excel y texto):** columna *Estado* (planificado vs. cumplido), tarea **3.7 Pipeline DevOps** (Abraham, listo), hito **5.2 MVP funcionando de punta a punta (20/10)**, responsables **Felipe y Abraham** en backend, RDS y Cognito, y Wokwi con Local 1 listo y Local 2 pendiente.
+- **RACI:** pipeline DevOps en la actividad 10 y Lambda `induplac-config` en la 5 (las 10 actividades siguen con un R y un solo A).
+- **Tareas por integrante:** pipeline y login con Cognito (PR #20) en las de Abraham; Wokwi separado en Local 1 y Local 2.
+- **`cloud-tecnologias.md`:** DynamoDB guarda intervalos y alertas, Lambda `induplac-config`, GitHub Actions y Nginx como diseño.
+- **`scrum-pmi.md`:** chequeos automáticos (CI) como herramienta de seguimiento.
+- **`conclusiones.md`:** beneficio de las pruebas automáticas; limitación de Cognito ajustada al PR #20.
+
+### Sigue pendiente
+- [ ] Fortaleza, rol y tareas de **Lisandra** (Bárbara avisa cuando hable con ella).
+- [ ] Si hubo **reuniones fijas** (punto de Scrum).
+- [ ] **Guion de la demo** (18), **PowerPoint** (17) e **informe** (16, confirmar formato).
+

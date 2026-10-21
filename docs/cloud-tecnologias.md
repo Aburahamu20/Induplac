@@ -2,6 +2,7 @@
 
 > **Autora:** Bárbara Saavedra (`barbaraantoniaa`). Tarea 11 de [`EN-CURSO.md`](EN-CURSO.md) · puntos 6 y 7 de la pauta ([`NOTA-2.md`](NOTA-2.md)).
 > Basado en las decisiones de [`decisiones-tecnicas.md`](decisiones-tecnicas.md) (ADR-01 a ADR-10).
+> **Actualizado el 21/10/2026** con lo construido el 20/10: alertas en DynamoDB, Lambda `induplac-config`, pipeline con GitHub Actions y Nginx como diseño.
 
 ## Glosario rápido
 
@@ -26,7 +27,7 @@
 
 | Tipo | Servicios | Por qué |
 |---|---|---|
-| **Serverless (FaaS)** | AWS Lambda | El código corre solo cuando llega un dato; no hay servidor encendido todo el día. |
+| **Serverless (FaaS)** | AWS Lambda (`induplac-api` e `induplac-config`) | El código corre solo cuando llega un dato o una consulta; no hay servidor encendido todo el día. |
 | **Serverless (datos y API)** | DynamoDB, API Gateway, S3, broker EMQX Serverless | Se pagan por uso y cuestan casi $0 con el bajo tráfico del proyecto (≈ 96 intervalos/día por local). |
 | **PaaS** | RDS PostgreSQL, Cognito | AWS administra la base de datos y el login; el equipo solo los configura. |
 
@@ -42,14 +43,15 @@
 | **Comunicación** | **MQTT** con broker **EMQX Serverless** (TLS) | Protocolo liviano pensado para IoT; cifrado y un usuario por dispositivo. |
 | **Edge** | **Raspberry Pi** + **Python** + **SQLite** | Guarda los datos localmente y calcula intervalos de 15 min, alertas y modo offline. |
 | **Edge** | Módulo **RTC DS3231** + **chrony** | Mantiene la hora correcta aunque se corten internet y la luz (las alertas dependen de la hora). |
-| **Edge** | **Nginx** | Sirve el dashboard dentro de la planta, con HTTPS. |
+| **Edge** | **Nginx** (solo diseño) | Serviría el dashboard dentro de la planta, con HTTPS. En la demo el dashboard corre en el PC y en S3. |
 | **Red** | **VLANs** (IoT y operarios) | Separa los sensores del resto de la red: si un sensor se ve comprometido, no alcanza a otros equipos. |
 | **Red** | **VPN Site-to-Site** (solo diseño) | Conexión cifrada planta–nube sin pasar por internet público. Queda documentada; no se demuestra por costo. |
 | **Nube** | **API Gateway** | Puerta de entrada única y controlada para los datos que llegan desde el Edge. |
-| **Nube** | **AWS Lambda** (Python) | Recibe los datos y evalúa las alertas con las mismas reglas que el Edge. |
-| **Nube** | **DynamoDB** | Guarda los intervalos de consumo; siempre encendida y casi gratis. |
+| **Nube** | **AWS Lambda** (Python) | `induplac-api` recibe los datos del Edge y evalúa las alertas con las mismas reglas; `induplac-config` entrega la configuración guardada en RDS (por ejemplo, `/config/umbrales`). |
+| **Nube** | **DynamoDB** | Guarda los intervalos de consumo **y las alertas**; siempre encendida y casi gratis. |
 | **Nube** | **RDS PostgreSQL** | Guarda la configuración: permisos por usuario, umbrales y catálogo de locales y dispositivos (datos con relaciones). Se apaga cuando no se usa; las alertas van en DynamoDB y las cuentas en Cognito. |
 | **Nube** | **S3** | Publica el dashboard para gerencia. |
-| **Seguridad** | **Cognito con MFA** | Login con clave y código del celular para quien puede modificar algo. |
+| **Seguridad** | **Cognito con MFA** | Cuentas con clave temporal y código del celular (TOTP) para quien puede modificar algo. Probado en el Learner Lab; el login del dashboard con Cognito está en el PR #20. |
 | **Visualización** | **React** + Vite + TypeScript + Tailwind | Un mismo dashboard para la planta y la nube. |
 | **Trabajo en equipo** | **GitHub** (ramas, Pull Requests, tablero) | Ordena quién hace qué y deja registro de cada cambio y su revisión. |
+| **DevOps** | **GitHub Actions** (CI/CD) | En cada Pull Request compila el dashboard y corre las pruebas del Edge (reglas de alerta); el despliegue a AWS se lanza a mano por las restricciones del Learner Lab. Ver [`devops.md`](devops.md). |
