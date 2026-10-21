@@ -67,3 +67,11 @@ sync: Enlace: 🟡 SINCRONIZANDO -> 🟢 ONLINE
 ## Base de datos (`edge.db`)
 
 Se crea sola al arrancar. Tablas de `docs/modo-offline.md` §3.2: `lecturas_crudas` (30 días), `intervalos_15min` y `alertas_local` (con `is_synced`) y `contadores` (horas hombre). Para revisarla se puede usar *DB Browser for SQLite*.
+
+## Días y HH sin incidentes
+
+Siguen el **calendario real** (`reglas.py`):
+
+- **Días sin incidentes** = hoy (hora de Chile) − `FECHA_INCIDENTE_LOCALn`. Avanzan solos cada día.
+- **HH sin incidentes** = HH **estimadas** desde el incidente hasta que se instaló el Edge (días hábiles × `PERSONAL_TURNO_LOCALn` × `HORAS_TURNO`, se calcula una sola vez y queda en SQLite) + HH **medidas** por el Edge (`personal_activo` × tiempo, solo mientras recibe lecturas).
+- **Registrar un incidente:** cambiar `FECHA_INCIDENTE_LOCALn` en `.env` y reiniciar el Edge. Días y HH vuelven a cero.

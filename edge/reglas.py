@@ -4,7 +4,7 @@ Las reglas son las mismas que usa la Lambda (CONTEXTO §8.2, ADR-06): así la pl
 tiene alertas también sin internet, y al sincronizar no se duplican.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 import config
 import db
@@ -62,6 +62,48 @@ def hora_lectura(datos: dict, recibido: int) -> int:
     return recibido
 
 
+# ---------- Seguridad: días y HH sin incidentes (calendario real) ----------
+
+def fecha_chile(ts: int) -> date:
+    return datetime.fromtimestamp(ts, timezone.utc).astimezone(TZ).date()
+
+
+def _fecha_incidente(local_id: str) -> date:
+    return date.fromisoformat(config.FECHA_INCIDENTE[local_id])
+
+
+def dias_sin_incidentes(local_id: str, ts: int) -> int:
+    """Días desde el último incidente: avanza solo con el calendario."""
+    return max(0, (fecha_chile(ts) - _fecha_incidente(local_id)).days)
+
+
+def dias_habiles(desde: date, hasta: date) -> int:
+    """Días de lunes a viernes entre el día siguiente a `desde` y el anterior a `hasta`."""
+    n, d = 0, desde + timedelta(days=1)
+    while d < hasta:
+        if d.weekday() < 5:
+            n += 1
+        d += timedelta(days=1)
+    return n
+
+
+def hh_sin_incidentes(local_id: str, ts: int) -> float:
+    """HH estimadas antes de instalar el Edge + HH medidas por el Edge con los sensores.
+
+    La parte estimada se calcula una sola vez (al primer uso) y queda guardada. Si cambia la
+    fecha del incidente (se registró uno nuevo), se recalcula y las HH medidas vuelven a cero.
+    """
+    fecha = config.FECHA_INCIDENTE[local_id]
+    guardado = db.hh_historicas(local_id)
+    if not guardado or guardado["fecha_inicio"] != fecha:
+        if guardado:  # incidente nuevo
+            db.reiniciar_hh_medidas(local_id)
+        estimado = dias_habiles(_fecha_incidente(local_id), fecha_chile(ts)) * config.PERSONAL_TURNO[local_id] * config.HORAS_TURNO
+        db.guardar_hh_historicas(local_id, fecha, estimado, ts)
+        guardado = {"hh": estimado}
+    return guardado["hh"] + db.hh_actual(local_id)
+
+
 # ---------- Intervalo de 15 minutos ----------
 
 def _prom(xs):
@@ -90,8 +132,8 @@ def calcular_intervalo(local_id: str, inicio: int) -> dict | None:
         "energia_kw_max": max((x for x in kw if isinstance(x, (int, float))), default=None),
         "agua_m3h": caudal,
         "agua_m3": agua_m3,
-        "hh_sin_incidentes": round(db.hh_actual(local_id)),
-        "dias_sin_incidentes": config.DIAS_SIN_INCIDENTES.get(local_id, 0),
+        "hh_sin_incidentes": round(hh_sin_incidentes(local_id, inicio + config.INTERVALO_SEG)),
+        "dias_sin_incidentes": dias_sin_incidentes(local_id, inicio + config.INTERVALO_SEG),
         "lecturas": len(lecturas),
     }
     if local_id == "local1":

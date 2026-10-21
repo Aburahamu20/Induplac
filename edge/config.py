@@ -58,7 +58,16 @@ INTERVALO_SEG = int(_num("INTERVALO_SEG", 15 * 60))  # solo se cambia para prueb
 
 # Bases para contadores que el ESP32 no conoce (valores ficticios de demo)
 PRODUCCION_ANUAL_BASE = int(_num("PRODUCCION_ANUAL_BASE", 3100))
-DIAS_SIN_INCIDENTES = {"local1": int(_num("DIAS_LOCAL1", 53)), "local2": int(_num("DIAS_LOCAL2", 120))}
+# Seguridad (HH y días sin incidentes) siguen el calendario real:
+#   días = hoy - fecha del último incidente con tiempo perdido (registrar uno = cambiar la fecha)
+#   HH   = estimado desde el incidente hasta que se instaló el Edge (días hábiles x dotación x turno)
+#          + lo que el Edge mide con los sensores (personal_activo x tiempo)
+FECHA_INCIDENTE = {
+    "local1": os.environ.get("FECHA_INCIDENTE_LOCAL1", "2026-08-29"),
+    "local2": os.environ.get("FECHA_INCIDENTE_LOCAL2", "2026-06-23"),
+}
+PERSONAL_TURNO = {"local1": _num("PERSONAL_TURNO_LOCAL1", 18), "local2": _num("PERSONAL_TURNO_LOCAL2", 20)}
+HORAS_TURNO = _num("HORAS_TURNO", 9)
 
 # ---- Simulador del ESP32 (solo pruebas) ----
 ESP32_CLAVES = {
