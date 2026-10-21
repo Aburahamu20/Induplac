@@ -106,5 +106,58 @@ class Alertas(unittest.TestCase):
         self.assertEqual(a["id"], f"local1:uv_index:{DIA}")
 
 
+class Seguridad(unittest.TestCase):
+    """Días y HH sin incidentes siguen el calendario real."""
+
+    def setUp(self):
+        import config
+        self.config = config
+        self.fecha_original = dict(config.FECHA_INCIDENTE)
+        config.FECHA_INCIDENTE["local1"] = "2026-08-29"
+        db.ejecutar("DELETE FROM hh_historicas")
+        db.ejecutar("DELETE FROM contadores")
+
+    def tearDown(self):
+        self.config.FECHA_INCIDENTE.clear()
+        self.config.FECHA_INCIDENTE.update(self.fecha_original)
+
+    def test_dias_avanzan_con_el_calendario(self):
+        self.assertEqual(reglas.dias_sin_incidentes("local1", utc(2026, 10, 21, 14)), 53)
+        self.assertEqual(reglas.dias_sin_incidentes("local1", utc(2026, 10, 22, 14)), 54)
+
+    def test_dia_segun_la_hora_de_chile(self):
+        # 22/10 a las 01:00 UTC todavía es 21/10 en Chile
+        self.assertEqual(reglas.dias_sin_incidentes("local1", utc(2026, 10, 22, 1)), 53)
+
+    def test_dias_habiles_sin_fines_de_semana(self):
+        from datetime import date
+        # entre el viernes 16/10 y el viernes 23/10: lunes a jueves
+        self.assertEqual(reglas.dias_habiles(date(2026, 10, 16), date(2026, 10, 23)), 4)
+
+    def test_hh_estimadas_mas_medidas(self):
+        from datetime import date
+        ts = utc(2026, 10, 21, 14)
+        base = reglas.dias_habiles(date(2026, 8, 29), date(2026, 10, 21)) * 18 * 9
+        self.assertEqual(reglas.hh_sin_incidentes("local1", ts), base)
+        db.sumar_hh("local1", ts, 18)
+        db.sumar_hh("local1", ts + 60, 18)  # 18 personas durante 1 minuto = 0,3 HH
+        self.assertAlmostEqual(reglas.hh_sin_incidentes("local1", ts + 60), base + 0.3)
+
+    def test_la_estimacion_se_guarda_una_vez(self):
+        reglas.hh_sin_incidentes("local1", utc(2026, 10, 21, 14))
+        primera = db.hh_historicas("local1")["hh"]
+        reglas.hh_sin_incidentes("local1", utc(2026, 10, 28, 14))  # una semana después
+        self.assertEqual(db.hh_historicas("local1")["hh"], primera)
+
+    def test_nuevo_incidente_reinicia_todo(self):
+        ts = utc(2026, 10, 21, 14)
+        reglas.hh_sin_incidentes("local1", ts)
+        db.sumar_hh("local1", ts, 18)
+        db.sumar_hh("local1", ts + 60, 18)
+        self.config.FECHA_INCIDENTE["local1"] = "2026-10-21"  # incidente hoy
+        self.assertEqual(reglas.dias_sin_incidentes("local1", ts), 0)
+        self.assertEqual(reglas.hh_sin_incidentes("local1", ts), 0)
+
+
 if __name__ == "__main__":
     unittest.main()

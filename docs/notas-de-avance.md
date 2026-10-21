@@ -457,3 +457,15 @@ Abraham, con la cuenta del Learner Lab de Felipe.
 - No cambia la API ni la Lambda: se usa el `origen` y el `ultimo_dato` que ya entrega `GET /api/estado`.
 - Requiere volver a publicar el dashboard en S3 (build + subir `index.html` y `assets`).
 
+---
+
+## 2026-10-21 (mediodía) — Días y HH sin incidentes con el calendario real
+
+- **Antes:** los días sin incidentes eran un número fijo (53) y las HH partían en 0 al instalar el Edge, así que el dashboard mostraba "0 hrs" al lado de "53 días".
+- **Ahora (Edge):**
+  - **Días** = hoy − fecha del último incidente (`FECHA_INCIDENTE_LOCAL1=2026-08-29`, `..._LOCAL2=2026-06-23`). Avanzan solos.
+  - **HH** = estimado antes de instalar el Edge (días hábiles × dotación × turno de 9 h; Planta 18 personas, Oficinas 20) + lo medido con los sensores. Hoy: Planta ≈ 5.994 HH, Oficinas ≈ 15.300 HH, y suben en vivo con el `personal_activo` del ESP32.
+  - Si el Edge está apagado, las HH de ese rato no se suman (no se inventan horas no medidas); los días sí avanzan.
+  - Nuevo incidente: cambiar la fecha en `.env` y reiniciar el Edge → días y HH a cero.
+- 6 pruebas nuevas en `edge/tests/` (21 en total).
+

@@ -58,6 +58,14 @@ _con.executescript(
         hh        REAL NOT NULL DEFAULT 0,
         ultimo_ts INTEGER
     );
+
+    -- HH estimadas antes de que el Edge midiera (se calculan una vez por incidente)
+    CREATE TABLE IF NOT EXISTS hh_historicas (
+        local_id      TEXT PRIMARY KEY,
+        fecha_inicio  TEXT NOT NULL,           -- fecha del último incidente (YYYY-MM-DD)
+        hh            REAL NOT NULL,
+        calculado_ts  INTEGER NOT NULL
+    );
     """
 )
 _con.commit()
@@ -154,6 +162,24 @@ def sumar_hh(local_id: str, ts: int, personas: float) -> float:
         )
         _con.commit()
         return hh
+
+
+def hh_historicas(local_id: str) -> dict | None:
+    filas = consultar("SELECT fecha_inicio, hh FROM hh_historicas WHERE local_id=?", (local_id,))
+    return dict(filas[0]) if filas else None
+
+
+def guardar_hh_historicas(local_id: str, fecha_inicio: str, hh: float, ts: int) -> None:
+    ejecutar(
+        "INSERT INTO hh_historicas (local_id, fecha_inicio, hh, calculado_ts) VALUES (?,?,?,?) "
+        "ON CONFLICT(local_id) DO UPDATE SET fecha_inicio=excluded.fecha_inicio, hh=excluded.hh, calculado_ts=excluded.calculado_ts",
+        (local_id, fecha_inicio, hh, ts),
+    )
+
+
+def reiniciar_hh_medidas(local_id: str) -> None:
+    """Nuevo incidente: las HH medidas vuelven a cero."""
+    ejecutar("UPDATE contadores SET hh=0 WHERE local_id=?", (local_id,))
 
 
 def hh_actual(local_id: str) -> float:
