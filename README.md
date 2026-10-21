@@ -6,7 +6,8 @@
 
 <br>
 
-![Estado](https://img.shields.io/badge/Estado-En%20desarrollo-yellow)
+![Estado](https://img.shields.io/badge/Estado-MVP%20funcionando-brightgreen)
+[![CI](https://github.com/Aburahamu20/Induplac/actions/workflows/ci.yml/badge.svg)](https://github.com/Aburahamu20/Induplac/actions/workflows/ci.yml)
 ![Fase](https://img.shields.io/badge/Fase-MVP-blue)
 ![Asignatura](https://img.shields.io/badge/Asignatura-Problemáticas%20Globales%20y%20Prototipado-purple)
 ![IoT](https://img.shields.io/badge/IoT-ESP32-green)
@@ -43,11 +44,53 @@
 
 ### 👥 Equipo
 
-- Abraham Castro Romero
-- Sebastián Fuentes Cortés
-- Lisandra González Hernández
-- Felipe Murúa Lobos
-- Bárbara Saavedra Fernández
+| Integrante | Rol | Rol Scrum |
+|---|---|---|
+| Abraham Castro Romero | Jefe de proyecto, integración y desarrollo (broker, Edge y dashboard) | **Product Owner** |
+| Sebastián Fuentes Cortés | IoT y simulación (ESP32 en Wokwi) | Equipo de desarrollo |
+| Lisandra González Hernández | Pruebas del Edge y modo offline | Equipo de desarrollo |
+| Felipe Murúa Lobos | Cloud, backend y ciberseguridad (AWS) | Equipo de desarrollo |
+| Bárbara Saavedra Fernández | Planificación y frontend | **Scrum Master** |
+
+Responsabilidades, fortalezas, matriz RACI y Carta Gantt en [`docs/roles-raci-gantt.md`](docs/roles-raci-gantt.md).
+
+---
+
+## 🚀 Probar el prototipo
+
+```text
+Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──HTTPS──► AWS ──► Dashboard (S3)
+```
+
+| Parte | Cómo | Guía |
+|---|---|---|
+| **ESP32** | Abrir el proyecto en Wokwi con los archivos de `simulation/wokwi-local1/` y darle *Play* | [README](simulation/wokwi-local1/README.md) |
+| **Edge** | `cd edge` → copiar `.env.example` a `.env` → `py edge_gateway.py` (sin Wokwi: `py simular_esp32.py`) | [README](edge/README.md) |
+| **Backend AWS** | API Gateway + Lambdas + DynamoDB + RDS en el Learner Lab. Prueba: `curl <API>/health` y `curl <API>/config/umbrales` | [README](backend/README.md) |
+| **Dashboard** | `cd dashboard` → `npm install` → `npm run dev` (o el build publicado en S3) | `dashboard/.env.example` |
+| **Pruebas automáticas** | `cd edge` → `py -m unittest discover -s tests -v` (también corren solas en cada PR) | [DevOps](docs/devops.md) |
+
+> Las claves (broker, ingesta, RDS) **no están en el repositorio**: van en archivos `.env` locales o en variables de AWS y GitHub.
+
+## 📚 Documentación
+
+| Tema | Documento |
+|---|---|
+| Decisiones vigentes (fuente de verdad) | [`docs/CONTEXTO.md`](docs/CONTEXTO.md) |
+| El proyecto explicado en simple | [`docs/GUIA-EQUIPO.md`](docs/GUIA-EQUIPO.md) |
+| Decisiones técnicas (ADR-01 a ADR-10) | [`docs/decisiones-tecnicas.md`](docs/decisiones-tecnicas.md) |
+| Contrato dashboard ↔ API | [`docs/api-dashboard.md`](docs/api-dashboard.md) |
+| Broker MQTT | [`docs/broker-mqtt.md`](docs/broker-mqtt.md) |
+| Modo offline y sincronización | [`docs/modo-offline.md`](docs/modo-offline.md) |
+| Ciberseguridad (5 capas) | [`docs/ciberseguridad.md`](docs/ciberseguridad.md) |
+| Redes, VPC y costos | [`infrastructure/README.md`](infrastructure/README.md) |
+| **Nota 2:** roles, RACI y Gantt | [`docs/roles-raci-gantt.md`](docs/roles-raci-gantt.md) · [Excel](docs/nota-2/Induplac_Roles_Equipo.xlsx) |
+| **Nota 2:** Scrum y PMI | [`docs/scrum-pmi.md`](docs/scrum-pmi.md) |
+| **Nota 2:** modelo Cloud y tecnologías | [`docs/cloud-tecnologias.md`](docs/cloud-tecnologias.md) |
+| **Nota 2:** pipeline DevOps | [`docs/devops.md`](docs/devops.md) |
+| **Nota 2:** conclusiones y defensa | [`docs/conclusiones.md`](docs/conclusiones.md) |
+| Pauta de la Nota 2 y su estado | [`docs/NOTA-2.md`](docs/NOTA-2.md) |
+| Tablero de tareas · bitácora | [`docs/EN-CURSO.md`](docs/EN-CURSO.md) · [`docs/notas-de-avance.md`](docs/notas-de-avance.md) |
 
 ---
 
@@ -205,7 +248,7 @@ El Edge conserva una copia local del dato antes de enviarlo a la nube.
 
 ---
 
-## 🟠 Modo Offline
+## 🔴 Modo Offline
 
 Si se pierde Internet:
 
@@ -225,7 +268,7 @@ Los datos se mantienen localmente hasta que pueda volver a establecerse la conex
 
 ---
 
-## 🔵 Sincronización
+## 🟡 Sincronización
 
 Cuando vuelve Internet:
 
@@ -234,7 +277,7 @@ Internet vuelve
       ↓
 Edge detecta conexión
       ↓
-SYNCING
+SINCRONIZANDO
       ↓
 Obtiene registros pendientes
       ↓
@@ -251,10 +294,9 @@ ONLINE
 
 | Estado | Significado |
 |---|---|
-| 🟢 **ONLINE** | Sistema conectado y sincronizado |
-| 🟠 **OFFLINE** | Sin conexión a Internet |
-| 🔵 **SYNCING** | Enviando información pendiente |
-| 🔴 **ERROR** | Existe un problema que requiere revisión |
+| 🟢 **ONLINE** | Sistema conectado y sincronizado (pendientes = 0) |
+| 🔴 **OFFLINE** | Sin conexión con AWS: el Edge sigue guardando y alertando en local |
+| 🟡 **SINCRONIZANDO** | Subiendo los intervalos y alertas pendientes, sin duplicar |
 
 ---
 
@@ -739,129 +781,34 @@ Induplac/
 
 # 🏃 19. Plan de desarrollo
 
-## Sprint 1 — Captura de datos
+Scrum con tres sprints de una semana (detalle en [`docs/scrum-pmi.md`](docs/scrum-pmi.md)) y, para la implementación real en Induplac, las 5 fases PMI de la Carta Gantt ([`docs/roles-raci-gantt.md`](docs/roles-raci-gantt.md)).
 
-```text
-ESP32
- ↓
-MQTT
- ↓
-Edge
- ↓
-Datos ficticios
-```
+| Sprint | Objetivo | Resultado |
+|---|---|---|
+| **Sprint 1** (05–09/10) | Diseño y documentación | Arquitectura híbrida, decisiones (ADR) y estructura del repositorio ✅ |
+| **Sprint 2** (12–16/10) | Captura y visualización | Broker EMQX, backend en AWS y dashboard con datos simulados ✅ |
+| **Sprint 3** (19–23/10) | Integración híbrida y demo | Wokwi, Edge con modo offline, RDS, Cognito y **demo del 21/10** ✅ |
 
-Objetivos:
-
-- Preparar ESP32.
-- Definir formato de datos.
-- Implementar comunicación.
-- Generar datos ficticios.
-- Preparar almacenamiento local.
-
----
-
-## Sprint 2 — Visualización
-
-```text
-Datos
- ↓
-Backend
- ↓
-Dashboard
-```
-
-Objetivos:
-
-- Dashboard Local 1.
-- Dashboard Local 2.
-- Dashboard General.
-- Tarjetas de indicadores.
-- Alertas.
-- Gráficos.
-- Comparaciones históricas.
-
----
-
-## Sprint 3 — Integración híbrida
-
-```text
-ONLINE
-  ↓
-AWS
-
-OFFLINE
-  ↓
-SQLite
-
-RECUPERACIÓN
-  ↓
-SYNC
-```
-
-Objetivos:
-
-- Implementar modo Offline.
-- Implementar sincronización.
-- Validar recuperación de conexión.
-- Integrar dashboards.
-- Ejecutar pruebas.
-- Preparar demostración final.
+**Cómo se trabaja:** cada tarea se reserva en [`docs/EN-CURSO.md`](docs/EN-CURSO.md), se hace en su rama y entra a `main` por Pull Request con la plantilla, revisión y CI en verde ([`docs/devops.md`](docs/devops.md)).
 
 ---
 
 # 🧪 20. Pruebas de demostración
 
-### Prueba 1 — Datos normales
+Se hacen en vivo con las perillas y botones del ESP32 en Wokwi (`simulation/wokwi-local1/`) y el Edge corriendo:
 
-```text
-ESP32 → Edge → AWS → Dashboard
+| # | Prueba | Cómo se provoca | Resultado esperado |
+|---|---|---|---|
+| 1 | **Datos normales** | Perillas bajas (energía ~15 %, agua ~2 %, UV bajo) | 🟢 ONLINE, valores en verde en el dashboard |
+| 2 | **Alerta eléctrica** | Subir la perilla de energía (> 55 kW, o +20 % sobre el promedio de 4 semanas) | 🚨 Alerta de energía |
+| 3 | **UV elevado** | Subir la perilla de UV (≥ 8) | 🚨 Alerta UV (riesgo para personal en exteriores) |
+| 4 | **Posible fuga** | Caudal > 0,3 m³/h entre 22:00 y 06:00 o en fin de semana | 🚨 Alerta de fuga |
+| 5 | **Pérdida de internet** | Cortar el enlace Edge → AWS | 🔴 OFFLINE: el Edge sigue guardando en SQLite y genera las alertas en local |
+| 6 | **Recuperación** | Volver a conectar | 🟡 SINCRONIZANDO → 🟢 ONLINE, sin perder ni duplicar datos ni alertas |
+| 7 | **Producción y HH** | Botón azul (+1 tablero) y botón verde (inicio/fin de turno) | Contadores al día, sin datos personales (Ley 19.628) |
+| 8 | **Login seguro** | Usuario nuevo con clave temporal | Cambio obligatorio de clave y MFA con Microsoft Authenticator |
 
-Resultado esperado:
-🟢 Sistema funcionando normalmente
-```
-
-### Prueba 2 — Alerta eléctrica
-
-```text
-Aumentar consumo
-      ↓
-Superar umbral
-      ↓
-⚠ Alerta
-```
-
-### Prueba 3 — UV elevado
-
-```text
-UV ≥ 8
- ↓
-⚠ Riesgo
-```
-
-### Prueba 4 — Pérdida de Internet
-
-```text
-Internet ❌
- ↓
-Edge continúa funcionando
- ↓
-SQLite almacena datos
- ↓
-Dashboard continúa disponible
-```
-
-### Prueba 5 — Recuperación
-
-```text
-Internet ✓
- ↓
-SYNCING
- ↓
-Datos pendientes enviados
- ↓
-ONLINE
-```
+Las reglas de las pruebas 2, 3 y 4 también se prueban solas en cada Pull Request (`edge/tests/`).
 
 ---
 
