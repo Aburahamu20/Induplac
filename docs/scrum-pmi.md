@@ -1,6 +1,6 @@
-# 🗓️ Planificación: Scrum del MVP + PMI de la implementación — Nota 2
+# 🗓️ Planificación: Scrum del MVP + PMI de la implementación
 
-> **Autora:** Bárbara Saavedra (`barbaraantoniaa`). Tarea 13 de [`EN-CURSO.md`](EN-CURSO.md) · punto 9 de la pauta ([`NOTA-2.md`](NOTA-2.md)).
+> **Autora:** Bárbara Saavedra (`barbaraantoniaa`). Tarea 13 de [`EN-CURSO.md`](EN-CURSO.md) · punto 9 de la pauta ([`pauta-entrega.md`](pauta-entrega.md)).
 > Se complementa con la Carta Gantt de [`roles-raci-gantt.md`](roles-raci-gantt.md) §3: **S1–S3 = Scrum** y **S4–S12 = PMI**.
 
 **Idea central:** Scrum explica **cómo construimos el prototipo (MVP)**; PMI explica **cómo se implementaría de verdad en Induplac**.

@@ -1,9 +1,9 @@
-# 🎯 Nota 2 — Pauta y borradores
+# 🎯 Pauta y borradores
 
-> Resumen de lo que pide el profesor Marco Antonio Perelli para la Nota 2, y borradores de roles, RACI y Gantt para que el equipo los ajuste.
+> Resumen de lo que pide el profesor Marco Antonio Perelli para esta entrega, y borradores de roles, RACI y Gantt para que el equipo los ajuste.
 > **Las tareas para repartir están en [`docs/EN-CURSO.md`](EN-CURSO.md)** (tareas 9 a 18).
 >
-> ⚠️ Los roles, la RACI y la Gantt de este documento son **borradores**. La propuesta con nombres de Bárbara está en [`roles-raci-gantt.md`](roles-raci-gantt.md) (Excel en `docs/nota-2/`); falta que el equipo la valide.
+> ⚠️ Los roles, la RACI y la Gantt de este documento son **borradores**. La propuesta con nombres de Bárbara está en [`roles-raci-gantt.md`](roles-raci-gantt.md) (Excel en `docs/planificacion/`); falta que el equipo la valide.
 
 ---
 
@@ -117,6 +117,6 @@ Implementación **hipotética** desde el prototipo actual hasta la puesta en mar
 ---
 
 ## 6. Pendiente de confirmar
-- [ ] Fecha de entrega o presentación de la Nota 2.
+- [ ] Fecha de entrega o presentación.
 - [ ] Validar la propuesta de roles de Bárbara y agregar la fortaleza de cada uno.
 - [ ] Formato del informe (¿Word?) y si existe el de la Nota 1 para actualizarlo.

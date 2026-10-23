@@ -1,6 +1,6 @@
-# 🎯 Conclusiones y defensa — Nota 2
+# 🎯 Conclusiones y defensa
 
-> **Autora:** Bárbara Saavedra (`barbaraantoniaa`). Tarea 15 de [`EN-CURSO.md`](EN-CURSO.md) · punto 12 de la pauta ([`NOTA-2.md`](NOTA-2.md)).
+> **Autora:** Bárbara Saavedra (`barbaraantoniaa`). Tarea 15 de [`EN-CURSO.md`](EN-CURSO.md) · punto 12 de la pauta ([`pauta-entrega.md`](pauta-entrega.md)).
 > Basado en [`CONTEXTO.md`](CONTEXTO.md) y [`decisiones-tecnicas.md`](decisiones-tecnicas.md).
 
 ---

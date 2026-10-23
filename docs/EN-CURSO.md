@@ -27,9 +27,9 @@
 3. Revisar: dashboard en S3, `/health` y `/config/umbrales`.
 4. Ensayar el showcase: corte de red → alerta → reconexión sin duplicados.
 5. ~~**Bárbara (con Claude):** revisar la lista de la nota de avance *2026-10-21 (madrugada)*~~ → hecho en el PR #25 (Gantt, RACI, tareas, Cloud, Scrum y conclusiones al día). Lo de Lisandra sigue pendiente.
-6. Nota 2 pendiente: guion de la demo (18), PowerPoint (17), pipeline DevOps (12), informe (16) y la fortaleza de Lisandra.
+6. Pendiente: guion de la demo (18), PowerPoint (17), pipeline DevOps (12), informe (16) y la fortaleza de Lisandra.
 
-La pauta completa de la Nota 2 y los borradores de roles, RACI y Gantt están en [`docs/NOTA-2.md`](NOTA-2.md).
+La pauta completa y los borradores de roles, RACI y Gantt están en [`docs/pauta-entrega.md`](pauta-entrega.md).
 
 ---
 
@@ -46,9 +46,9 @@ La pauta completa de la Nota 2 y los borradores de roles, RACI y Gantt están en
 
 ---
 
-## Nota 2 — Entregables
+## Entregables
 
-Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es para hoy.
+Pauta del profesor: ver [`docs/pauta-entrega.md`](pauta-entrega.md). Lo marcado con 🔥 es para hoy.
 
 | # | Tarea | Pauta | Estado | Quién | Desde | Rama / PR | Notas |
 |---|---|---|---|---|---|---|---|
@@ -75,7 +75,7 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 | Tablero EN-CURSO, AGENTS.md y reglas de Pull Request | Abraham (con Claude) | 2026-10-14 | PR #4 |
 | Registrar EMQX Serverless como broker | Abraham (con Claude) | 2026-10-14 | PR #5 |
 | Base del dashboard (Vite + React + TS + Tailwind) | Abraham (con Claude) | 2026-10-14 | PR #6 |
-| Pauta de la Nota 2 y borradores de roles, RACI, PMI y Gantt | Abraham (con Claude) | 2026-10-14 | PR #7 |
+| Pauta de la entrega y borradores de roles, RACI, PMI y Gantt | Abraham (con Claude) | 2026-10-14 | PR #7 |
 | Contrato de datos del dashboard, login, permisos y hora sin internet (tarea 19) | Abraham (con Claude) | 2026-10-18 | PR #8 |
 | Broker MQTT EMQX Serverless creado y probado (tarea 2) | Abraham (con Claude) | 2026-10-18 | PR #9 |
 | README principal actualizado al diseño vigente (tarea 7) | Abraham (con Claude) | 2026-10-18 | PR #10 |
@@ -87,4 +87,4 @@ Pauta del profesor: ver [`docs/NOTA-2.md`](NOTA-2.md). Lo marcado con 🔥 es pa
 | RDS + Lambda `induplac-config`, Cognito probado y Wokwi conectado (tareas 3, 5 y 6) | Abraham y Felipe (con Claude), Sebastián | 2026-10-20 | PR #16 |
 | Corrección: alertas en DynamoDB, cuentas en Cognito y RDS solo configuración | Abraham (con Claude) | 2026-10-21 | PR #17 |
 | Código del Edge, dashboard y backend subido a `main` (tareas 1, 4 y 5) | Abraham (con Claude) | 2026-10-21 | PR #18 |
-| Nota 2 al día con lo del 20/10: Gantt con Estado, RACI, tareas, Cloud, Scrum y conclusiones | Bárbara Saavedra (con Claude) | 2026-10-21 | PR #25 |
+| Documentación al día con lo del 20/10: Gantt con Estado, RACI, tareas, Cloud, Scrum y conclusiones | Bárbara Saavedra (con Claude) | 2026-10-21 | PR #25 |

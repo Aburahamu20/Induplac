@@ -239,7 +239,7 @@ Fuente: `Induplac_Decisiones_Cloud` (Castro, Fuentes, González, Murúa, Saavedr
 
 ## 2026-10-14 (noche) — Pauta de la Nota 2
 
-- El profesor envió la pauta de la **Nota 2** (13 entregables) y la clase de **PMI, roles y RACI**. Resumen y borradores en [`docs/NOTA-2.md`](NOTA-2.md).
+- El profesor envió la pauta de la **Nota 2** (13 entregables) y la clase de **PMI, roles y RACI**. Resumen y borradores en [`docs/pauta-entrega.md`](pauta-entrega.md).
 - Ponderación conocida: roles y fortalezas **15 %**; planificación ágil + PMI/Gantt **15 %**.
 - Se cargaron las tareas **9 a 18** en `docs/EN-CURSO.md`, todas libres para que cada integrante reserve la suya. Prioridad de hoy: roles (9) y RACI (10).
 - Propuesta: como somos 5, agregar el rol **Seguridad y DevOps** a los 4 que sugiere el profe.
@@ -322,7 +322,7 @@ Cadena demostrada: `simulador → API Gateway → Lambda → DynamoDB → Lambda
 ## 2026-10-18 (noche) — Roles, RACI y Carta Gantt de Bárbara (tareas 9, 10 y 14)
 
 - Bárbara Saavedra hizo el Excel con roles, tareas por integrante, RACI y Carta Gantt; lo subió Abraham porque ella no sabía cómo hacer el commit.
-- Original en `docs/nota-2/Induplac_Roles_Equipo.xlsx` y copia en texto en `docs/roles-raci-gantt.md`.
+- Original en `docs/planificacion/Induplac_Roles_Equipo.xlsx` y copia en texto en `docs/roles-raci-gantt.md`.
 - Corregido según lo que está en GitHub: responsables de lo ya construido (broker, dashboard, Edge, backend), RACI de 19 a 10 actividades (la pauta pide 6–10), Gantt en dos partes (sprints del MVP S1–S3 desde el 05/10 + implementación PMI S4–S12 hasta la puesta en marcha), términos del Edge alineados con el código, sin RDS y con columna de fortalezas.
 - Falta: que cada uno escriba su fortaleza y que Lisandra y Bárbara confirmen sus roles (§5 del documento).
 
@@ -404,7 +404,7 @@ Abraham pidió que el 21/10 **Bárbara**, en su conversación con Claude, revise
 
 ### Lo que falta de la Nota 2
 - [ ] **Guion de la demo** (tarea 18): orden, tiempos y quién muestra cada parte. Base: README §20 *Pruebas de demostración*.
-- [ ] **PowerPoint** (tarea 17), en el orden de la pauta (`NOTA-2.md`).
+- [ ] **PowerPoint** (tarea 17), en el orden de la pauta (`pauta-entrega.md`).
 - [ ] **Informe** (tarea 16): confirmar el formato con el profe.
 - [ ] **Fortaleza de Lisandra.**
 
