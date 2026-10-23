@@ -1,8 +1,8 @@
-# 👥 Roles, RACI y Carta Gantt — Nota 2
+# 👥 Roles, RACI y Carta Gantt
 
 > **Autora:** Bárbara Saavedra (`barbaraantoniaa`). Tareas 9, 10 y 14 de [`EN-CURSO.md`](EN-CURSO.md).
 > **Actualizado el 21/10/2026:** Gantt con columna *Estado*, pipeline DevOps y MVP de punta a punta (ver §5).
-> **Archivo original (con fórmulas y colores):** [`docs/nota-2/Induplac_Roles_Equipo.xlsx`](nota-2/Induplac_Roles_Equipo.xlsx). Esta página es una copia en texto para leerla en GitHub; si cambian algo, cámbienlo en los dos.
+> **Archivo original (con fórmulas y colores):** [`docs/planificacion/Induplac_Roles_Equipo.xlsx`](planificacion/Induplac_Roles_Equipo.xlsx). Esta página es una copia en texto para leerla en GitHub; si cambian algo, cámbienlo en los dos.
 
 ---
 
@@ -60,7 +60,7 @@
 | Bárbara | Carta Gantt hasta la puesta en marcha | Sprint 3 | Listo (PR #11, actualizada PR #15) |
 | Bárbara | Modelo Cloud y tecnologías con su aporte | Sprint 3 | Listo (PR #13) |
 | Bárbara | Conclusiones y defensa | Sprint 3 | Listo (PR #14) |
-| Bárbara | Actualización de la Nota 2 con lo construido el 20/10 | Sprint 3 | Listo (PR #25) |
+| Bárbara | Actualización de la documentación con lo construido el 20/10 | Sprint 3 | Listo (PR #25) |
 | Bárbara | Capacitación de usuarios del dashboard | Implementación | Pendiente |
 ---
 
@@ -98,7 +98,7 @@ Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya e
 |---|---|---|---|---|---|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | **1** | **Sprint 1 – Diseño y documentación** | | Sprint 1 | | | | | | | | | | | | | | | | |
 | 1.1 | Contexto, arquitectura y decisiones técnicas (docs/) | Abraham | Sprint 1 | 05/10 | 09/10 | — | Listo | ■ |  |  |  |  |  |  |  |  |  |  |  |
-| 1.2 | Pauta Nota 2, roles, RACI, Scrum/PMI, Cloud, conclusiones y Carta Gantt | Bárbara | Sprint 2 y 3 | 12/10 | 23/10 | 1.1 | Listo |  | ■ | ■ |  |  |  |  |  |  |  |  |  |
+| 1.2 | Pauta, roles, RACI, Scrum/PMI, Cloud, conclusiones y Carta Gantt | Bárbara | Sprint 2 y 3 | 12/10 | 23/10 | 1.1 | Listo |  | ■ | ■ |  |  |  |  |  |  |  |  |  |
 | **2** | **Sprint 2 – Captura y visualización** | | Sprint 2 | | | | | | | | | | | | | | | | |
 | 2.1 | Contrato de datos del dashboard y formato de telemetría | Abraham | Sprint 2 | 12/10 | 16/10 | 1.1 | Listo |  | ■ |  |  |  |  |  |  |  |  |  |  |
 | 2.2 | Broker MQTT EMQX (TLS, usuario y Client ID por dispositivo) | Abraham | Sprint 2 | 12/10 | 16/10 | 2.1 | Listo |  | ■ |  |  |  |  |  |  |  |  |  |  |
@@ -141,7 +141,7 @@ Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya e
 
 ## 4. Cómo editar
 
-1. Abrir `docs/nota-2/Induplac_Roles_Equipo.xlsx` en Excel. En la hoja **Carta Gantt**, cambiar la fecha de inicio (celda E2) o el **Inicio** y la **Duración** de cada tarea (en azul): las fechas de fin, las barras y sus colores por responsable se recalculan solos. En la hoja **RACI**, la columna *Control* y los totales también se calculan solos, igual que el resumen de la hoja **Tareas por integrante**.
+1. Abrir `docs/planificacion/Induplac_Roles_Equipo.xlsx` en Excel. En la hoja **Carta Gantt**, cambiar la fecha de inicio (celda E2) o el **Inicio** y la **Duración** de cada tarea (en azul): las fechas de fin, las barras y sus colores por responsable se recalculan solos. En la hoja **RACI**, la columna *Control* y los totales también se calculan solos, igual que el resumen de la hoja **Tareas por integrante**.
 2. Las celdas amarillas (fortalezas, Product Owner, Scrum Master) las completa el equipo. Al 21/10 solo falta la fortaleza de Lisandra.
 3. Actualizar también las tablas de esta página.
 4. Entregar el cambio por Pull Request, como todo lo demás ([`CONTRIBUTING.md`](../CONTRIBUTING.md)).
@@ -169,7 +169,7 @@ Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya e
 5. Agregada la tabla de **roles Scrum** (Product Owner y Scrum Master por definir).
 6. **Tareas por integrante** al día: estados de Bárbara actualizados (PR #11 a #15) y resumen automático por persona en el Excel.
 
-**21/10/2026** — Nota 2 al día con lo construido el 20/10:
+**21/10/2026** — Documentación al día con lo construido el 20/10:
 1. Carta Gantt con columna **Estado** (lo planificado contra lo cumplido en S1–S3).
 2. Nueva tarea **3.7 Pipeline DevOps** (Abraham, listo, PR #21) y nuevo hito **5.2 MVP funcionando de punta a punta (20/10)**; los hitos siguientes se renumeran (demo 5.3, puesta en marcha 5.6).
 3. Responsables compartidos **Felipe y Abraham** en el backend (2.4), RDS + Lambda `induplac-config` (3.3) y Cognito (3.4).

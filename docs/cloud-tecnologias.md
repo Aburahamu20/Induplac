@@ -1,6 +1,6 @@
-# ☁️ Modelo Cloud y tecnologías — Nota 2
+# ☁️ Modelo Cloud y tecnologías
 
-> **Autora:** Bárbara Saavedra (`barbaraantoniaa`). Tarea 11 de [`EN-CURSO.md`](EN-CURSO.md) · puntos 6 y 7 de la pauta ([`NOTA-2.md`](NOTA-2.md)).
+> **Autora:** Bárbara Saavedra (`barbaraantoniaa`). Tarea 11 de [`EN-CURSO.md`](EN-CURSO.md) · puntos 6 y 7 de la pauta ([`pauta-entrega.md`](pauta-entrega.md)).
 > Basado en las decisiones de [`decisiones-tecnicas.md`](decisiones-tecnicas.md) (ADR-01 a ADR-10).
 > **Actualizado el 21/10/2026** con lo construido el 20/10: alertas en DynamoDB, Lambda `induplac-config`, pipeline con GitHub Actions y Nginx como diseño.
 

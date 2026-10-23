@@ -84,12 +84,12 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 | Modo offline y sincronización | [`docs/modo-offline.md`](docs/modo-offline.md) |
 | Ciberseguridad (5 capas) | [`docs/ciberseguridad.md`](docs/ciberseguridad.md) |
 | Redes, VPC y costos | [`infrastructure/README.md`](infrastructure/README.md) |
-| **Nota 2:** roles, RACI y Gantt | [`docs/roles-raci-gantt.md`](docs/roles-raci-gantt.md) · [Excel](docs/nota-2/Induplac_Roles_Equipo.xlsx) |
-| **Nota 2:** Scrum y PMI | [`docs/scrum-pmi.md`](docs/scrum-pmi.md) |
-| **Nota 2:** modelo Cloud y tecnologías | [`docs/cloud-tecnologias.md`](docs/cloud-tecnologias.md) |
-| **Nota 2:** pipeline DevOps | [`docs/devops.md`](docs/devops.md) |
-| **Nota 2:** conclusiones y defensa | [`docs/conclusiones.md`](docs/conclusiones.md) |
-| Pauta de la Nota 2 y su estado | [`docs/NOTA-2.md`](docs/NOTA-2.md) |
+| Roles, RACI y Gantt | [`docs/roles-raci-gantt.md`](docs/roles-raci-gantt.md) · [Excel](docs/planificacion/Induplac_Roles_Equipo.xlsx) |
+| Scrum y PMI | [`docs/scrum-pmi.md`](docs/scrum-pmi.md) |
+| Modelo Cloud y tecnologías | [`docs/cloud-tecnologias.md`](docs/cloud-tecnologias.md) |
+| Pipeline DevOps | [`docs/devops.md`](docs/devops.md) |
+| Conclusiones y defensa | [`docs/conclusiones.md`](docs/conclusiones.md) |
+| Pauta de la entrega y su estado | [`docs/pauta-entrega.md`](docs/pauta-entrega.md) |
 | Tablero de tareas · bitácora | [`docs/EN-CURSO.md`](docs/EN-CURSO.md) · [`docs/notas-de-avance.md`](docs/notas-de-avance.md) |
 
 ---
@@ -735,8 +735,8 @@ Induplac/
 │   ├── EN-CURSO.md            ← tablero: quién hace qué
 │   ├── notas-de-avance.md     ← bitácora de sesiones
 │   ├── GUIA-EQUIPO.md         ← el proyecto explicado en simple
-│   ├── NOTA-2.md              ← pauta de la Nota 2
-│   ├── roles-raci-gantt.md    ← roles, RACI y Carta Gantt (+ Excel en nota-2/)
+│   ├── pauta-entrega.md       ← pauta de la entrega
+│   ├── roles-raci-gantt.md    ← roles, RACI y Carta Gantt (+ Excel en planificacion/)
 │   ├── scrum-pmi.md · cloud-tecnologias.md · conclusiones.md
 │   ├── api-dashboard.md       ← contrato entre el dashboard y la API
 │   ├── broker-mqtt.md         ← broker de la simulación
