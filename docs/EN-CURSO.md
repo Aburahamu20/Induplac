@@ -35,6 +35,8 @@ La pauta completa y los borradores de roles, RACI y Gantt están en [`docs/pauta
 
 ## Tareas
 
+> **Reparto (2026-10-27):** Abraham y Felipe ven toda la configuración de AWS y las tareas 20 a 22; Sebastián, Wokwi; Bárbara y Lisandra, la documentación.
+
 | # | Tarea | Carpeta | Estado | Quién | Desde | Rama / PR | Notas |
 |---|---|---|---|---|---|---|---|
 | 1 | Dashboard React (monitor por sede, alertas, histórico, panel de simulación) con datos simulados | `dashboard/` | ✅ Listo | Abraham (con Claude) | 2026-10-14 | PR #18 | Publicado en S3 leyendo de AWS. Login con clave temporal, MFA TOTP y permisos por usuario. |
@@ -43,6 +45,11 @@ La pauta completa y los borradores de roles, RACI y Gantt están en [`docs/pauta
 | 5 | Backend AWS: Lambda de ingesta y alertas, DynamoDB, RDS, API | `backend/` | ✅ Listo | Abraham y Felipe Murúa | 2026-10-17 | PR #16, #18 | `induplac-api` + DynamoDB + S3; RDS con la configuración y Lambda `induplac-config` (`/config/umbrales`). Pendiente: que `induplac-api` lea los umbrales desde RDS. |
 | 6 | Cognito con MFA (probar primero que el Learner Lab lo permita) | `backend/`, `dashboard/` | ✅ Listo | Abraham y Felipe Murúa | 2026-10-20 | PR #16, #20 | Dashboard en S3 con login de Cognito y MFA (21/10). Grupos `administrador`, `jefe` y `operario` con las cuentas del equipo. |
 | 8 | Identificador por lectura (`device_id + seq`) entre ESP32 y Edge | `simulation/`, `edge/` | ✅ Listo | Abraham y Sebastián | 2026-10-20 | PR #16, #18 | El ESP32 manda `device_id + seq + ts`; el Edge descarta duplicados con esa llave, también tras reinicios. |
+| 20 | Validar el token de Cognito en la API: authorizer JWT en API Gateway (`/api/*` y `/config/*`), token en el dashboard y reconocer alertas solo jefe/admin | `backend/`, `dashboard/` | 🟡 En curso | Abraham y Felipe Murúa | 2026-10-27 | — | `/intervalos` (clave del Edge) y `/health` quedan sin authorizer. |
+| 21 | Umbrales desde RDS: `induplac-config` los copia a DynamoDB al cambiarlos e `induplac-api` los lee de ahí (valores por defecto si no hay) | `backend/` | 🟡 En curso | Abraham y Felipe Murúa | 2026-10-27 | — | Requiere VPC Endpoint de DynamoDB (gateway) para `induplac-config`; probar que el Learner Lab lo permita. |
+| 22 | API local del Edge: mismos endpoints de `api-dashboard.md` leyendo SQLite + servir el build del dashboard de planta, con login local | `edge/` | 🟡 En curso | Abraham y Felipe Murúa | 2026-10-27 | — | Mismo build del dashboard que en la nube. |
+| 23 | Simulación en Wokwi | `simulation/` | 🟡 En curso | Sebastián Fuentes | 2026-10-27 | — | Alcance por definir con Sebastián. |
+| 24 | Documentación del proyecto al día | `docs/` | 🟡 En curso | Bárbara Saavedra y Lisandra González | 2026-10-27 | — | |
 
 ---
 
