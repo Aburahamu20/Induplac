@@ -9,6 +9,7 @@ Capas:
   1. Escucha el broker, valida y guarda cada lectura en SQLite.
   2. Cierra intervalos de 15 min y evalúa alertas locales.
   3. Sincroniza con AWS; sin internet encola y sube después.
+  4. API local + dashboard de planta en un hilo aparte (api_local.py).
 
 Uso (desde la carpeta edge/):  py edge_gateway.py
 """
@@ -22,6 +23,7 @@ import time
 
 import paho.mqtt.client as mqtt
 
+import api_local
 import config
 import db
 import reglas
@@ -144,6 +146,12 @@ def main():
     cliente = conectar_broker()
     proxima_sync = proximo_health = proximo_resumen = 0.0
     abiertos: dict[str, dict] = {}
+
+    # Capa 4: la API comparte el mismo Enlace (estado y demo) y ve el intervalo en curso
+    try:
+        api_local.iniciar(enlace, lambda: abiertos)
+    except OSError as e:
+        log.error("No se pudo abrir la API local en el puerto %s (%s); el Edge sigue sin ella.", config.API_PORT, e)
 
     log.info("Edge iniciado · locales %s · base %s", ",".join(config.LOCALES), config.DB.name)
     while not _parar.is_set():

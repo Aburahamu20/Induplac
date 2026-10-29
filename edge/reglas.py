@@ -31,6 +31,7 @@ AGUA = {
     "local2": {"normal": 1.5, "advertencia": 2, "critico": 2.5, "fuga": 0.05},
 }
 ENERGIA_FIJA_CRITICO = 55
+ENERGIA_FIJA_ADVERTENCIA = 45  # respaldo sin 4 semanas de historia (igual que la Lambda)
 
 
 def iso(ts: int | float) -> str:
@@ -163,7 +164,7 @@ def _alerta(local_id, variable, valor, umbral, regla, inicio):
     }
 
 
-def _promedio_4_semanas(local_id: str, inicio: str) -> float | None:
+def promedio_4_semanas(local_id: str, inicio: str) -> float | None:
     t = datetime.fromisoformat(inicio.replace("Z", "+00:00"))
     vals = []
     for s in range(1, 5):
@@ -173,7 +174,7 @@ def _promedio_4_semanas(local_id: str, inicio: str) -> float | None:
     return sum(vals) / len(vals) if len(vals) == 4 else None
 
 
-def _fuera_de_horario(inicio: str) -> bool:
+def fuera_de_horario(inicio: str) -> bool:
     local = datetime.fromisoformat(inicio.replace("Z", "+00:00")).astimezone(TZ)
     return local.weekday() >= 5 or local.hour >= 22 or local.hour < 6
 
@@ -191,13 +192,30 @@ def agua_del_dia(local_id: str, hasta_ts: int, intervalo_abierto: dict | None = 
     return total
 
 
+# ---------- Nivel de cada tarjeta (lo usa la API local, igual que la Lambda) ----------
+
+def nivel_energia(valor: float, referencia: float | None) -> str:
+    if referencia:
+        return "critico" if valor > referencia * 1.2 else "advertencia" if valor > referencia * 1.1 else "normal"
+    return "critico" if valor > ENERGIA_FIJA_CRITICO else "advertencia" if valor > ENERGIA_FIJA_ADVERTENCIA else "normal"
+
+
+def nivel_uv(uv: float) -> str:
+    return "critico" if uv >= 8 else "advertencia" if uv >= 6 else "normal"
+
+
+def nivel_agua_dia(local_id: str, m3: float) -> str:
+    a = AGUA[local_id]
+    return "critico" if m3 > a["critico"] else "advertencia" if m3 > a["advertencia"] else "normal"
+
+
 def evaluar(local_id: str, r: dict) -> list[dict]:
     """Reglas de CONTEXTO §8.2 sobre un intervalo (cerrado o en curso)."""
     inicio, salida = r["inicio_intervalo"], []
 
     kw = r.get("energia_kw")
     if kw is not None:
-        ref = _promedio_4_semanas(local_id, inicio)
+        ref = promedio_4_semanas(local_id, inicio)
         if ref and kw > ref * 1.2:
             salida.append(_alerta(local_id, "energia_kw", kw, ref * 1.2, "20 % sobre el promedio de 4 semanas a la misma hora", inicio))
         elif not ref and kw > ENERGIA_FIJA_CRITICO:
@@ -209,7 +227,7 @@ def evaluar(local_id: str, r: dict) -> list[dict]:
 
     caudal = r.get("agua_m3h")
     fuga = AGUA[local_id]["fuga"]
-    if caudal is not None and caudal > fuga and _fuera_de_horario(inicio):
+    if caudal is not None and caudal > fuga and fuera_de_horario(inicio):
         salida.append(_alerta(local_id, "agua_m3h", caudal, fuga, f"Posible fuga: caudal sobre {fuga} m³/h fuera de horario", inicio))
 
     ts = int(datetime.fromisoformat(inicio.replace("Z", "+00:00")).timestamp())
