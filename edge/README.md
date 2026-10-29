@@ -15,7 +15,7 @@ ESP32 (Wokwi) --MQTT--> broker EMQX --MQTT--> edge_gateway.py --HTTPS--> AWS (AP
 | 1 | Se suscribe a `induplac/+/telemetria`, valida rangos y guarda cada lectura en SQLite. Descarta duplicados por `device_id + seq` | `edge_gateway.py`, `db.py` |
 | 2 | Cierra intervalos de 15 min (promedios, máximos, consumo de agua) y evalúa **las mismas reglas de alerta que la Lambda** | `reglas.py` |
 | 3 | Sincroniza con AWS: healthcheck cada 10 s, 3 fallos = **OFFLINE**; al volver, sube los pendientes en lotes de 50 y vuelve a **ONLINE** | `sincronizacion.py` |
-| 4 | API local para el dashboard de planta | *pendiente* |
+| 4 | API local + dashboard de planta, con login local (con o sin internet). Ver [API local y login de planta](#api-local-y-login-de-planta) | `api_local.py`, `auth_local.py`, `usuarios.py` |
 
 Detalles importantes:
 - **Se vuelve a suscribir en cada conexión**: si el broker lo desconecta, recupera la suscripción solo (lección de la prueba del broker).
@@ -67,6 +67,49 @@ sync: Enlace: 🟡 SINCRONIZANDO -> 🟢 ONLINE
 ## Base de datos (`edge.db`)
 
 Se crea sola al arrancar. Tablas de `docs/modo-offline.md` §3.2: `lecturas_crudas` (30 días), `intervalos_15min` y `alertas_local` (con `is_synced`) y `contadores` (horas hombre). Para revisarla se puede usar *DB Browser for SQLite*.
+
+## API local y login de planta
+
+`edge_gateway.py` levanta la API en un hilo (puerto `API_PORT`, por defecto **8080**). Desde cualquier PC de la red de la planta: `http://<ip-de-la-raspberry>:8080`.
+
+- **Mismos endpoints y JSON que la nube** (`docs/api-dashboard.md` §3), leyendo `edge.db`, con `origen: "edge"`. Las tarjetas usan el intervalo en curso, así que se ven casi en vivo.
+- **Siempre con login** (§6). La API revisa **permisos y locales en cada petición**: sin el permiso o pidiendo otro local → **403**.
+- **Sirve el dashboard** desde `dashboard/dist-planta`. Para generarlo (una vez, o al cambiar el dashboard):
+
+  ```powershell
+  cd ..\dashboard
+  npm run build:planta
+  ```
+
+- **Demo (§5):** para la demo hay que poner **`DEMO=1` en `edge/.env`** y reiniciar el Edge. Sin eso, los botones del panel **🎬 Demo** del dashboard de planta responden **404**. **Nunca en producción.** Con `DEMO=1` se activan:
+  - `POST /api/demo/enlace`: corta o restablece la sincronización con AWS, sin tocar la red.
+  - `POST /api/demo/inyectar`: mete el valor como si viniera del ESP32 y evalúa las alertas al tiro. Energía y caudal se **promedian** en el intervalo de 15 min, así que una sola lectura no los movería. Por eso se guardan ~9 lecturas con ese valor por cada lectura real del intervalo en curso, y el promedio queda en ~90 % del valor inyectado.
+  - **"Posible fuga" solo alerta fuera de horario** (22:00 a 06:00, hora de Chile, o fin de semana), igual que la regla real. Si inyectas un caudal alto en horario laboral, no aparece la alerta: se muestra en la demo de noche o un sábado/domingo. UV y energía alertan a cualquier hora.
+- Para probar solo la API, sin broker ni AWS: `py api_local.py`.
+
+### Usuarios (login local)
+
+Usuarios propios del Edge en SQLite (opción 1 del §6.3). Se crean con alias, **nunca con nombre ni RUT**:
+
+```powershell
+py usuarios.py crear admin1 --rol administrador --locales local1,local2
+py usuarios.py crear jefe1 --rol jefe --locales local1,local2
+py usuarios.py crear operario1 --rol operario --locales local1 --agregar ver_historico
+py usuarios.py resetear-clave jefe1     # clave olvidada (también desbloquea)
+py usuarios.py resetear-mfa jefe1       # celular perdido
+py usuarios.py listar
+```
+
+| Paso | Qué pasa |
+| :--- | :--- |
+| 1 | El comando muestra una **clave temporal** una sola vez. Se la entregas al usuario. |
+| 2 | En su primer ingreso el dashboard le pide **cambiarla** (mínimo 10 caracteres, distinta a la temporal). |
+| 3 | Si tiene algún permiso de modificación (`reconocer_alertas`, …), **registra el MFA** escaneando el QR con Microsoft Authenticator. Aparece como *Induplac Planta*, aparte de la entrada de la nube. |
+| 4 | Desde ahí entra con clave (+ código de 6 dígitos si tiene MFA). La sesión dura **8 h**. |
+
+Seguridad: claves con **scrypt**; secreto MFA **cifrado** con la clave de `EDGE_CLAVE_MFA` o, si no está, de `edge/clave_mfa.key` (se crea sola, **no se sube** y **no se debe perder**: sin ella hay que resetear el MFA de todos); token guardado solo como hash; **5 intentos fallidos bloquean la cuenta 15 min**.
+
+> Pendiente: que los usuarios bajen desde RDS al sincronizar. Por ahora se crean en cada Edge con `usuarios.py`.
 
 ## Días y HH sin incidentes
 

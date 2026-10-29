@@ -23,6 +23,16 @@ class Enlace:
         self.estado = "offline"  # hasta el primer healthcheck exitoso
         self.fallos = 0
         self.ultima_sincronizacion: str | None = None
+        self.cortado = False  # demo (POST /api/demo/enlace): simula que se cayó internet
+
+    def cortar(self, cortado: bool) -> None:
+        """Panel de demo: corta o restablece la sincronización con AWS sin tocar la red."""
+        self.cortado = cortado
+        if cortado:
+            log.warning("Demo: sincronización con AWS cortada a mano.")
+            self._cambiar("offline")
+        else:
+            log.info("Demo: sincronización restablecida; vuelve en el próximo healthcheck.")
 
     # ---------- HTTP ----------
 
@@ -40,7 +50,7 @@ class Enlace:
     # ---------- Healthcheck ----------
 
     def revisar(self) -> None:
-        if not config.AWS_API_URL:
+        if not config.AWS_API_URL or self.cortado:
             self.estado = "offline"
             return
         try:

@@ -69,6 +69,18 @@ FECHA_INCIDENTE = {
 PERSONAL_TURNO = {"local1": _num("PERSONAL_TURNO_LOCAL1", 18), "local2": _num("PERSONAL_TURNO_LOCAL2", 20)}
 HORAS_TURNO = _num("HORAS_TURNO", 9)
 
+# ---- API local y login de planta (docs/api-dashboard.md §3, §5 y §6) ----
+API_HOST = os.environ.get("API_HOST", "0.0.0.0")  # 0.0.0.0 = visible para los PC de la red de la planta
+API_PORT = int(_num("API_PORT", 8080))
+DEMO = os.environ.get("DEMO", "0").lower() in ("1", "true")  # endpoints /api/demo/*; nunca en producción
+DASHBOARD_DIR = CARPETA / os.environ.get("DASHBOARD_DIR", "../dashboard/dist-planta")
+SESION_HORAS = _num("SESION_HORAS", 8)   # un turno
+DESAFIO_SEG = 5 * 60                     # sesión temporal del login (cambiar clave / MFA)
+INTENTOS_BLOQUEO = 5
+BLOQUEO_MIN = _num("BLOQUEO_MIN", 15)
+# Clave que cifra los secretos MFA en SQLite. Si no viene en EDGE_CLAVE_MFA, se crea sola en este archivo
+CLAVE_MFA_ARCHIVO = CARPETA / "clave_mfa.key"
+
 # ---- Simulador del ESP32 (solo pruebas) ----
 ESP32_CLAVES = {
     "local1": os.environ.get("ESP32_LOCAL1_CLAVE", ""),

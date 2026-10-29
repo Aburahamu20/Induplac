@@ -108,6 +108,13 @@ def consultar(sql: str, params=()) -> list[sqlite3.Row]:
         return _con.execute(sql, params).fetchall()
 
 
+def ejecutar_script(sql: str) -> None:
+    """Para crear tablas desde otros módulos (ej. usuarios del login local)."""
+    with _lock:
+        _con.executescript(sql)
+        _con.commit()
+
+
 # ---------- Lecturas ----------
 
 def guardar_lectura(local_id: str, device_id: str, seq: int, ts: int, datos: dict) -> bool:
@@ -119,6 +126,25 @@ def guardar_lectura(local_id: str, device_id: str, seq: int, ts: int, datos: dic
         )
         _con.commit()
         return cur.rowcount == 1
+
+
+def guardar_lecturas(local_id: str, device_id: str, lecturas: list[tuple[int, int, dict]]) -> int:
+    """Guarda varias lecturas (seq, ts, datos) en una sola transacción. Devuelve cuántas entraron."""
+    with _lock:
+        antes = _con.total_changes
+        with _con:  # commit al final, o rollback si algo falla
+            _con.executemany(
+                "INSERT OR IGNORE INTO lecturas_crudas (local_id, device_id, seq, ts, datos) VALUES (?,?,?,?,?)",
+                [(local_id, device_id, seq, ts, json.dumps(datos)) for seq, ts, datos in lecturas],
+            )
+        return _con.total_changes - antes
+
+
+def contar_lecturas(local_id: str, desde: int, hasta: int, sin_demo: bool = False) -> int:
+    sql = "SELECT COUNT(*) n FROM lecturas_crudas WHERE local_id=? AND ts>=? AND ts<?"
+    if sin_demo:
+        sql += " AND device_id NOT LIKE 'demo-%'"
+    return consultar(sql, (local_id, desde, hasta))[0]["n"]
 
 
 def lecturas_entre(local_id: str, desde: int, hasta: int) -> list[dict]:
@@ -213,6 +239,21 @@ def intervalos_desde(local_id: str, desde: str) -> list[dict]:
     return [json.loads(f["datos"]) for f in filas]
 
 
+def intervalos_entre(local_id: str, desde: str, hasta: str) -> list[dict]:
+    filas = consultar(
+        "SELECT datos FROM intervalos_15min WHERE local_id=? AND inicio_intervalo BETWEEN ? AND ? ORDER BY inicio_intervalo",
+        (local_id, desde, hasta),
+    )
+    return [json.loads(f["datos"]) for f in filas]
+
+
+def ultimo_intervalo(local_id: str) -> dict | None:
+    filas = consultar(
+        "SELECT datos FROM intervalos_15min WHERE local_id=? ORDER BY inicio_intervalo DESC LIMIT 1", (local_id,)
+    )
+    return json.loads(filas[0]["datos"]) if filas else None
+
+
 def intervalos_pendientes(local_id: str, limite: int) -> list[dict]:
     filas = consultar(
         "SELECT datos FROM intervalos_15min WHERE local_id=? AND is_synced=0 ORDER BY inicio_intervalo LIMIT ?",
@@ -258,6 +299,19 @@ def alertas(local_id: str | None = None, estado: str | None = None) -> list[dict
     if estado:
         sql, p = sql + " AND estado=?", p + [estado]
     return [dict(f) for f in consultar(sql + " ORDER BY inicio_intervalo DESC", p)]
+
+
+def reconocer_alerta(id_alerta: str, cuando: str) -> dict | None:
+    """Marca la alerta como reconocida (también offline) y la deja pendiente para subirla a AWS."""
+    with _lock:
+        cur = _con.execute(
+            "UPDATE alertas_local SET estado='reconocida', reconocida_en=COALESCE(reconocida_en, ?), is_synced=0 WHERE id=?",
+            (cuando, id_alerta),
+        )
+        _con.commit()
+        if cur.rowcount == 0:
+            return None
+        return dict(_con.execute("SELECT * FROM alertas_local WHERE id=?", (id_alerta,)).fetchone())
 
 
 def alertas_pendientes(local_id: str) -> list[dict]:

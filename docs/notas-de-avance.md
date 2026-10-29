@@ -469,3 +469,28 @@ Abraham, con la cuenta del Learner Lab de Felipe.
   - Nuevo incidente: cambiar la fecha en `.env` y reiniciar el Edge → días y HH a cero.
 - 6 pruebas nuevas en `edge/tests/` (21 en total).
 
+
+---
+
+## 2026-10-29 — API local del Edge y login de planta (tarea 22)
+
+Abraham y Felipe (con Claude). Rama `feature/api-local-edge`.
+
+- **`edge/api_local.py`:** API del dashboard de planta con `http.server` (solo biblioteca estándar). Mismos endpoints y JSON que `induplac-api` (`docs/api-dashboard.md` §3), pero leyendo `edge.db`, con `origen = "edge"`. `/actual` y `/historico` usan también el **intervalo en curso** que le comparte `edge_gateway.py`, así la planta ve datos casi en vivo.
+- **Permisos en cada petición:** sin token → 401; sin el permiso (`ver_actual`, `ver_alertas`, `ver_historico`, `reconocer_alertas`) o pidiendo un local que no es suyo → 403. `/estado`, `/locales` y `/alertas` solo devuelven los locales del usuario.
+- **Reconocer alertas offline:** la alerta queda `reconocida` y vuelve a `is_synced = 0`, así sube a AWS en la siguiente sincronización (la Lambda ya respeta el estado que manda el Edge).
+- **Demo (§5), solo con `DEMO=1`:** `POST /api/demo/enlace` corta o restablece la sincronización con AWS (bandera `cortado` del `Enlace`, sin tocar la red); `POST /api/demo/inyectar` mete el valor como si viniera del ESP32 y evalúa las alertas al tiro. Ambos piden login. Como energía y caudal se promedian, una sola lectura no movía el intervalo (120 lecturas a 40 kW + una a 60 kW = 40,17 kW, sin alerta): ahora se guardan ~9 lecturas por cada lectura real del intervalo en curso, en una sola transacción.
+- **Sirve el dashboard:** `dashboard/dist-planta`, con vuelta a `index.html`. Nuevo `npm run build:planta` con `.env.planta` (`VITE_FUENTE=api`, `VITE_API_URL=/api`, `VITE_AUTH=api`).
+- **`edge/auth_local.py` (login local, §6.2, opción 1 del §6.3):** usuarios en SQLite; claves con **scrypt**; MFA **TOTP RFC 6238** (Microsoft Authenticator, aparece como *Induplac Planta*), obligatorio para quien tenga permisos de modificación; secreto MFA **cifrado** con una clave maestra que no está en la base (`EDGE_CLAVE_MFA` o `edge/clave_mfa.key`, que no se sube); token de **8 h** guardado como hash; **bloqueo de 15 min tras 5 intentos fallidos**; un código MFA no se puede usar dos veces.
+- **`edge/usuarios.py`:** CLI para crear usuario con clave temporal (rol como plantilla + `--agregar` / `--quitar` permisos), resetear clave (también desbloquea), resetear MFA y listar.
+- **`edge_gateway.py`** arranca la API en un hilo y le comparte el `Enlace` y el intervalo en curso. Si el puerto está ocupado, el Edge sigue funcionando sin la API.
+- **Pruebas:** 38 nuevas en `edge/tests/test_api_local.py` (login completo con MFA, bloqueo, permisos 403, endpoints, demo, archivos del dashboard, vector del RFC 6238). **53 en total**, todas pasan.
+
+### Decisiones tomadas en esta tarea (revisar en el PR)
+- El cifrado del secreto MFA usa solo la biblioteca estándar (HMAC-SHA256 en modo contador + HMAC de integridad) para no agregar dependencias a la Raspberry Pi. Si se prefiere AES-GCM, se cambia por `cryptography` sin tocar el resto.
+- Bloqueo **temporal** (15 min, `BLOQUEO_MIN`) en vez de permanente: el Administrador igual puede desbloquear antes con `resetear-clave`.
+- La demo corta la sincronización de **todo el Edge** (en la demo un solo Edge atiende las dos sedes).
+
+### Siguen abiertos
+- [ ] Bajar los usuarios desde RDS al sincronizar (§6.3 opción 1). Hoy se crean en cada Edge con `usuarios.py`, con acceso a la Raspberry Pi.
+- [ ] Con la base vacía, el dashboard se queda en *"Cargando datos…"* (la API responde 503 `SIN_DATOS`); podría mostrar un aviso.
