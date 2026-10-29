@@ -68,6 +68,7 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 - [ ] Despliegue en microcontroladores físicos reales con sensores SCT-013 (corriente) y caudalímetros.
 - [ ] Notificaciones externas automáticas (correo, Telegram, Slack) mediante Amazon SNS o webhooks de n8n.
 - [ ] Analítica predictiva de consumo con modelos sencillos de Machine Learning.
+- [ ] **Usuarios de planta desde RDS:** hoy hay dos listas (Cognito en la nube y el login local del Edge, creado a mano con `edge/usuarios.py`). Idea: que el Edge descargue usuarios y permisos desde RDS cada vez que tenga internet y los use offline, para administrarlos en un solo lugar y que una baja llegue también a la planta. La clave de planta seguiría aparte (Cognito no entrega claves) y se crearía en el primer login local.
 - [ ] Ideas de históricos en evaluación (comparación por estaciones, análisis por hora/dispositivo): ver `docs/notas-de-avance.md`.
 
 ---
