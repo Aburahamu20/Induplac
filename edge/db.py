@@ -128,6 +128,25 @@ def guardar_lectura(local_id: str, device_id: str, seq: int, ts: int, datos: dic
         return cur.rowcount == 1
 
 
+def guardar_lecturas(local_id: str, device_id: str, lecturas: list[tuple[int, int, dict]]) -> int:
+    """Guarda varias lecturas (seq, ts, datos) en una sola transacción. Devuelve cuántas entraron."""
+    with _lock:
+        antes = _con.total_changes
+        with _con:  # commit al final, o rollback si algo falla
+            _con.executemany(
+                "INSERT OR IGNORE INTO lecturas_crudas (local_id, device_id, seq, ts, datos) VALUES (?,?,?,?,?)",
+                [(local_id, device_id, seq, ts, json.dumps(datos)) for seq, ts, datos in lecturas],
+            )
+        return _con.total_changes - antes
+
+
+def contar_lecturas(local_id: str, desde: int, hasta: int, sin_demo: bool = False) -> int:
+    sql = "SELECT COUNT(*) n FROM lecturas_crudas WHERE local_id=? AND ts>=? AND ts<?"
+    if sin_demo:
+        sql += " AND device_id NOT LIKE 'demo-%'"
+    return consultar(sql, (local_id, desde, hasta))[0]["n"]
+
+
 def lecturas_entre(local_id: str, desde: int, hasta: int) -> list[dict]:
     filas = consultar(
         "SELECT ts, datos FROM lecturas_crudas WHERE local_id=? AND ts>=? AND ts<? ORDER BY ts",

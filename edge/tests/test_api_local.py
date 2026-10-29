@@ -321,6 +321,22 @@ class Endpoints(Servidor):
                                   token=self.token)
         self.assertEqual(codigo, 400)  # fuera de rango, igual que una lectura real
 
+    def test_demo_inyectar_domina_el_promedio_del_intervalo(self):
+        # Que no caiga justo en el cambio de intervalo
+        if reglas.inicio_de(int(time.time()) + 5) != reglas.inicio_de(int(time.time())):
+            time.sleep(6)
+        inicio = reglas.inicio_de(int(time.time()))
+        db.guardar_lecturas("local2", "esp32-local2-prueba",
+                            [(i, inicio, {"device_id": "esp32-local2-prueba", "seq": i, "energia_kw": 40.0})
+                             for i in range(1, 121)])
+        self.assertEqual(reglas.calcular_intervalo("local2", inicio)["energia_kw"], 40.0)
+
+        r = self.ok("POST", "/api/demo/inyectar", {"local_id": "local2", "variable": "energia_kw", "valor": 60}, token=self.token)
+        self.assertEqual(r["lecturas"], 9 * 120)
+        self.assertGreater(reglas.calcular_intervalo("local2", inicio)["energia_kw"], 55)
+        ids = [a["id"] for a in self.ok("GET", "/api/alertas?local_id=local2", token=self.token)]
+        self.assertIn(f"local2:energia_kw:{reglas.iso(inicio)}", ids)
+
     def test_demo_enlace_corta_y_restablece_la_sincronizacion(self):
         self.ok("POST", "/api/demo/enlace", {"local_id": "local1", "conectado": False}, token=self.token)
         self.assertTrue(self.enlace.cortado)

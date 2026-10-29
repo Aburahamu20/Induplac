@@ -81,7 +81,10 @@ Se crea sola al arrancar. Tablas de `docs/modo-offline.md` §3.2: `lecturas_crud
   npm run build:planta
   ```
 
-- **Demo (§5):** con `DEMO=1` en `.env` se activan `POST /api/demo/enlace` (corta la sincronización con AWS sin tocar la red) y `POST /api/demo/inyectar` (mete una lectura y dispara la alerta al tiro). **Nunca en producción.**
+- **Demo (§5):** para la demo hay que poner **`DEMO=1` en `edge/.env`** y reiniciar el Edge. Sin eso, los botones del panel **🎬 Demo** del dashboard de planta responden **404**. **Nunca en producción.** Con `DEMO=1` se activan:
+  - `POST /api/demo/enlace`: corta o restablece la sincronización con AWS, sin tocar la red.
+  - `POST /api/demo/inyectar`: mete el valor como si viniera del ESP32 y evalúa las alertas al tiro. Energía y caudal se **promedian** en el intervalo de 15 min, así que una sola lectura no los movería. Por eso se guardan ~9 lecturas con ese valor por cada lectura real del intervalo en curso, y el promedio queda en ~90 % del valor inyectado.
+  - **"Posible fuga" solo alerta fuera de horario** (22:00 a 06:00, hora de Chile, o fin de semana), igual que la regla real. Si inyectas un caudal alto en horario laboral, no aparece la alerta: se muestra en la demo de noche o un sábado/domingo. UV y energía alertan a cualquier hora.
 - Para probar solo la API, sin broker ni AWS: `py api_local.py`.
 
 ### Usuarios (login local)

@@ -267,8 +267,17 @@ def demo_enlace(ctx: Contexto, u: dict, cuerpo: dict) -> dict:
     return {"conectado": conectado, "enlace": ctx.enlace.estado}
 
 
+DEMO_PESO = 9  # lecturas inyectadas por cada lectura real del intervalo en curso
+
+
 def demo_inyectar(u: dict, cuerpo: dict) -> dict:
-    """Mete una lectura como si viniera del ESP32 y evalúa las alertas al tiro."""
+    """Mete el valor como si viniera del ESP32 y evalúa las alertas al tiro.
+
+    Energía y caudal se promedian en el intervalo: una sola lectura no lo mueve (120 a 40 kW
+    + una a 60 kW = 40,17 kW). Por eso se guardan ~9 lecturas por cada lectura real que ya
+    tenga el intervalo en curso, y el valor inyectado queda en ~90 % del promedio. Solo se
+    cuentan las lecturas reales: si se cuentan también las de demo, cada clic crece x10.
+    """
     local_id = _local(u, _texto(cuerpo, "local_id"))
     variable, valor = cuerpo.get("variable"), cuerpo.get("valor")
     if variable not in VARIABLES_DEMO or variable not in VARIABLES[local_id]:
@@ -276,18 +285,23 @@ def demo_inyectar(u: dict, cuerpo: dict) -> dict:
     if isinstance(valor, bool) or not isinstance(valor, (int, float)):
         raise ErrorApi(400, "PARAMETROS", "valor debe ser un número.")
     ahora = int(time.time())
+    inicio = reglas.inicio_de(ahora)
+    device_id = f"demo-{local_id}"
     base = db.ultima_lectura(local_id) or {}
-    lectura = {**{k: v for k, v in base.items() if k != "ts"}, "device_id": f"demo-{local_id}",
-               "seq": time.time_ns() // 1_000_000, "ts": ahora, variable: valor}
-    motivo = reglas.validar(lectura)
+    lectura = {**{k: v for k, v in base.items() if k != "ts"}, "device_id": device_id, "ts": ahora, variable: valor}
+    motivo = reglas.validar({**lectura, "seq": 0})
     if motivo:
         raise ErrorApi(400, "VALOR_FUERA_DE_RANGO", motivo)
-    db.guardar_lectura(local_id, lectura["device_id"], lectura["seq"], ahora, lectura)
-    r = reglas.calcular_intervalo(local_id, reglas.inicio_de(ahora))
+    reales = db.contar_lecturas(local_id, inicio, inicio + config.INTERVALO_SEG, sin_demo=True)
+    cantidad = max(1, DEMO_PESO * reales)
+    seq0 = time.time_ns() // 1_000_000 * 100_000  # seq distintos aunque se inyecte dos veces en el mismo segundo
+    db.guardar_lecturas(local_id, device_id,
+                        [(seq0 + i, ahora, {**lectura, "seq": seq0 + i}) for i in range(cantidad)])
+    r = reglas.calcular_intervalo(local_id, inicio)
     nuevas = [a for a in reglas.evaluar(local_id, r) if db.guardar_alerta(a)] if r else []
     for a in nuevas:
         log.warning("🚨 ALERTA %s (demo): %s (valor %s, umbral %s)", local_id, a["regla"], a["valor"], a["umbral"])
-    return {"ok": True, "alertas_nuevas": len(nuevas)}
+    return {"ok": True, "lecturas": cantidad, "alertas_nuevas": len(nuevas)}
 
 
 # ---------------- enrutador ----------------
