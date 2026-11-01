@@ -50,6 +50,12 @@ La pauta completa y los borradores de roles, RACI y Gantt están en [`docs/pauta
 | 22 | API local del Edge: mismos endpoints de `api-dashboard.md` leyendo SQLite + servir el build del dashboard de planta, con login local | `edge/` | ✅ Listo | Abraham y Felipe Murúa | 2026-10-27 | [PR #30](https://github.com/Aburahamu20/Induplac/pull/30) | API local + login de planta con MFA y panel de demo. Pendiente: usuarios desde RDS. |
 | 23 | Simulación en Wokwi | `simulation/` | 🟡 En curso | Sebastián Fuentes | 2026-10-27 | — | Alcance por definir con Sebastián. |
 | 24 | Documentación del proyecto al día | `docs/` | 🟡 En curso | Bárbara Saavedra y Lisandra González | 2026-10-27 | — | |
+| 25 | Pruebas en el Learner Lab para los bocetos aprobados: atributo `custom:sede` en Cognito, crear/desactivar usuarios desde Lambda (LabRole) y PITR + protección contra borrado en DynamoDB | `backend/` | 🟡 En curso | Abraham y Felipe Murúa | 2026-11-01 | — | Fase 0 del plan de los bocetos del dashboard (aprobados por el equipo el 01/11). Define si se puede seguir como está planeado. |
+| 26 | Roles nuevos en Cognito: `admin-general`, `admin-sede`, `jefe`, `operario` + sede por usuario | `backend/` | 🟢 Libre | | | | Fase 1. Depende de la 20 y la 25. |
+| 27 | Auditoría: tabla `induplac-auditoria` (solo agregar, hash encadenado, PITR) + `GET /api/auditoria` filtrado por sede | `backend/` | 🟢 Libre | | | | Fases 2 y 3. Ver idea en `docs/CONTEXTO.md` §2.3. |
+| 28 | Endpoints nuevos: reconocer alerta con comentario, usuarios (crear/desactivar/reenviar) y simulación de umbrales | `backend/` | 🟢 Libre | | | | Fase 3. Depende de la 26 y la 27. |
+| 29 | Edge: auditoría local en SQLite que se sube al reconectar | `edge/` | 🟢 Libre | | | | Fase 4. |
+| 30 | Dashboard: llevar los bocetos aprobados al React (menú nuevo, 7 pantallas por rol) | `dashboard/` | 🟢 Libre | | | | Fase 5. Puede avanzar en paralelo con datos simulados. Bocetos: canvas de Claude Design (respaldo versión 1793325632-2eca). |
 
 ---
 
