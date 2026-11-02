@@ -136,15 +136,13 @@ class RepoDynamo:
 
     def __init__(self, tabla):
         from boto3.dynamodb.conditions import Key
-        from boto3.dynamodb.types import TypeSerializer
 
         self.t = tabla
+        # Ojo: el cliente de un resource de boto3 convierte solo los valores de
+        # Python a tipos de DynamoDB. Si se le pasan ya convertidos ({"S": ...})
+        # los convierte otra vez y quedan como MAP (error real del 02/11).
         self.c = tabla.meta.client
         self.Key = Key
-        self.ser = TypeSerializer()
-
-    def _d(self, v):
-        return self.ser.serialize(v)
 
     def leer_cabeza(self, sede):
         return self.t.get_item(Key={"sede": CABECERA, "id": sede}, ConsistentRead=True).get("Item")
@@ -152,14 +150,14 @@ class RepoDynamo:
     def escribir(self, reg, hash_previo):
         # Nombres con # porque DynamoDB tiene palabras reservadas (ej. "total" lo es)
         cond = "attribute_not_exists(#uh)" if hash_previo is None else "#uh = :p"
-        valores = {":h": self._d(reg["hash"]), ":i": self._d(reg["id"]), ":t": self._d(reg["ts"]), ":uno": self._d(1)}
+        valores = {":h": reg["hash"], ":i": reg["id"], ":t": reg["ts"], ":uno": 1}
         if hash_previo is not None:
-            valores[":p"] = self._d(hash_previo)
+            valores[":p"] = hash_previo
         try:
             self.c.transact_write_items(TransactItems=[
                 {"Update": {
                     "TableName": self.t.name,
-                    "Key": {"sede": self._d(CABECERA), "id": self._d(reg["sede"])},
+                    "Key": {"sede": CABECERA, "id": reg["sede"]},
                     "UpdateExpression": "SET #uh = :h, #ui = :i, #ut = :t ADD #tot :uno",
                     "ConditionExpression": cond,
                     "ExpressionAttributeNames": {"#uh": "ultimo_hash", "#ui": "ultimo_id", "#ut": "ultimo_ts", "#tot": "total"},
@@ -167,7 +165,7 @@ class RepoDynamo:
                 }},
                 {"Put": {
                     "TableName": self.t.name,
-                    "Item": {k: self._d(v) for k, v in reg.items()},
+                    "Item": dict(reg),
                     "ConditionExpression": "attribute_not_exists(#id)",
                     "ExpressionAttributeNames": {"#id": "id"},
                 }},
