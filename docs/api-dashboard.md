@@ -57,6 +57,8 @@ Cualquier error devuelve el código HTTP correspondiente y este cuerpo:
 
 ## 3. Endpoints
 
+> **Nube (2026-11-02):** todo `/api/*` exige el IdToken de Cognito (`Authorization: Bearer …`) y filtra por la sede del usuario (`custom:sede`). Sin rol o sin sede → `403`; pedir otra sede → `403`; `/api/historico` es solo para jefes y admins.
+
 ### 3.1. `GET /api/estado` — Estado del enlace
 
 Alimenta el badge 🟢 / 🔴 / 🟡.

@@ -575,3 +575,15 @@ Abraham (con Claude), en el lab de Felipe. Rama `feature/auditoria`.
 **Corrección (02/11, mediodía):** en la primera prueba real la alerta se reconoció, pero la auditoría no se guardó. CloudWatch mostró `ValidationException: Attribute name is a reserved keyword; reserved keyword: total`. Los nombres de campo de la transacción ahora van con `#` (`ExpressionAttributeNames`), como ya hacía `guardar_alerta`. Rama `fix/auditoria-palabra-reservada`.
 
 **Segunda corrección (02/11):** con `total` ya arreglado, apareció `ValidationException: Incorrect operand type for operator: ADD, operand type: MAP`. Causa: el cliente de un *resource* de boto3 (`tabla.meta.client`) ya convierte los valores de Python a tipos de DynamoDB, y el código además los convertía a mano (`TypeSerializer`). Quedaban convertidos dos veces, como MAP. Ahora se pasan valores simples. Nueva prueba `tests/test_repo_dynamo.py`: intercepta la petición real que arma boto3, sin enviarla a AWS, y revisa los tipos. El CI instala boto3 para correrla. Rama `fix/auditoria-doble-serializacion`.
+
+---
+
+## 2026-11-02 — API filtrada por sede (tarea 28, parte 1)
+
+Abraham (con Claude). Rama `feature/api-por-sede`.
+
+- Todo `/api/*` revisa el token: sin grupo o sin sede válida → 403.
+- `/api/estado`, `/api/locales` y `/api/alertas` devuelven **solo las sedes del usuario**. `/actual`, `/historico` y `/alertas?local_id=` de otra sede → 403.
+- `/api/historico` solo para jefes y admins, porque el operario no ve el histórico (igual que en el dashboard).
+- Antes, la restricción por sede era solo visual: el dashboard escondía las pestañas, pero la API entregaba los datos de las dos sedes a cualquiera con sesión.
+- **Pruebas:** 8 nuevas en `tests/test_permisos.py`, con DynamoDB reemplazado por datos en memoria. **20 en total**, todas pasan.
