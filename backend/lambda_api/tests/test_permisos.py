@@ -98,6 +98,24 @@ class TestPermisos(unittest.TestCase):
         c, b = self.pedir("GET", "/api/auditoria", "[admin-general]", "todas")
         self.assertEqual(set(b["integridad"]), {"local1", "local2", "general"})
 
+    def test_rutas_usuarios(self):
+        from test_usuarios import CognitoFalso
+        import usuarios as U
+
+        self.L._usuarios = U.Usuarios(CognitoFalso(), "pool", self.L.AUDIT)
+        self.assertEqual(self.pedir("GET", "/api/usuarios", "[jefe]", "todas")[0], 403)
+        c, b = self.pedir("GET", "/api/usuarios", "[admin-sede]", "planta")
+        self.assertEqual((c, [u["usuario"] for u in b]), (200, ["barbara", "lisandra"]))
+        ev_cuerpo = '{"usuario": "op.nuevo", "email": "o@x.cl", "grupo": "operario", "sede": "planta"}'
+        claims = {"cognito:groups": "[admin-sede]", "custom:sede": "planta", "cognito:username": "barbara"}
+        r = self.L.lambda_handler({"rawPath": "/api/usuarios", "body": ev_cuerpo, "requestContext": {
+            "http": {"method": "POST"}, "authorizer": {"jwt": {"claims": claims}}}}, None)
+        self.assertEqual(r["statusCode"], 201)
+        r = self.L.lambda_handler({"rawPath": "/api/usuarios/op.nuevo/desactivar", "requestContext": {
+            "http": {"method": "POST"}, "authorizer": {"jwt": {"claims": claims}}}}, None)
+        self.assertEqual(r["statusCode"], 200)
+        self.assertEqual(self.pedir("POST", "/api/usuarios/op.nuevo/borrar", "[admin-general]", "todas")[0], 404)
+
     def test_health_e_ingesta_sin_token(self):
         self.assertEqual(self.pedir("GET", "/health")[0], 200)
         self.assertEqual(self.pedir("POST", "/intervalos")[0], 401)  # pide la clave del Edge, no el token

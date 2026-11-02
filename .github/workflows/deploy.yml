@@ -82,7 +82,7 @@ jobs:
       - name: Actualizar induplac-api
         if: inputs.que != 'dashboard'
         run: |
-          cd backend/lambda_api && zip -q ../../induplac-api.zip lambda_function.py auditoria.py && cd ../..
+          cd backend/lambda_api && zip -q ../../induplac-api.zip lambda_function.py auditoria.py usuarios.py && cd ../..
           aws lambda update-function-code --function-name induplac-api --zip-file fileb://induplac-api.zip --query LastModified
       - name: Actualizar induplac-config
         if: inputs.que != 'dashboard'

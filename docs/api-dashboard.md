@@ -342,15 +342,24 @@ Al crear la cuenta, el Administrador elige un **rol como plantilla** y luego **m
 - **La API valida los permisos en cada petición** y responde 403 si falta. El dashboard solo oculta botones y pestañas; ocultar no es proteger.
 - Cambios de permisos quedan registrados (quién, cuándo, qué cambió), sin nombres ni RUT de operarios (Ley 19.628).
 
-**Endpoints de administración** (nube, requieren `gestionar_usuarios` + MFA):
+**Endpoints de administración** (nube, implementados el 2026-11-02, tarea 28). Los permisos salen del **grupo de Cognito** y la sede de `custom:sede`, no de una lista de permisos por usuario:
 
 | Endpoint | Uso |
 | :--- | :--- |
-| `GET /api/permisos` | Lista de permisos y plantillas (para armar el formulario). |
-| `POST /api/usuarios` | `{ "usuario", "clave_temporal", "rol", "locales", "permisos" }` |
-| `PATCH /api/usuarios/{id}` | Cambia rol, locales o permisos. |
-| `POST /api/usuarios/{id}/resetear-clave` | Nueva clave temporal. |
-| `POST /api/usuarios/{id}/resetear-mfa` | Obliga a registrar el MFA de nuevo. |
+| `GET /api/usuarios` | Lista `{usuario, grupo, sede, habilitado, estado, creado}`, **sin correo**. `estado = FORCE_CHANGE_PASSWORD` significa que todavía no entra por primera vez. |
+| `POST /api/usuarios` | `{ "usuario", "email", "grupo", "sede" }`. Cognito genera la clave temporal y la manda al correo. `409` si ya existe. |
+| `PATCH /api/usuarios/{u}` | `{ "grupo"?, "sede"? }`: cambia rol o sede. |
+| `POST /api/usuarios/{u}/desactivar` | Desactiva la cuenta y cierra sus sesiones abiertas. |
+| `POST /api/usuarios/{u}/activar` | La vuelve a activar. |
+| `POST /api/usuarios/{u}/resetear-clave` | Pone una clave temporal nueva y la devuelve **una sola vez** en `clave_temporal`, para que el admin se la entregue al usuario. |
+| `POST /api/usuarios/{u}/resetear-mfa` | Borra el MFA: jefes y admins deben registrarlo de nuevo al entrar. |
+
+Reglas que valida la API:
+- `admin-general` maneja a todos. `admin-sede` solo a jefes y operarios de su sede (ve también a los otros admins de su sede, sin poder tocarlos).
+- Grupo y sede tienen que calzar: `admin-general` → `todas`; `admin-sede` → `planta`/`oficinas`; `jefe` → cualquiera; `operario` → `planta`/`oficinas`.
+- Nadie se desactiva ni se cambia el rol a sí mismo (`409 NO_A_SI_MISMO`), y siempre queda al menos un `admin-general` activo (`409 ULTIMO_ADMIN`).
+- No hay endpoint para borrar cuentas: se desactivan.
+- Todo queda en la auditoría (`usuario.creado`, `usuario.modificado`, `usuario.desactivado`, `usuario.activado`, `usuario.clave_reseteada`, `usuario.mfa_reseteado`), sin correos ni claves.
 
 ---
 

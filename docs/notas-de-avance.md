@@ -587,3 +587,18 @@ Abraham (con Claude). Rama `feature/api-por-sede`.
 - `/api/historico` solo para jefes y admins, porque el operario no ve el histórico (igual que en el dashboard).
 - Antes, la restricción por sede era solo visual: el dashboard escondía las pestañas, pero la API entregaba los datos de las dos sedes a cualquiera con sesión.
 - **Pruebas:** 8 nuevas en `tests/test_permisos.py`, con DynamoDB reemplazado por datos en memoria. **20 en total**, todas pasan.
+
+---
+
+## 2026-11-02 — Usuarios desde la API (tarea 28, parte 2)
+
+Abraham (con Claude). Rama `feature/api-usuarios`.
+
+- **`backend/lambda_api/usuarios.py` (nuevo):** listar, crear, cambiar rol o sede, desactivar (cierra también sus sesiones), activar, resetear la clave y resetear el MFA, con las APIs admin de Cognito. Contrato y reglas en `docs/api-dashboard.md` §6.4.
+- **Decisiones (revisar en el PR):**
+  - Al crear la cuenta, **Cognito genera la clave temporal y la manda al correo**. Así el admin nunca la ve.
+  - Al resetear, la API genera una clave temporal y se la muestra **una vez** al admin, porque con el login actual no hay flujo de "olvidé mi clave".
+  - Las cuentas **no se borran, se desactivan**. Así la auditoría siempre apunta a un usuario que existe.
+- `USER_POOL_ID` tiene por defecto el user pool del lab. Se puede cambiar con una variable de entorno de la Lambda.
+- **Por confirmar en AWS:** que el LabRole de la Lambda pueda usar las APIs admin de Cognito (pendiente desde la tarea 25). Si no puede, la API responde `502 SIN_PERMISO_COGNITO`.
+- **Pruebas:** 8 nuevas en `tests/test_usuarios.py` (Cognito falso en memoria) y 1 de rutas en `test_permisos.py`. **29 en total**, todas pasan.

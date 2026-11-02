@@ -10,6 +10,10 @@ Detrás de una API Gateway HTTP API. Implementa:
                             POST /api/alertas/{id}/reconocer
                             GET  /api/historico
                             GET  /api/auditoria          (solo admins)
+                            GET  /api/usuarios           (solo admins, tarea 28)
+                            POST /api/usuarios
+                            PATCH /api/usuarios/{u}
+                            POST /api/usuarios/{u}/desactivar | activar | resetear-clave | resetear-mfa
                             GET  /health
 
 Formato de la consulta: docs/api-dashboard.md. Formato de la ingesta: backend/README.md.
@@ -18,6 +22,7 @@ Variables de entorno:
   TABLA_INTERVALOS  (por defecto induplac-intervalos)
   TABLA_ALERTAS     (por defecto induplac-alertas)
   TABLA_AUDITORIA   (por defecto induplac-auditoria)
+  USER_POOL_ID      user pool de Cognito (por defecto el del lab de Felipe)
   CLAVE_INGESTA     clave compartida con el Edge (nunca en el repo)
 
 Login: API Gateway valida el IdToken de Cognito (authorizer JWT `cognito-jwt` en
@@ -38,6 +43,7 @@ import boto3
 from boto3.dynamodb.conditions import Key
 
 import auditoria
+import usuarios as mod_usuarios
 
 try:
     from zoneinfo import ZoneInfo
@@ -50,6 +56,17 @@ dynamo = boto3.resource("dynamodb")
 T_INT = dynamo.Table(os.environ.get("TABLA_INTERVALOS", "induplac-intervalos"))
 T_ALE = dynamo.Table(os.environ.get("TABLA_ALERTAS", "induplac-alertas"))
 CLAVE_INGESTA = os.environ.get("CLAVE_INGESTA", "")
+USER_POOL_ID = os.environ.get("USER_POOL_ID", "us-east-1_BBaCiAwOt")
+_usuarios = None
+
+
+def usuarios():
+    global _usuarios
+    if _usuarios is None:  # se crea al primer uso: las demás rutas no necesitan Cognito
+        _usuarios = mod_usuarios.Usuarios(boto3.client("cognito-idp"), USER_POOL_ID, AUDIT)
+    return _usuarios
+
+
 AUDIT = auditoria.RepoDynamo(dynamo.Table(os.environ.get("TABLA_AUDITORIA", "induplac-auditoria")))
 
 LOCALES = [
@@ -80,7 +97,7 @@ MINUTOS_DESCONECTADO = 30
 CORS = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "content-type,authorization,x-induplac-key",
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Methods": "GET,POST,PATCH,OPTIONS",
 }
 
 
@@ -485,6 +502,35 @@ def historico(evento, quien):
     return respuesta(200, {"variable": variable, "agrupacion": agr, "series": series})
 
 
+def rutas_usuarios(metodo, partes, evento, quien):
+    from urllib.parse import unquote
+
+    try:
+        cuerpo = json.loads(evento.get("body") or "{}")
+    except ValueError:
+        return error(400, "PARAMETROS", "El cuerpo no es JSON válido.")
+    acciones = {"desactivar": "desactivar", "activar": "activar",
+                "resetear-clave": "resetear_clave", "resetear-mfa": "resetear_mfa"}
+    try:
+        u = usuarios()
+        if metodo == "GET" and len(partes) == 2:
+            return respuesta(200, u.listar(quien))
+        if metodo == "POST" and len(partes) == 2:
+            return respuesta(201, u.crear(quien, cuerpo))
+        if metodo == "PATCH" and len(partes) == 3:
+            return respuesta(200, u.modificar(quien, unquote(partes[2]), cuerpo))
+        if metodo == "POST" and len(partes) == 4 and partes[3] in acciones:
+            return respuesta(200, getattr(u, acciones[partes[3]])(quien, unquote(partes[2])))
+    except mod_usuarios.ErrorUsuarios as e:
+        return error(e.http, e.codigo, e.mensaje)
+    except Exception as e:
+        if "AccessDenied" in repr(e) or "not authorized" in repr(e):
+            print("ERROR permisos Cognito", repr(e))
+            return error(502, "SIN_PERMISO_COGNITO", "La Lambda no tiene permiso para administrar Cognito.")
+        raise
+    return error(404, "RUTA_NO_EXISTE", f"{metodo} /{'/'.join(partes)}")
+
+
 # ---------------- enrutador ----------------
 
 def lambda_handler(evento, _contexto):
@@ -523,6 +569,8 @@ def lambda_handler(evento, _contexto):
             return historico(evento, quien)
         if metodo == "GET" and ruta == "/api/auditoria":
             return ver_auditoria(q, quien)
+        if partes[:2] == ["api", "usuarios"]:
+            return rutas_usuarios(metodo, partes, evento, quien)
         return error(404, "RUTA_NO_EXISTE", f"{metodo} {ruta}")
     except Exception as e:  # nunca devolver el stack al cliente
         print("ERROR", repr(e))
