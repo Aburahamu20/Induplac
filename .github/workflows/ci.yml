@@ -46,6 +46,9 @@ jobs:
       - name: Pruebas del Edge (validación, duplicados y reglas de alerta)
         working-directory: edge
         run: python -m unittest discover -s tests -v
+      - name: Pruebas de la auditoría (cadena de hashes)
+        working-directory: backend/lambda_api
+        run: python -m unittest discover -s tests -v
 
   secretos:
     name: Sin claves en el repositorio
