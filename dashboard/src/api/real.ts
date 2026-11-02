@@ -71,13 +71,17 @@ export class FuenteApi implements Fuente {
     return this.get<Alerta[]>(`/alertas${qs ? `?${qs}` : ''}`)
   }
 
-  async reconocerAlerta(id: string) {
+  async reconocerAlerta(id: string, comentario?: string) {
     const t = this.token()
     const res = await fetch(`${this.base}/alertas/${encodeURIComponent(id)}/reconocer`, {
       method: 'POST',
-      headers: t ? { Authorization: `Bearer ${t}` } : {},
+      headers: { 'Content-Type': 'application/json', ...(t ? { Authorization: `Bearer ${t}` } : {}) },
+      body: JSON.stringify(comentario ? { comentario } : {}),
     })
-    if (!res.ok) throw new Error(`Error HTTP ${res.status}`)
+    if (!res.ok) {
+      const cuerpo = await res.json().catch(() => null)
+      throw new Error(cuerpo?.error?.mensaje ?? `Error HTTP ${res.status}`)
+    }
     return res.json() as Promise<Alerta>
   }
 

@@ -416,11 +416,13 @@ export class FuenteSimulada implements Fuente {
       .map((a) => ({ ...a }))
   }
 
-  async reconocerAlerta(id: string): Promise<Alerta> {
+  async reconocerAlerta(id: string, comentario?: string): Promise<Alerta> {
     const a = this.listaAlertas.find((x) => x.id === id)
     if (!a) throw new Error('Alerta no encontrada')
+    if (a.estado !== 'activa') throw new Error('Esta alerta ya fue reconocida.')
     a.estado = 'reconocida'
     a.reconocida_en = iso(new Date())
+    a.comentario = comentario || null
     // Reconocer sin internet también queda pendiente de subir (ADR-08)
     if (this.sim[a.local_id].enlace.enlace === 'offline') this.sim[a.local_id].enlace.pendientes += 1
     return { ...a }

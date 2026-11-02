@@ -32,10 +32,19 @@ class TablaAlertas:
         local = KeyConditionExpression.get_expression()["values"][1]
         return {"Items": [dict(a) for a in self.items.get(local, [])]}
 
-    def update_item(self, Key, **_):
-        a = next(x for x in self.items[Key["local_id"]] if x["id"] == Key["id"])
-        a["estado"] = "reconocida"
+    def update_item(self, Key, ExpressionAttributeValues=None, **_):
+        import lambda_function as L
+        a = next((x for x in self.items[Key["local_id"]] if x["id"] == Key["id"]), None)
+        if not a or a["estado"] != "activa":
+            raise L.dynamo.meta.client.exceptions.ConditionalCheckFailedException(
+                {"Error": {"Code": "ConditionalCheckFailedException", "Message": "x"}}, "UpdateItem")
+        v = ExpressionAttributeValues or {}
+        a.update(estado="reconocida", reconocida_por=v.get(":p"), comentario=v.get(":c"))
         return {"Attributes": dict(a)}
+
+    def get_item(self, Key):
+        a = next((x for x in self.items.get(Key["local_id"], []) if x["id"] == Key["id"]), None)
+        return {"Item": dict(a)} if a else {}
 
 
 @unittest.skipUnless(boto3, "boto3 no está instalado")
@@ -91,6 +100,23 @@ class TestPermisos(unittest.TestCase):
         self.assertEqual(self.pedir("POST", ruta, "[jefe]", "oficinas")[0], 403)
         self.assertEqual(self.pedir("POST", ruta, "[jefe]", "planta")[0], 200)
         self.assertEqual(len(self.L.AUDIT.items), 1)
+
+    def test_reconocer_con_comentario_una_sola_vez(self):
+        ruta = "/api/alertas/local1:energia_kw:t1/reconocer"
+        claims = {"cognito:groups": "[jefe]", "custom:sede": "planta", "cognito:username": "jefe.planta"}
+
+        def post(cuerpo):
+            r = self.L.lambda_handler({"rawPath": ruta, "body": cuerpo, "requestContext": {
+                "http": {"method": "POST"}, "authorizer": {"jwt": {"claims": claims}}}}, None)
+            return r["statusCode"], json.loads(r["body"])
+
+        self.assertEqual(post('{"comentario": "' + "x" * 501 + '"}')[0], 400)
+        c, a = post('{"comentario": "Era el compresor 2, ya se apagó"}')
+        self.assertEqual((c, a["reconocida_por"], a["comentario"]), (200, "jefe.planta", "Era el compresor 2, ya se apagó"))
+        self.assertEqual(post('{"comentario": "otro"}')[0], 409)  # no se reescribe
+        reg = list(self.L.AUDIT.items.values())[0]
+        self.assertIn("compresor 2", reg["detalle"])
+        self.assertEqual(self.pedir("POST", "/api/alertas/local1:no:existe/reconocer", "[jefe]", "planta")[0], 404)
 
     def test_auditoria(self):
         self.assertEqual(self.pedir("GET", "/api/auditoria", "[jefe]", "todas")[0], 403)

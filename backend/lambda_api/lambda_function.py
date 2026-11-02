@@ -401,30 +401,48 @@ def lista_alertas(q, quien):
     items.sort(key=lambda a: a["inicio_intervalo"], reverse=True)
     for a in items:
         a.setdefault("reconocida_en", None)
+        a.setdefault("reconocida_por", None)
+        a.setdefault("comentario", None)
     return respuesta(200, items[:200])
 
 
-def reconocer(id_alerta, quien):
+MAX_COMENTARIO = 500
+
+
+def reconocer(id_alerta, quien, evento=None):
     local_id = id_alerta.split(":", 1)[0]
     if local_id not in IDS_LOCALES:
         return error(404, "ALERTA_NO_EXISTE", "Alerta inexistente.")
     if not quien or quien["grupo"] not in PUEDEN_RECONOCER or local_id not in quien["locales"]:
         return error(403, "SIN_PERMISO", "Tu rol no puede reconocer alertas de esta sede.")
     try:
+        cuerpo = json.loads((evento or {}).get("body") or "{}")
+    except ValueError:
+        return error(400, "PARAMETROS", "El cuerpo no es JSON válido.")
+    comentario = str(cuerpo.get("comentario") or "").strip()
+    if len(comentario) > MAX_COMENTARIO:
+        return error(400, "PARAMETROS", f"El comentario puede tener hasta {MAX_COMENTARIO} caracteres.")
+    try:
+        # Solo una vez: una alerta ya reconocida no se vuelve a reconocer ni se le cambia el comentario
         r = T_ALE.update_item(
             Key={"local_id": local_id, "id": id_alerta},
-            UpdateExpression="SET #e=:e, reconocida_en=:t",
-            ConditionExpression="attribute_exists(id)",
+            UpdateExpression="SET #e=:e, reconocida_en=:t, reconocida_por=:p, comentario=:c",
+            ConditionExpression="attribute_exists(id) AND #e = :activa",
             ExpressionAttributeNames={"#e": "estado"},
-            ExpressionAttributeValues={":e": "reconocida", ":t": iso(datetime.now(timezone.utc))},
+            ExpressionAttributeValues={":e": "reconocida", ":t": iso(datetime.now(timezone.utc)),
+                                       ":p": quien["usuario"], ":c": comentario or None, ":activa": "activa"},
             ReturnValues="ALL_NEW",
         )
     except dynamo.meta.client.exceptions.ConditionalCheckFailedException:
+        existe = T_ALE.get_item(Key={"local_id": local_id, "id": id_alerta}).get("Item")
+        if existe:
+            return error(409, "YA_RECONOCIDA", "Esta alerta ya fue reconocida.")
         return error(404, "ALERTA_NO_EXISTE", "Alerta inexistente.")
     a = r["Attributes"]
     try:
         auditoria.registrar(AUDIT, local_id, quien["usuario"], quien["grupo"], "alerta.reconocida", id_alerta,
-                            {"variable": a.get("variable"), "nivel": a.get("nivel"), "valor": a.get("valor")})
+                            {"variable": a.get("variable"), "nivel": a.get("nivel"), "valor": a.get("valor"),
+                             "comentario": comentario or None})
     except Exception as e:  # la alerta ya quedó reconocida: se avisa en los logs
         print("ERROR auditoría", repr(e))
     return respuesta(200, a)
@@ -564,7 +582,7 @@ def lambda_handler(evento, _contexto):
             return lista_alertas(q, quien)
         if metodo == "POST" and len(partes) == 4 and partes[:2] == ["api", "alertas"] and partes[3] == "reconocer":
             from urllib.parse import unquote
-            return reconocer(unquote(partes[2]), quien)
+            return reconocer(unquote(partes[2]), quien, evento)
         if metodo == "GET" and ruta == "/api/historico":
             return historico(evento, quien)
         if metodo == "GET" and ruta == "/api/auditoria":
