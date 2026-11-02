@@ -26,8 +26,7 @@ requestContext.authorizer.jwt.claims. /intervalos y /health no pasan por él.
 
 Simplificaciones del MVP (documentadas en backend/README.md):
   - Las alertas se guardan en DynamoDB, no en RDS.
-  - Las consultas de datos todavía no filtran por la sede del usuario (Fase 3);
-    reconocer alertas y la auditoría sí revisan grupo y sede.
+  - Cada /api/* filtra por la sede del token (custom:sede) y revisa el grupo.
 """
 
 import json
@@ -94,6 +93,7 @@ GRUPOS_TODAS_LAS_SEDES = {"admin-general", "administrador"}
 SEDES_COGNITO = {"planta": ["local1"], "oficinas": ["local2"], "todas": ["local1", "local2"]}
 PUEDEN_RECONOCER = {"admin-general", "administrador", "admin-sede", "jefe"}
 VEN_AUDITORIA = {"admin-general", "administrador", "admin-sede"}
+VEN_HISTORICO = {"admin-general", "administrador", "admin-sede", "jefe"}  # el operario solo ve lo actual
 
 
 def grupos_de(claims):
@@ -317,10 +317,12 @@ def evaluar_alertas(local_id, r):
 
 # ---------------- consulta (dashboard) ----------------
 
-def estado():
+def estado(quien):
     ahora = datetime.now(timezone.utc)
     salida = []
     for l in LOCALES:
+        if l["local_id"] not in quien["locales"]:
+            continue
         u = ultimo_intervalo(l["local_id"])
         ultimo = (u.get("recibido_en") or u["inicio_intervalo"]) if u else None
         caido = not ultimo or ahora - leer_iso(ultimo) > timedelta(minutes=MINUTOS_DESCONECTADO)
@@ -334,9 +336,11 @@ def estado():
     return respuesta(200, {"origen": "nube", "hora_servidor": iso(ahora), "locales": salida})
 
 
-def actual(local_id):
+def actual(local_id, quien):
     if local_id not in IDS_LOCALES:
         return error(404, "LOCAL_NO_EXISTE", "Local inexistente.")
+    if local_id not in quien["locales"]:
+        return error(403, "SIN_PERMISO", "No puedes ver esta sede.")
     u = ultimo_intervalo(local_id)
     if not u:
         return error(503, "SIN_DATOS", "Todavía no llegan datos de este local.")
@@ -368,8 +372,10 @@ def actual(local_id):
     return respuesta(200, {"local_id": local_id, "ts": inicio, "variables": v})
 
 
-def lista_alertas(q):
-    locales = [q["local_id"]] if q.get("local_id") in IDS_LOCALES else sorted(IDS_LOCALES)
+def lista_alertas(q, quien):
+    if q.get("local_id") and q["local_id"] not in quien["locales"]:
+        return error(403, "SIN_PERMISO", "No puedes ver esta sede.")
+    locales = [q["local_id"]] if q.get("local_id") in IDS_LOCALES else sorted(quien["locales"])
     items = []
     for l in locales:
         items += T_ALE.query(KeyConditionExpression=Key("local_id").eq(l))["Items"]
@@ -435,7 +441,9 @@ def ver_auditoria(q, quien):
 CAMPO_HIST = {"energia_kw": "energia_kw", "uv_index": "uv_max", "agua_m3h": "agua_m3h", "agua_m3_dia": "agua_m3"}
 
 
-def historico(evento):
+def historico(evento, quien):
+    if quien["grupo"] not in VEN_HISTORICO:
+        return error(403, "SIN_PERMISO", "Tu rol no ve el histórico.")
     q = evento.get("queryStringParameters") or {}
     multi = evento.get("rawQueryString", "")
     locales = [p.split("=", 1)[1] for p in multi.split("&") if p.startswith("local_id=")] or [q.get("local_id")]
@@ -448,6 +456,8 @@ def historico(evento):
     for l in locales:
         if l not in IDS_LOCALES:
             return error(400, "PARAMETROS", f"Local inválido: {l}")
+        if l not in quien["locales"]:
+            return error(403, "SIN_PERMISO", "No puedes ver esta sede.")
         grupos = {}
         for i in intervalos(l, q["desde"], q["hasta"]):
             if i.get(campo) is None:
@@ -494,21 +504,25 @@ def lambda_handler(evento, _contexto):
             return respuesta(200, {"ok": True})
         if metodo == "POST" and ruta == "/intervalos":
             return ingesta(evento)
+        # Todo /api/* pasa por el authorizer JWT: sin grupo o sede válidos no se ve nada
+        quien = perfil(evento) if ruta.startswith("/api/") else None
+        if ruta.startswith("/api/") and not quien:
+            return error(403, "SIN_PERMISO", "Tu cuenta no tiene rol o sede asignados.")
         if metodo == "GET" and ruta == "/api/estado":
-            return estado()
+            return estado(quien)
         if metodo == "GET" and ruta == "/api/locales":
-            return respuesta(200, LOCALES)
+            return respuesta(200, [l for l in LOCALES if l["local_id"] in quien["locales"]])
         if metodo == "GET" and len(partes) == 4 and partes[:2] == ["api", "locales"] and partes[3] == "actual":
-            return actual(partes[2])
+            return actual(partes[2], quien)
         if metodo == "GET" and ruta == "/api/alertas":
-            return lista_alertas(q)
+            return lista_alertas(q, quien)
         if metodo == "POST" and len(partes) == 4 and partes[:2] == ["api", "alertas"] and partes[3] == "reconocer":
             from urllib.parse import unquote
-            return reconocer(unquote(partes[2]), perfil(evento))
+            return reconocer(unquote(partes[2]), quien)
         if metodo == "GET" and ruta == "/api/historico":
-            return historico(evento)
+            return historico(evento, quien)
         if metodo == "GET" and ruta == "/api/auditoria":
-            return ver_auditoria(q, perfil(evento))
+            return ver_auditoria(q, quien)
         return error(404, "RUTA_NO_EXISTE", f"{metodo} {ruta}")
     except Exception as e:  # nunca devolver el stack al cliente
         print("ERROR", repr(e))
