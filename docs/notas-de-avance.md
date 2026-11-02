@@ -571,3 +571,5 @@ Abraham (con Claude), en el lab de Felipe. Rama `feature/auditoria`.
 - [ ] Pantalla de Auditoría en el dashboard, con el aviso "Auditoría alterada" (tarea 30).
 - [ ] Las consultas de datos (`/api/estado`, `/actual`, `/historico`) todavía no filtran por la sede del token (Fase 3).
 - [ ] Reconocer una alerta todavía **cambia** el registro de la alerta. La idea de §2.3 es que solo agregue (tarea 28).
+
+**Corrección (02/11, mediodía):** en la primera prueba real la alerta se reconoció, pero la auditoría no se guardó. CloudWatch mostró `ValidationException: Attribute name is a reserved keyword; reserved keyword: total`. Los nombres de campo de la transacción ahora van con `#` (`ExpressionAttributeNames`), como ya hacía `guardar_alerta`. Rama `fix/auditoria-palabra-reservada`.
