@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Aviso } from './estadoEnlace'
-import { NOMBRE_ROL } from '../auth'
+import { NOMBRE_ROL, nombreSedes } from '../auth'
 import { useSesion } from '../auth/sesion'
 
 const PILDORA = {
@@ -51,7 +51,7 @@ export function Encabezado({ aviso, simulado }: { aviso?: Aviso; simulado: boole
         <div className="flex items-center gap-2 border-l border-borde pl-3">
           <div className="text-right leading-tight">
             <p className="text-sm font-bold">{sesion.usuario}</p>
-            <p className="text-[11px] text-tinta-2">{NOMBRE_ROL[sesion.rol]}</p>
+            <p className="text-[11px] text-tinta-2">{NOMBRE_ROL[sesion.rol]} · {nombreSedes(sesion.locales)}</p>
           </div>
           <button
             onClick={cerrar}

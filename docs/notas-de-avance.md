@@ -494,3 +494,24 @@ Abraham y Felipe (con Claude). Rama `feature/api-local-edge`.
 ### Siguen abiertos
 - [ ] Bajar los usuarios desde RDS al sincronizar (§6.3 opción 1). Hoy se crean en cada Edge con `usuarios.py`, con acceso a la Raspberry Pi.
 - [ ] Con la base vacía, el dashboard se queda en *"Cargando datos…"* (la API responde 503 `SIN_DATOS`); podría mostrar un aviso.
+
+---
+
+## 2026-11-02 — Roles por sede en Cognito (tarea 26, Fase 1)
+
+Abraham (con Claude), en el Learner Lab de Felipe. Rama `feature/roles-cognito-sede`.
+
+- **Cognito (consola):** grupos nuevos `admin-general` y `admin-sede`, junto a `jefe` y `operario`. `administrador` queda por ahora para no cortar el acceso.
+- **`custom:sede`:** valores legibles `planta`, `oficinas` y `todas` (en vez de `local1`/`local2`, que confundían). En el app client se puede leer pero **no escribir**.
+- **Cuentas asignadas:** Abraham y Felipe → `admin-general` + `todas`; Bárbara → `admin-sede` + `planta`; Seba → `admin-sede` + `oficinas`; Lisandra → `operario` + `planta`.
+- **Dashboard (`auth/cognito.ts`):** nueva función `rolDesdeToken`. Lee `cognito:groups` y `custom:sede` del IdToken. Orden si hay varios grupos: `admin-general` > `administrador` > `admin-sede` > `jefe` > `operario`. `admin-general` y `administrador` ven ambas sedes; los demás, la de su `custom:sede` (sin importar mayúsculas ni espacios).
+- **Cambio de comportamiento:** antes, una cuenta sin grupo entraba como operario y el operario siempre veía Planta. Ahora una cuenta **sin grupo o sin sede válida no entra** y ve un mensaje para pedirle al admin que la revise.
+- **Encabezado:** muestra rol y sede, por ejemplo *Admin de sede · Planta*.
+- Se borró el usuario de prueba `prueba.lab` (tarea 25).
+- **Pruebas:** build y lint sin errores. `rolDesdeToken` se probó con las cuentas del equipo y con casos borde (sin grupo, sin sede, `plantas` mal escrito, mayúsculas).
+
+### Siguen abiertos
+- [ ] Desplegar el dashboard en S3 y probar el login con cada cuenta.
+- [ ] Sacar a Abraham y Felipe de `administrador` y después borrar ese grupo.
+- [ ] Que `induplac-api` también valide grupo y sede en cada petición (Fase 3). Hoy la restricción es solo en la pantalla.
+- [ ] Definir con Felipe si el MFA es para todos o solo para jefes y admins.
