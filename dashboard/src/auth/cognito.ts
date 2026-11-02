@@ -6,8 +6,8 @@
 // público (sin secreto) y tener habilitado ALLOW_USER_PASSWORD_AUTH.
 //
 // Cognito dice QUIÉN es el usuario y maneja la clave temporal y el MFA.
-// QUÉ puede hacer sale del grupo de Cognito (administrador / jefe / operario),
-// que se traduce a la misma plantilla de permisos que el login de demo.
+// QUÉ puede hacer sale del grupo de Cognito y DÓNDE, del atributo custom:sede
+// (ver rolDesdeToken más abajo).
 
 import type { LocalId } from '../api/tipos'
 import { uriOtpauth } from './totp'
@@ -15,30 +15,54 @@ import type { Permiso, ProveedorAuth, RespuestaAuth, Rol, Sesion } from './tipos
 
 interface Plantilla {
   rol: Rol
-  locales: LocalId[]
   permisos: Permiso[]
+  // true: ve ambas sedes sin mirar custom:sede
+  todasLasSedes?: boolean
 }
 
-// Mismas plantillas que los usuarios de demo (auth/simulada.ts)
+const PERMISOS_ADMIN: Permiso[] = ['ver_actual', 'ver_alertas', 'ver_historico', 'ver_general', 'reconocer_alertas', 'modificar_umbrales', 'gestionar_usuarios']
+const PERMISOS_JEFE: Permiso[] = ['ver_actual', 'ver_alertas', 'ver_historico', 'ver_general', 'reconocer_alertas']
+const PERMISOS_OPERARIO: Permiso[] = ['ver_actual', 'ver_alertas']
+
+// Grupos de Cognito. El grupo dice QUÉ puede hacer; custom:sede dice DÓNDE.
 const PLANTILLAS: Record<string, Plantilla> = {
-  administrador: {
-    rol: 'administrador',
-    locales: ['local1', 'local2'],
-    permisos: ['ver_actual', 'ver_alertas', 'ver_historico', 'ver_general', 'reconocer_alertas', 'modificar_umbrales', 'gestionar_usuarios'],
-  },
-  jefe: {
-    rol: 'jefe_mantenimiento_operaciones',
-    locales: ['local1', 'local2'],
-    permisos: ['ver_actual', 'ver_alertas', 'ver_historico', 'ver_general', 'reconocer_alertas'],
-  },
-  operario: {
-    rol: 'operario',
-    locales: ['local1'],
-    permisos: ['ver_actual', 'ver_alertas'],
-  },
+  'admin-general': { rol: 'admin_general', permisos: PERMISOS_ADMIN, todasLasSedes: true },
+  // Grupo antiguo: se mantiene mientras se migra a admin-general
+  administrador: { rol: 'administrador', permisos: PERMISOS_ADMIN, todasLasSedes: true },
+  'admin-sede': { rol: 'admin_sede', permisos: PERMISOS_ADMIN },
+  jefe: { rol: 'jefe_mantenimiento_operaciones', permisos: PERMISOS_JEFE },
+  operario: { rol: 'operario', permisos: PERMISOS_OPERARIO },
 }
-// Si un usuario no tiene grupo, entra con lo mínimo
-const ORDEN_GRUPOS = ['administrador', 'jefe', 'operario']
+// Si el usuario está en varios grupos, gana el primero de esta lista
+const ORDEN_GRUPOS = ['admin-general', 'administrador', 'admin-sede', 'jefe', 'operario']
+
+// Valores de custom:sede (legibles para el equipo) -> locales internos (RDS y Edge)
+const SEDES: Record<string, LocalId[]> = {
+  planta: ['local1'],
+  oficinas: ['local2'],
+  todas: ['local1', 'local2'],
+}
+
+const SIN_SEDE = 'Tu cuenta no tiene una sede válida asignada. Pídele al administrador que la revise.'
+const SIN_GRUPO = 'Tu cuenta no tiene un rol asignado. Pídele al administrador que la revise.'
+
+// Traduce el payload del IdToken a rol, locales y permisos.
+// Sin grupo conocido o sin sede válida no se entra: es mejor no ver nada que ver de más.
+export function rolDesdeToken(datos: Record<string, unknown>): { rol: Rol; locales: LocalId[]; permisos: Permiso[] } {
+  const grupos = (datos['cognito:groups'] as string[] | undefined) ?? []
+  const grupo = ORDEN_GRUPOS.find((g) => grupos.includes(g))
+  if (!grupo) throw new Error(SIN_GRUPO)
+  const p = PLANTILLAS[grupo]
+  let locales: LocalId[]
+  if (p.todasLasSedes) locales = ['local1', 'local2']
+  else {
+    const sede = String(datos['custom:sede'] ?? '').trim().toLowerCase()
+    const encontrados = SEDES[sede]
+    if (!encontrados) throw new Error(SIN_SEDE)
+    locales = encontrados
+  }
+  return { rol: p.rol, locales: [...locales], permisos: [...p.permisos] }
+}
 
 const EMISOR_MFA = 'Induplac (nube)'
 
@@ -131,9 +155,7 @@ export class AuthCognito implements ProveedorAuth {
 
   private crearSesion(usuario: string, res: { IdToken: string; AccessToken: string; ExpiresIn: number }): Sesion {
     const datos = payloadJwt(res.IdToken)
-    const grupos = (datos['cognito:groups'] as string[] | undefined) ?? []
-    const grupo = ORDEN_GRUPOS.find((g) => grupos.includes(g)) ?? 'operario'
-    const p = PLANTILLAS[grupo]
+    const p = rolDesdeToken(datos)
     const sesion: Sesion = {
       usuario: String(datos['cognito:username'] ?? usuario),
       token: res.IdToken,
@@ -209,8 +231,7 @@ export class AuthCognito implements ProveedorAuth {
   async yo(token: string): Promise<Sesion> {
     const datos = payloadJwt(token)
     if (Number(datos.exp) * 1000 < Date.now()) throw new Error('Sesión expirada.')
-    const grupos = (datos['cognito:groups'] as string[] | undefined) ?? []
-    const p = PLANTILLAS[ORDEN_GRUPOS.find((g) => grupos.includes(g)) ?? 'operario']
+    const p = rolDesdeToken(datos)
     return { usuario: String(datos['cognito:username']), token, rol: p.rol, locales: p.locales, permisos: p.permisos, expira: new Date(Number(datos.exp) * 1000).toISOString() }
   }
 

@@ -13,12 +13,22 @@ export type Permiso =
 
 export const PERMISOS_MODIFICAR: Permiso[] = ['reconocer_alertas', 'modificar_umbrales', 'gestionar_usuarios']
 
-export type Rol = 'operario' | 'jefe_mantenimiento_operaciones' | 'administrador'
+export type Rol = 'operario' | 'jefe_mantenimiento_operaciones' | 'administrador' | 'admin_general' | 'admin_sede'
 
 export const NOMBRE_ROL: Record<Rol, string> = {
   operario: 'Operario',
   jefe_mantenimiento_operaciones: 'Jefe de Mantenimiento/Operaciones',
   administrador: 'Administrador',
+  admin_general: 'Admin general',
+  admin_sede: 'Admin de sede',
+}
+
+// Texto corto de las sedes que ve el usuario, para mostrar junto al rol
+export function nombreSedes(locales: LocalId[]): string {
+  if (locales.includes('local1') && locales.includes('local2')) return 'Ambas sedes'
+  if (locales.includes('local1')) return 'Planta'
+  if (locales.includes('local2')) return 'Oficinas'
+  return 'Sin sede'
 }
 
 export interface Sesion {
