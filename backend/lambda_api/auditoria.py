@@ -150,7 +150,8 @@ class RepoDynamo:
         return self.t.get_item(Key={"sede": CABECERA, "id": sede}, ConsistentRead=True).get("Item")
 
     def escribir(self, reg, hash_previo):
-        cond = "attribute_not_exists(ultimo_hash)" if hash_previo is None else "ultimo_hash = :p"
+        # Nombres con # porque DynamoDB tiene palabras reservadas (ej. "total" lo es)
+        cond = "attribute_not_exists(#uh)" if hash_previo is None else "#uh = :p"
         valores = {":h": self._d(reg["hash"]), ":i": self._d(reg["id"]), ":t": self._d(reg["ts"]), ":uno": self._d(1)}
         if hash_previo is not None:
             valores[":p"] = self._d(hash_previo)
@@ -159,14 +160,16 @@ class RepoDynamo:
                 {"Update": {
                     "TableName": self.t.name,
                     "Key": {"sede": self._d(CABECERA), "id": self._d(reg["sede"])},
-                    "UpdateExpression": "SET ultimo_hash = :h, ultimo_id = :i, ultimo_ts = :t ADD total :uno",
+                    "UpdateExpression": "SET #uh = :h, #ui = :i, #ut = :t ADD #tot :uno",
                     "ConditionExpression": cond,
+                    "ExpressionAttributeNames": {"#uh": "ultimo_hash", "#ui": "ultimo_id", "#ut": "ultimo_ts", "#tot": "total"},
                     "ExpressionAttributeValues": valores,
                 }},
                 {"Put": {
                     "TableName": self.t.name,
                     "Item": {k: self._d(v) for k, v in reg.items()},
-                    "ConditionExpression": "attribute_not_exists(id)",
+                    "ConditionExpression": "attribute_not_exists(#id)",
+                    "ExpressionAttributeNames": {"#id": "id"},
                 }},
             ])
         except self.c.exceptions.TransactionCanceledException as e:
