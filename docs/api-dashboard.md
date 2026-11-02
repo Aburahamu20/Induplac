@@ -161,6 +161,8 @@ Parámetros (todos opcionales): `local_id`, `estado` (`activa` · `reconocida` �
 - Funciona **también offline** en el Edge con login local (decisión 2026-10-14).
 - Respuesta: la alerta actualizada (`estado: "reconocida"`, `reconocida_en` con la hora).
 - **Nube (2026-11-02):** solo grupos `admin-general`, `admin-sede` y `jefe`, y solo alertas de su sede (`custom:sede`); si no, `403 SIN_PERMISO`. Cada reconocimiento queda en la auditoría (§3.7).
+- **Cuerpo opcional:** `{ "comentario": "…" }`, de hasta 500 caracteres. La respuesta agrega `reconocida_por` (usuario) y `comentario`, que también quedan en la auditoría.
+- **Una sola vez:** si la alerta ya estaba reconocida → `409 YA_RECONOCIDA`. No se reescribe quién ni el comentario.
 
 ### 3.6. `GET /api/historico` — Series históricas
 

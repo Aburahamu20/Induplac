@@ -68,6 +68,9 @@ export interface Alerta {
   estado: 'activa' | 'reconocida' | 'cerrada'
   origen: 'edge' | 'lambda'
   reconocida_en: string | null
+  // Nube (2026-11-02): quién la reconoció y su comentario opcional
+  reconocida_por?: string | null
+  comentario?: string | null
 }
 
 // §3.6 GET /api/historico

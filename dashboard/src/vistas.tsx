@@ -143,12 +143,19 @@ function TarjetaAlerta({ a, sincronizada }: { a: Alerta; sincronizada: boolean }
   const v = VARIABLES[a.variable]
   const { puede } = useSesion()
   const [enviando, setEnviando] = useState(false)
+  const [escribiendo, setEscribiendo] = useState(false)
+  const [comentario, setComentario] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const reconocida = a.estado !== 'activa'
   const reconocer = async () => {
     setEnviando(true)
+    setError(null)
     try {
-      await fuente.reconocerAlerta(a.id)
+      await fuente.reconocerAlerta(a.id, comentario.trim() || undefined)
+      setEscribiendo(false)
       refrescarTodo()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
     } finally {
       setEnviando(false)
     }
@@ -186,14 +193,43 @@ function TarjetaAlerta({ a, sincronizada }: { a: Alerta; sincronizada: boolean }
         <span className="tabular-nums">{formatear(a.variable, a.umbral)} {v.unidad}</span> · desde las{' '}
         {fechaHora(a.inicio_intervalo)}
       </p>
-      <div className="mt-3 flex items-center gap-3">
+      <div className="mt-3 flex flex-wrap items-center gap-3">
         {reconocida ? (
-          <span className="text-sm text-tinta-2">✓ Reconocida {a.reconocida_en && `a las ${fechaHora(a.reconocida_en)}`}</span>
+          <div className="text-sm text-tinta-2">
+            <span>
+              ✓ Reconocida {a.reconocida_en && `a las ${fechaHora(a.reconocida_en)}`}
+              {a.reconocida_por && ` por ${a.reconocida_por}`}
+            </span>
+            {a.comentario && <p className="mt-1 italic text-tinta">“{a.comentario}”</p>}
+          </div>
+        ) : puede('reconocer_alertas') && escribiendo ? (
+          <div className="grid w-full gap-2">
+            <textarea
+              value={comentario}
+              onChange={(e) => setComentario(e.target.value.slice(0, 500))}
+              placeholder="Comentario (opcional): qué revisaste o qué se hizo"
+              rows={2}
+              className="w-full rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-tinta outline-none placeholder:text-tinta-3 focus:border-oficinas"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={reconocer}
+                disabled={enviando}
+                className="rounded-md bg-oficinas px-3 py-1.5 text-sm font-bold text-white hover:brightness-110 disabled:opacity-50"
+              >
+                Confirmar reconocimiento
+              </button>
+              <button onClick={() => setEscribiendo(false)} className="rounded-md border border-borde px-3 py-1.5 text-sm text-tinta-2 hover:text-tinta">
+                Cancelar
+              </button>
+              <span className="self-center text-xs text-tinta-3">{comentario.length}/500 · queda en la auditoría</span>
+            </div>
+            {error && <p className="text-sm text-critico">{error}</p>}
+          </div>
         ) : puede('reconocer_alertas') ? (
           <button
-            onClick={reconocer}
-            disabled={enviando}
-            className="rounded-md border border-borde bg-panel px-3 py-1.5 text-sm font-bold hover:border-tinta-3 disabled:opacity-50"
+            onClick={() => setEscribiendo(true)}
+            className="rounded-md border border-borde bg-panel px-3 py-1.5 text-sm font-bold hover:border-tinta-3"
           >
             Reconocer alerta
           </button>

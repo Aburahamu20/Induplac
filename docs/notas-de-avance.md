@@ -602,3 +602,13 @@ Abraham (con Claude). Rama `feature/api-usuarios`.
 - `USER_POOL_ID` tiene por defecto el user pool del lab. Se puede cambiar con una variable de entorno de la Lambda.
 - **Por confirmar en AWS:** que el LabRole de la Lambda pueda usar las APIs admin de Cognito (pendiente desde la tarea 25). Si no puede, la API responde `502 SIN_PERMISO_COGNITO`.
 - **Pruebas:** 8 nuevas en `tests/test_usuarios.py` (Cognito falso en memoria) y 1 de rutas en `test_permisos.py`. **29 en total**, todas pasan.
+
+---
+
+## 2026-11-02 — Reconocer alertas con comentario (tarea 28, parte 3)
+
+Abraham (con Claude). Rama `feature/reconocer-comentario`.
+
+- **API:** `POST /api/alertas/{id}/reconocer` acepta un `comentario` opcional (hasta 500 caracteres) y guarda en la alerta `reconocida_por` y `comentario`. Además, **solo se puede reconocer una vez**: si ya estaba reconocida responde `409`, así nadie reescribe quién la reconoció ni lo que escribió. El comentario va también a la auditoría.
+- **Dashboard:** el botón *Reconocer alerta* abre un cuadro para escribir el comentario (opcional) y confirmar. Las alertas reconocidas muestran quién las reconoció y su comentario.
+- **Pruebas:** 1 nueva en `test_permisos.py`: largo máximo, guarda usuario y comentario, la segunda vez da 409 y una alerta inexistente da 404. **30 en total**, todas pasan. Dashboard: build y lint sin errores.
