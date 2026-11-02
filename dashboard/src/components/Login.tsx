@@ -173,7 +173,7 @@ function PasoMfa({ id, registrar, avanzar, error, cargando }: PropsPaso & { id: 
       titulo={registrar ? 'Activa la verificación en dos pasos' : 'Verificación en dos pasos'}
       subtitulo={
         registrar
-          ? 'Tu cuenta puede modificar datos, por eso el MFA es obligatorio. Escanea el código con Microsoft Authenticator.'
+          ? 'Por tu rol (jefe o admin), el MFA es obligatorio. Escanea el código con Microsoft Authenticator.'
           : 'Ingresa el código de 6 dígitos de Microsoft Authenticator.'
       }
     >
