@@ -158,6 +158,7 @@ Parámetros (todos opcionales): `local_id`, `estado` (`activa` · `reconocida` �
 - Requiere login y el permiso `reconocer_alertas` (§6.4).
 - Funciona **también offline** en el Edge con login local (decisión 2026-10-14).
 - Respuesta: la alerta actualizada (`estado: "reconocida"`, `reconocida_en` con la hora).
+- **Nube (2026-11-02):** solo grupos `admin-general`, `admin-sede` y `jefe`, y solo alertas de su sede (`custom:sede`); si no, `403 SIN_PERMISO`. Cada reconocimiento queda en la auditoría (§3.7).
 
 ### 3.6. `GET /api/historico` — Series históricas
 
@@ -191,6 +192,33 @@ Parámetros:
 - En el Edge solo hay 13 meses de intervalos (`modo-offline.md` §5).
 
 ---
+
+### 3.7. `GET /api/auditoria` — Quién hizo qué (solo admins, nube)
+
+- **Quién puede:** `admin-general` ve las sedes `local1`, `local2` y `general` (acciones que no son de una sede). `admin-sede` solo la suya. El resto recibe `403`.
+- **Parámetros (todos opcionales):**
+  - `desde` / `hasta`: ISO 8601. Sin zona horaria se entienden en hora de Chile, por ejemplo `desde=2026-08-03&hasta=2026-08-03T23:59:59`. Por defecto: los últimos 7 días.
+  - `sede`: una de las que el usuario puede ver.
+  - `usuario`, `accion`: filtros exactos.
+- **Respuesta:**
+
+```json
+{
+  "registros": [
+    {"sede": "local1", "id": "2026-11-02T14:40:00.123Z#a1b2c3d4", "ts": "2026-11-02T14:40:00.123Z",
+     "usuario": "barbara.saavedra", "rol": "admin-sede", "accion": "alerta.reconocida",
+     "objeto": "local1:energia_kw:2026-11-02T14:30:00Z",
+     "detalle": {"variable": "energia_kw", "nivel": "critico", "valor": "60.2"},
+     "origen": "nube", "hash_anterior": "…", "hash": "…"}
+  ],
+  "integridad": {"local1": {"estado": "ok", "problemas": []}},
+  "truncado": false
+}
+```
+
+- Registros del más reciente al más antiguo, hasta 1000 por sede (`truncado: true` si había más; conviene pedir un rango menor).
+- `integridad.<sede>.estado = "alterada"` si se cambió o borró algún registro desde la consola: cada registro guarda el hash del anterior. El dashboard debe mostrar *"Auditoría alterada"* con los `problemas`.
+- No existe ningún endpoint para editar ni borrar registros de auditoría.
 
 ## 4. Variables y unidades
 

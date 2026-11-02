@@ -542,3 +542,32 @@ Abraham (con Claude). Rama `feature/mfa-por-rol`.
 ### Siguen abiertos
 - [ ] Desplegar, cambiar el user pool a Opcional y probar con una cuenta jefe/admin y una operario.
 - [ ] En la Fase 3, que la API también exija MFA a jefes y admins antes de modificar datos. Hoy el bloqueo es solo en el dashboard.
+
+---
+
+## 2026-11-02 — Auditoría encadenada y API con login (tarea 27, Fase 2)
+
+Abraham (con Claude), en el lab de Felipe. Rama `feature/auditoria`.
+
+### En la consola de AWS
+- **API Gateway:** se creó el authorizer JWT `cognito-jwt` (emisor: el user pool; audience: el client id del dashboard). Antes, **cualquiera podía consultar la API sin iniciar sesión**.
+  - Como todo pasaba por un solo `ANY /{proxy+}`, se agregaron dos rutas más específicas: `ANY /api/{proxy+}` **con** el authorizer y `OPTIONS /api/{proxy+}` **sin** él, para la consulta previa de CORS del navegador.
+  - `/health` y `/intervalos` (el Edge, con su clave) siguen por `/{proxy+}`.
+  - Probado: sin token → 401, con un token falso → 401, OPTIONS → 204, y el dashboard sigue cargando con sesión.
+- **DynamoDB:** tabla `induplac-auditoria` (PK `sede`, SK `id`, bajo demanda) con **PITR de 35 días** y **protección contra eliminación**, sin TTL. A `induplac-alertas` también se le activó PITR.
+
+### En el código
+- **`backend/lambda_api/auditoria.py`:** cada registro guarda el **hash SHA-256 del anterior** de su sede. Una cabecera por sede (`sede = "cadena"`) guarda el último hash, y registro y cabecera se escriben en **una transacción** condicionada al hash anterior: si dos escriben a la vez, uno reintenta y la cadena no se bifurca. `verificar` detecta registros cambiados, borrados del medio, el primero o el último.
+- **`lambda_function.py`:**
+  - `perfil()` lee el usuario, el grupo y `custom:sede` de los claims del authorizer, con el mismo criterio que el dashboard.
+  - **Reconocer alerta:** solo `admin-general`, `admin-sede` y `jefe`, y solo de su sede (si no, 403). Queda auditado como `alerta.reconocida`.
+  - **`GET /api/auditoria`:** admin general ve todo y admin de sede solo la suya. Filtros: fechas (sin zona = hora de Chile), sede, usuario y acción. Responde la `integridad` de cada sede. Contrato en `docs/api-dashboard.md` §3.7.
+- **Deploy:** el zip de `induplac-api` ahora incluye `auditoria.py`. **CI:** corre las pruebas de la auditoría.
+- **Pruebas:** 11 en `backend/lambda_api/tests/test_auditoria.py`, todas pasan. Además se probaron los permisos del handler con claims simulados: operario → 403, jefe de otra sede → 403, jefe de su sede → 200, admin de sede pidiendo otra sede → 403, fecha inválida → 400.
+
+### Siguen abiertos
+- [ ] Desplegar la Lambda (Deploy → `lambdas`) y probar reconocer una alerta y `GET /api/auditoria` con sesión.
+- [ ] Auditar más acciones: cambios de umbrales y usuarios (tarea 28) y la auditoría local del Edge (tarea 29).
+- [ ] Pantalla de Auditoría en el dashboard, con el aviso "Auditoría alterada" (tarea 30).
+- [ ] Las consultas de datos (`/api/estado`, `/actual`, `/historico`) todavía no filtran por la sede del token (Fase 3).
+- [ ] Reconocer una alerta todavía **cambia** el registro de la alerta. La idea de §2.3 es que solo agregue (tarea 28).

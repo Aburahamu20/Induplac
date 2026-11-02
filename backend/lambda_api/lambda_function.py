@@ -9,6 +9,7 @@ Detrás de una API Gateway HTTP API. Implementa:
                             GET  /api/alertas
                             POST /api/alertas/{id}/reconocer
                             GET  /api/historico
+                            GET  /api/auditoria          (solo admins)
                             GET  /health
 
 Formato de la consulta: docs/api-dashboard.md. Formato de la ingesta: backend/README.md.
@@ -16,11 +17,17 @@ Formato de la consulta: docs/api-dashboard.md. Formato de la ingesta: backend/RE
 Variables de entorno:
   TABLA_INTERVALOS  (por defecto induplac-intervalos)
   TABLA_ALERTAS     (por defecto induplac-alertas)
+  TABLA_AUDITORIA   (por defecto induplac-auditoria)
   CLAVE_INGESTA     clave compartida con el Edge (nunca en el repo)
+
+Login: API Gateway valida el IdToken de Cognito (authorizer JWT `cognito-jwt` en
+ANY /api/{proxy+}) y entrega los datos del usuario en
+requestContext.authorizer.jwt.claims. /intervalos y /health no pasan por él.
 
 Simplificaciones del MVP (documentadas en backend/README.md):
   - Las alertas se guardan en DynamoDB, no en RDS.
-  - El login de la nube (Cognito) todavía no está: la API de consulta no valida el token.
+  - Las consultas de datos todavía no filtran por la sede del usuario (Fase 3);
+    reconocer alertas y la auditoría sí revisan grupo y sede.
 """
 
 import json
@@ -30,6 +37,8 @@ from decimal import Decimal
 
 import boto3
 from boto3.dynamodb.conditions import Key
+
+import auditoria
 
 try:
     from zoneinfo import ZoneInfo
@@ -42,6 +51,7 @@ dynamo = boto3.resource("dynamodb")
 T_INT = dynamo.Table(os.environ.get("TABLA_INTERVALOS", "induplac-intervalos"))
 T_ALE = dynamo.Table(os.environ.get("TABLA_ALERTAS", "induplac-alertas"))
 CLAVE_INGESTA = os.environ.get("CLAVE_INGESTA", "")
+AUDIT = auditoria.RepoDynamo(dynamo.Table(os.environ.get("TABLA_AUDITORIA", "induplac-auditoria")))
 
 LOCALES = [
     {
@@ -73,6 +83,39 @@ CORS = {
     "Access-Control-Allow-Headers": "content-type,authorization,x-induplac-key",
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
 }
+
+
+# ---------------- quién es el usuario (token de Cognito) ----------------
+
+# Mismo criterio que el dashboard (dashboard/src/auth/cognito.ts): el grupo dice
+# qué puede hacer y custom:sede dice dónde. Si hay varios grupos, gana el primero.
+ORDEN_GRUPOS = ["admin-general", "administrador", "admin-sede", "jefe", "operario"]
+GRUPOS_TODAS_LAS_SEDES = {"admin-general", "administrador"}
+SEDES_COGNITO = {"planta": ["local1"], "oficinas": ["local2"], "todas": ["local1", "local2"]}
+PUEDEN_RECONOCER = {"admin-general", "administrador", "admin-sede", "jefe"}
+VEN_AUDITORIA = {"admin-general", "administrador", "admin-sede"}
+
+
+def grupos_de(claims):
+    g = claims.get("cognito:groups") or []
+    if isinstance(g, str):  # API Gateway lo entrega como texto: "[jefe operario]"
+        g = g.strip("[]").replace(",", " ").split()
+    return list(g)
+
+
+def perfil(evento):
+    """Usuario, grupo y locales del token, o None si no hay sesión válida."""
+    claims = (evento.get("requestContext", {}).get("authorizer", {}).get("jwt", {}) or {}).get("claims") or {}
+    grupo = next((g for g in ORDEN_GRUPOS if g in grupos_de(claims)), None)
+    if not grupo:
+        return None
+    if grupo in GRUPOS_TODAS_LAS_SEDES:
+        locales = ["local1", "local2"]
+    else:
+        locales = SEDES_COGNITO.get(str(claims.get("custom:sede", "")).strip().lower())
+        if not locales:
+            return None
+    return {"usuario": claims.get("cognito:username") or claims.get("sub", "?"), "grupo": grupo, "locales": locales}
 
 
 # ---------------- utilidades ----------------
@@ -338,10 +381,12 @@ def lista_alertas(q):
     return respuesta(200, items[:200])
 
 
-def reconocer(id_alerta):
+def reconocer(id_alerta, quien):
     local_id = id_alerta.split(":", 1)[0]
     if local_id not in IDS_LOCALES:
         return error(404, "ALERTA_NO_EXISTE", "Alerta inexistente.")
+    if not quien or quien["grupo"] not in PUEDEN_RECONOCER or local_id not in quien["locales"]:
+        return error(403, "SIN_PERMISO", "Tu rol no puede reconocer alertas de esta sede.")
     try:
         r = T_ALE.update_item(
             Key={"local_id": local_id, "id": id_alerta},
@@ -353,7 +398,38 @@ def reconocer(id_alerta):
         )
     except dynamo.meta.client.exceptions.ConditionalCheckFailedException:
         return error(404, "ALERTA_NO_EXISTE", "Alerta inexistente.")
-    return respuesta(200, r["Attributes"])
+    a = r["Attributes"]
+    try:
+        auditoria.registrar(AUDIT, local_id, quien["usuario"], quien["grupo"], "alerta.reconocida", id_alerta,
+                            {"variable": a.get("variable"), "nivel": a.get("nivel"), "valor": a.get("valor")})
+    except Exception as e:  # la alerta ya quedó reconocida: se avisa en los logs
+        print("ERROR auditoría", repr(e))
+    return respuesta(200, a)
+
+
+def ver_auditoria(q, quien):
+    if not quien or quien["grupo"] not in VEN_AUDITORIA:
+        return error(403, "SIN_PERMISO", "Solo los administradores ven la auditoría.")
+    permitidas = list(auditoria.SEDES) if quien["grupo"] in GRUPOS_TODAS_LAS_SEDES else quien["locales"]
+    sedes = [q["sede"]] if q.get("sede") else permitidas
+    if any(s not in permitidas for s in sedes):
+        return error(403, "SIN_PERMISO", "No puedes ver la auditoría de esa sede.")
+    ahora = datetime.now(timezone.utc)
+    try:
+        # Sin zona horaria se entiende hora de Chile (ej. "2026-08-03" = ese día en Chile)
+        con_zona = lambda s: (lambda d: d if d.tzinfo else d.replace(tzinfo=TZ_CHILE))(leer_iso(s))
+        hasta = con_zona(q["hasta"]) if q.get("hasta") else ahora
+        desde = con_zona(q["desde"]) if q.get("desde") else hasta - timedelta(days=7)
+    except ValueError:
+        return error(400, "PARAMETROS", "desde y hasta deben ser fechas ISO 8601.")
+    if desde > hasta:
+        return error(400, "PARAMETROS", "desde es posterior a hasta.")
+    r = auditoria.consultar(AUDIT, sedes, desde, min(hasta, ahora), ahora)
+    if q.get("usuario"):
+        r["registros"] = [x for x in r["registros"] if x.get("usuario") == q["usuario"]]
+    if q.get("accion"):
+        r["registros"] = [x for x in r["registros"] if x.get("accion") == q["accion"]]
+    return respuesta(200, r)
 
 
 CAMPO_HIST = {"energia_kw": "energia_kw", "uv_index": "uv_max", "agua_m3h": "agua_m3h", "agua_m3_dia": "agua_m3"}
@@ -428,9 +504,11 @@ def lambda_handler(evento, _contexto):
             return lista_alertas(q)
         if metodo == "POST" and len(partes) == 4 and partes[:2] == ["api", "alertas"] and partes[3] == "reconocer":
             from urllib.parse import unquote
-            return reconocer(unquote(partes[2]))
+            return reconocer(unquote(partes[2]), perfil(evento))
         if metodo == "GET" and ruta == "/api/historico":
             return historico(evento)
+        if metodo == "GET" and ruta == "/api/auditoria":
+            return ver_auditoria(q, perfil(evento))
         return error(404, "RUTA_NO_EXISTE", f"{metodo} {ruta}")
     except Exception as e:  # nunca devolver el stack al cliente
         print("ERROR", repr(e))
