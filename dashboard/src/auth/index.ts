@@ -28,4 +28,7 @@ function crear(): ProveedorAuth {
 
 export const auth: ProveedorAuth = crear()
 
+// Solo con Cognito: para activar el MFA opcional desde la sesión abierta
+export const authCognito = auth instanceof AuthCognito ? auth : null
+
 export * from './tipos'

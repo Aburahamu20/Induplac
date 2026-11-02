@@ -38,6 +38,8 @@ export interface Sesion {
   locales: LocalId[]
   permisos: Permiso[]
   expira: string
+  // Solo con Cognito: si la cuenta tiene MFA activo (undefined = no se sabe)
+  mfa?: boolean
 }
 
 export type Desafio = 'cambiar_clave' | 'registrar_mfa' | 'codigo_mfa'

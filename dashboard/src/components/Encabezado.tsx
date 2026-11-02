@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Aviso } from './estadoEnlace'
 import { NOMBRE_ROL, nombreSedes } from '../auth'
 import { useSesion } from '../auth/sesion'
+import { ActivarMfa } from './ActivarMfa'
 
 const PILDORA = {
   ok: { clase: 'border-ok/40 bg-ok/10 text-ok', punto: 'bg-ok' },
@@ -53,6 +54,7 @@ export function Encabezado({ aviso, simulado }: { aviso?: Aviso; simulado: boole
             <p className="text-sm font-bold">{sesion.usuario}</p>
             <p className="text-[11px] text-tinta-2">{NOMBRE_ROL[sesion.rol]} · {nombreSedes(sesion.locales)}</p>
           </div>
+          <ActivarMfa />
           <button
             onClick={cerrar}
             className="rounded-md border border-borde px-2.5 py-1 text-xs text-tinta-2 hover:border-tinta-3 hover:text-tinta"

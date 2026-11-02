@@ -526,3 +526,19 @@ Abraham (con Claude), en el Learner Lab de Felipe. Rama `feature/roles-cognito-s
 ### Siguen abiertos
 - [ ] Que `induplac-api` también valide grupo y sede en cada petición (Fase 3). Hoy la restricción es solo en la pantalla.
 - [ ] Definir con Felipe si el MFA es para todos o solo para jefes y admins.
+
+---
+
+## 2026-11-02 — MFA por rol (tarea 31)
+
+Abraham (con Claude). Rama `feature/mfa-por-rol`.
+
+- **Decisión:** el MFA es **obligatorio para jefes y admins** y **opcional para operarios**. Cognito no permite pedir MFA según el grupo (solo Desactivado / Opcional / Obligatorio para todo el user pool), así que el user pool pasa a **Opcional** y el dashboard pone la obligación.
+- **`auth/cognito.ts`:** si el login termina sin un paso de MFA, se consulta `GetUser`. Un jefe o admin sin app autenticadora registrada no entra: se le muestra el QR y el código se confirma con `AssociateSoftwareToken` + `VerifySoftwareToken` + `SetUserMFAPreference`, usando el AccessToken. Quien ya tiene MFA sigue recibiendo el reto normal de Cognito.
+- **MFA opcional:** el operario sin MFA ve un botón **Activar MFA** en el encabezado (`components/ActivarMfa.tsx`). La sesión guarda `mfa` (true/false).
+- **Orden de despliegue:** primero el dashboard y después Cognito → Opcional. Con el user pool todavía en Obligatorio el cambio no altera nada, porque todos pasan por un reto de MFA.
+- **Pruebas:** build y lint sin errores. Login simulado contra Cognito (fetch falso): jefe sin MFA → se le pide registrar; operario sin MFA → entra y puede activarlo; admin con MFA → entra; reto normal de MFA → sin llamadas extra.
+
+### Siguen abiertos
+- [ ] Desplegar, cambiar el user pool a Opcional y probar con una cuenta jefe/admin y una operario.
+- [ ] En la Fase 3, que la API también exija MFA a jefes y admins antes de modificar datos. Hoy el bloqueo es solo en el dashboard.
