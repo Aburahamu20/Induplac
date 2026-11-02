@@ -510,8 +510,19 @@ Abraham (con Claude), en el Learner Lab de Felipe. Rama `feature/roles-cognito-s
 - Se borró el usuario de prueba `prueba.lab` (tarea 25).
 - **Pruebas:** build y lint sin errores. `rolDesdeToken` se probó con las cuentas del equipo y con casos borde (sin grupo, sin sede, `plantas` mal escrito, mayúsculas).
 
+### Despliegue y prueba (02/11, mañana)
+- Se configuraron en GitHub los secretos (credenciales del lab) y las variables `S3_BUCKET`, `VITE_API_URL` y `VITE_COGNITO_CLIENT_ID`, que no estaban creadas. **Deploy #1** (`dashboard`, `cognito`) en ✅.
+- Probado en S3 con la cuenta de Abraham y con una cuenta de prueba a la que se le fue cambiando el rol:
+
+| Rol | Encabezado | Qué ve |
+|---|---|---|
+| `admin-general` + `todas` | Admin general · Ambas sedes | Resumen, Oficinas, Planta y Alertas |
+| `admin-sede` + `planta` | Admin de sede · Planta | Solo Planta y Alertas |
+| `admin-sede` + `oficinas` | Admin de sede · Oficinas | Solo Oficinas y Alertas (el aviso de enlace también mira solo Oficinas) |
+| `operario` + `planta` | Operario · Planta | Solo Planta y Alertas, sin gráficos del histórico |
+
+- Se sacó a Abraham y Felipe de `administrador` y **se borró ese grupo**. Quedan 4 grupos.
+
 ### Siguen abiertos
-- [ ] Desplegar el dashboard en S3 y probar el login con cada cuenta.
-- [ ] Sacar a Abraham y Felipe de `administrador` y después borrar ese grupo.
 - [ ] Que `induplac-api` también valide grupo y sede en cada petición (Fase 3). Hoy la restricción es solo en la pantalla.
 - [ ] Definir con Felipe si el MFA es para todos o solo para jefes y admins.
