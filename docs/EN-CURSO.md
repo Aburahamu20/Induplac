@@ -56,7 +56,7 @@ La pauta completa y los borradores de roles, RACI y Gantt están en [`docs/pauta
 | 28 | Endpoints nuevos: reconocer alerta con comentario, usuarios (crear/desactivar/reenviar) y simulación de umbrales | `backend/` | 🟢 Libre | | | | Fase 3. Depende de la 26 y la 27. |
 | 29 | Edge: auditoría local en SQLite que se sube al reconectar | `edge/` | 🟢 Libre | | | | Fase 4. |
 | 30 | Dashboard: llevar los bocetos aprobados al React (menú nuevo, 7 pantallas por rol) | `dashboard/` | 🟢 Libre | | | | Fase 5. Puede avanzar en paralelo con datos simulados. Bocetos: canvas de Claude Design (respaldo versión 1793325632-2eca). |
-| 31 | MFA por rol: obligatorio para jefes y admins, opcional para operarios (Cognito en modo Opcional + el dashboard obliga el registro) | `dashboard/` | 🟡 En curso | Abraham y Felipe Murúa | 2026-11-02 | `feature/mfa-por-rol` | Decidido el 02/11. Primero se despliega el dashboard y recién después se cambia Cognito a Opcional. |
+| 31 | MFA por rol: obligatorio para jefes y admins, opcional para operarios (Cognito en modo Opcional + el dashboard obliga el registro) | `dashboard/` | 🟡 En curso | Abraham y Felipe Murúa | 2026-11-02 | [PR #35](https://github.com/Aburahamu20/Induplac/pull/35) (mergeado) | Desplegado (Deploy #2) y user pool en Opcional el 02/11. **Falta probar** con una cuenta nueva `jefe` (debe pedir QR) y una `operario` (entra directo, ve *Activar MFA*). |
 
 ---
 
