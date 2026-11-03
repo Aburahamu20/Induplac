@@ -51,6 +51,11 @@ jobs:
         run: |
           pip install --quiet boto3
           python -m unittest discover -s tests -v
+      - name: Dependencias de induplac-config (las mismas que sube el deploy)
+        working-directory: backend/lambda_config
+        run: |
+          pip install --quiet -r requirements.txt
+          python -c "import pg8000.native, scramp; assert hasattr(scramp, 'make_channel_binding'), 'scramp incompatible con pg8000'"
       - name: Pruebas de induplac-config (umbrales con RDS falso)
         working-directory: backend/lambda_config
         run: python -m unittest discover -s tests -v
