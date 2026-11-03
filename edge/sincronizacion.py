@@ -109,6 +109,9 @@ class Enlace:
                 if abierto:
                     self._pedir("POST", "/intervalos", {"batch_id": f"{local}-vivo", "local_id": local, "records": [abierto]})
 
+            # 3) Auditoría local: lo que se hizo en planta (también sin internet), en orden
+            self._subir_auditoria()
+
             self.ultima_sincronizacion = _ahora_iso()
             if self.estado == "sincronizando" and not any(db.contar_pendientes(l) for l in config.LOCALES):
                 self._cambiar("online")
@@ -119,8 +122,21 @@ class Enlace:
                 self._cambiar("offline")
 
 
+    def _subir_auditoria(self) -> None:
+        import auditoria_local
+        while True:
+            lote = auditoria_local.pendientes(100)
+            if not lote:
+                return
+            self._pedir("POST", "/auditoria/edge", {"edge_id": config.MQTT_CLIENT_ID, "registros": lote})
+            auditoria_local.marcar([r["id"] for r in lote])
+            log.info("Auditoría: %d registros subidos", len(lote))
+
+
 def _alerta_para_nube(a: dict) -> dict:
-    return {k: a[k] for k in ("id", "variable", "valor", "umbral", "regla", "inicio_intervalo", "estado", "reconocida_en")}
+    campos = ("id", "variable", "valor", "umbral", "regla", "inicio_intervalo", "estado", "reconocida_en",
+              "reconocida_por", "comentario")
+    return {k: a.get(k) for k in campos}
 
 
 def _ahora_iso() -> str:

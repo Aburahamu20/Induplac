@@ -224,6 +224,18 @@ Parámetros:
 - `integridad.<sede>.estado = "alterada"` si se cambió o borró algún registro desde la consola: cada registro guarda el hash del anterior. El dashboard debe mostrar *"Auditoría alterada"* con los `problemas`.
 - No existe ningún endpoint para editar ni borrar registros de auditoría.
 
+### 3.7b. Auditoría del Edge (2026-11-03, tarea 29)
+
+- **En el Edge (`edge/auditoria_local.py`):** lo que se hace en planta queda en SQLite con la misma cadena de hashes que la nube, **también sin internet**:
+  - `alerta.reconocida`: con comentario y con `sin_internet` si no había enlace.
+  - `sesion.bloqueada`: 5 claves malas seguidas.
+  - `usuario.creado`, `usuario.clave_reseteada` y `usuario.mfa_reseteado`: desde la consola de la Raspberry, con usuario `consola:<usuario del sistema>`.
+
+  La tabla tiene *triggers* que impiden borrar o editar desde la aplicación.
+- **`GET /api/auditoria` en la API local del Edge** (permiso `gestionar_usuarios`): registros, `integridad.edge` y `pendientes_de_subir`.
+- **`POST /auditoria/edge` en la nube** (clave del Edge `x-induplac-key`, sin token): el Edge sube los pendientes al reconectar, en orden y de a 100. Cada registro entra a la cadena de la nube con `origen: "edge"`. En `detalle._edge` quedan la hora y el hash originales, `hash_ok` (nadie lo cambió en la Raspberry) y `cadena_ok` (no falta ninguno antes ni se reinició la base). Reenviar no duplica. Respuesta: `{recibidos, duplicados, alterados}`.
+- Reconocer en el Edge también es **una sola vez** (`409 YA_RECONOCIDA`), y `reconocida_por` y `comentario` suben a la nube con la alerta.
+
 ### 3.8. Umbrales (2026-11-03)
 
 Los umbrales se editan en **RDS** (Lambda `induplac-config`) y se copian a DynamoDB (`induplac-umbrales`). Las alertas usan esa copia; si RDS está apagado, siguen con la última copia y, si falta una variable, con los valores por defecto de `backend/lambda_api/umbrales.py`.

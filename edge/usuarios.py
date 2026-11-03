@@ -31,6 +31,20 @@ def _mostrar_temporal(usuario: str, temporal: str) -> None:
     print("Entrégala al usuario; no se vuelve a mostrar. La cambia en su primer inicio de sesión.")
 
 
+def _quien() -> str:
+    """Quién usa la consola de la Raspberry: su usuario del sistema operativo."""
+    import getpass
+    try:
+        return f"consola:{getpass.getuser()}"
+    except Exception:
+        return "consola"
+
+
+def _auditar(accion: str, usuario: str, detalle: dict | None = None) -> None:
+    import auditoria_local
+    auditoria_local.registrar("general", _quien(), "consola-edge", accion, usuario, detalle)
+
+
 def crear(a) -> None:
     rol = ALIAS_ROL.get(a.rol, a.rol)
     if rol not in auth_local.ROLES:
@@ -39,6 +53,7 @@ def crear(a) -> None:
     permisos += [p for p in _lista(a.agregar) if p not in permisos]
     permisos = [p for p in permisos if p not in _lista(a.quitar)]
     temporal = auth_local.crear_usuario(a.usuario, rol, _lista(a.locales), permisos)
+    _auditar("usuario.creado", a.usuario.lower(), {"rol": rol, "locales": _lista(a.locales), "permisos": permisos})
     print(f"Usuario {a.usuario.lower()} creado · rol {rol} · permisos: {', '.join(permisos) or '(ninguno)'}")
     if auth_local.requiere_mfa(permisos):
         print("Tiene permisos de modificación: registrará el MFA (Authenticator) en su primer inicio de sesión.")
@@ -47,10 +62,12 @@ def crear(a) -> None:
 
 def resetear_clave(a) -> None:
     _mostrar_temporal(a.usuario, auth_local.resetear_clave(a.usuario.lower()))
+    _auditar("usuario.clave_reseteada", a.usuario.lower())
 
 
 def resetear_mfa(a) -> None:
     auth_local.resetear_mfa(a.usuario.lower())
+    _auditar("usuario.mfa_reseteado", a.usuario.lower())
     print(f"MFA de {a.usuario} borrado: lo registra de nuevo en su próximo inicio de sesión.")
 
 

@@ -70,6 +70,13 @@ _con.executescript(
 )
 _con.commit()
 
+# Migración (tarea 29): quién reconoció la alerta y su comentario
+_cols = {f["name"] for f in _con.execute("PRAGMA table_info(alertas_local)")}
+for _col in ("reconocida_por", "comentario"):
+    if _col not in _cols:
+        _con.execute(f"ALTER TABLE alertas_local ADD COLUMN {_col} TEXT")
+_con.commit()
+
 # Migración: las bases creadas antes tenían UNIQUE (device_id, seq), que descartaba las
 # lecturas de un ESP32 recién reiniciado. Se reconstruye la tabla conservando los datos.
 _sql = _con.execute("SELECT sql FROM sqlite_master WHERE name='lecturas_crudas'").fetchone()[0]
@@ -301,17 +308,22 @@ def alertas(local_id: str | None = None, estado: str | None = None) -> list[dict
     return [dict(f) for f in consultar(sql + " ORDER BY inicio_intervalo DESC", p)]
 
 
-def reconocer_alerta(id_alerta: str, cuando: str) -> dict | None:
-    """Marca la alerta como reconocida (también offline) y la deja pendiente para subirla a AWS."""
+def reconocer_alerta(id_alerta: str, cuando: str, por: str | None = None, comentario: str | None = None) -> dict | None:
+    """Marca la alerta como reconocida (también offline) y la deja pendiente para subirla a AWS.
+
+    Solo una vez: si ya estaba reconocida no se cambia y se devuelve con `ya_reconocida=True`.
+    """
     with _lock:
         cur = _con.execute(
-            "UPDATE alertas_local SET estado='reconocida', reconocida_en=COALESCE(reconocida_en, ?), is_synced=0 WHERE id=?",
-            (cuando, id_alerta),
+            "UPDATE alertas_local SET estado='reconocida', reconocida_en=?, reconocida_por=?, comentario=?, is_synced=0 "
+            "WHERE id=? AND estado='activa'",
+            (cuando, por, comentario, id_alerta),
         )
         _con.commit()
-        if cur.rowcount == 0:
+        fila = _con.execute("SELECT * FROM alertas_local WHERE id=?", (id_alerta,)).fetchone()
+        if not fila:
             return None
-        return dict(_con.execute("SELECT * FROM alertas_local WHERE id=?", (id_alerta,)).fetchone())
+        return {**dict(fila), "ya_reconocida": cur.rowcount == 0}
 
 
 def alertas_pendientes(local_id: str) -> list[dict]:
