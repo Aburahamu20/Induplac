@@ -266,13 +266,16 @@ export function VistaHistorico() {
                 {SEDES[s.local_id].nombre} · {nombreActual}
               </p>
               <p className="mt-1 font-display text-3xl font-bold tabular-nums">
-                {fmt(t, variable === 'agua' ? 1 : 0)} <span className="text-sm font-normal text-tinta-2">{unidad}</span>
+                {s.valores.size ? fmt(t, variable === 'agua' ? 1 : 0) : '—'}{' '}
+                <span className="text-sm font-normal text-tinta-2">{s.valores.size ? unidad : ''}</span>
               </p>
-              {delta != null && Number.isFinite(delta) && (
+              {/* Sin datos no es "consumo cero": no se compara */}
+              {s.valores.size > 0 && delta != null && Number.isFinite(delta) && (
                 <p className={`mt-1 text-sm ${Math.abs(delta) < 0.05 ? 'text-tinta-2' : delta > 0 ? 'text-aviso' : 'text-ok'}`}>
                   {Math.abs(delta) < 0.05 ? '= igual que' : `${delta > 0 ? '▲' : '▼'} ${fmt(Math.abs(delta), 1)} % vs.`} {nombrePrevio}
                 </p>
               )}
+              {s.valores.size > 0 && tp === 0 && previo && <p className="mt-1 text-sm text-tinta-3">Sin datos en {nombrePrevio} para comparar</p>}
               {periodoEfectivo !== 'dia' && completo.hasta > ahora && s.valores.size > 0 && (
                 <p className="mt-1 text-xs text-tinta-3">Período en curso: hasta hoy</p>
               )}

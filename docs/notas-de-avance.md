@@ -737,3 +737,5 @@ Abraham (con Claude). Rama `feature/dashboard-umbrales`.
   - **En celular:** una tarjeta por variable en vez de la tabla.
 - **Pendiente:** el boceto decía "Guardar pide tu código MFA". Hoy el MFA se pide al entrar, porque es obligatorio para admins, pero no se vuelve a pedir al guardar. Queda como mejora.
 - **Revisión visual:** escritorio (ver, editar, simular y guardar) y celular, con datos simulados. Build y lint sin errores.
+
+**Corrección (03/11):** en el Histórico, una semana sin datos mostraba "0 kWh, ▼ 100 % vs. la semana anterior". Ahora muestra "—" y "Sin datos en este período", sin porcentaje, porque no tener datos no es lo mismo que no consumir. Si el período anterior no tiene datos, se avisa en vez de comparar.
