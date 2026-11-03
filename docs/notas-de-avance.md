@@ -648,3 +648,5 @@ Los umbrales estaban en RDS, pero `induplac-api`, que genera las alertas, está 
 - [ ] Desplegar, encender RDS y probar: copiar todo, simular y cambiar un umbral.
 - [ ] El Edge todavía usa sus propios umbrales fijos: que los descargue al sincronizar (Fase 4).
 - [ ] Pantalla de Umbrales en el dashboard (Fase 5).
+
+**Corrección (03/11, madrugada):** `induplac-config` no se conectaba a RDS: `AttributeError: module 'scramp' has no attribute 'make_channel_binding'`. El problema venía de antes de este cambio, del deploy de `lambdas` del 02/11. `requirements.txt` solo fijaba `pg8000==1.31.5`, que pide `scramp>=1.4.5`, y pip instaló la `scramp 1.5.0` nueva, que ya no trae esa función. Ahora se fijan las versiones exactas de todas las dependencias y el CI instala `requirements.txt` y revisa que `scramp` sea compatible. Rama `fix/config-scramp`.

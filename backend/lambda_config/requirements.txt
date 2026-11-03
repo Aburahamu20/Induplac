@@ -1,1 +1,7 @@
+# Versiones exactas, también de las dependencias: con solo pg8000 fijo, pip trajo
+# scramp 1.5.0 (sin make_channel_binding) y la Lambda dejó de conectarse a RDS (03/11).
 pg8000==1.31.5
+scramp==1.4.18
+asn1crypto==1.5.1
+python-dateutil==2.9.0.post0
+six==1.17.0
