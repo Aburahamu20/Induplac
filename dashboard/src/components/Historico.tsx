@@ -358,7 +358,8 @@ function GraficoPeriodo({
     },
     scales: {
       x: { grid: { color: 'rgba(42,47,57,0.6)' }, ticks: { maxRotation: 0, autoSkipPadding: 14 } },
-      y: { grid: { color: 'rgba(42,47,57,0.6)' }, ticks: { callback: (v) => fmt(Number(v)) } },
+      // Con valores chicos (ej. agua de Oficinas, ~1 m³) se necesitan decimales en el eje
+      y: { grid: { color: 'rgba(42,47,57,0.6)' }, ticks: { callback: (v) => fmt(Number(v), max < 5 ? 2 : max < 50 ? 1 : 0) } },
     },
   }
 
