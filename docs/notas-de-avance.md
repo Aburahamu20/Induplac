@@ -676,3 +676,22 @@ Abraham (con Claude). Rama `feature/auditoria-edge`.
 ### Siguen abiertos
 - [ ] Desplegar `lambdas` y probar de punta a punta con el Edge corriendo: reconocer offline, reconectar y ver el registro en `induplac-auditoria`.
 - [ ] Que el Edge descargue los umbrales de la nube al sincronizar (hoy usa los suyos, fijos).
+
+---
+
+## 2026-11-03 — Dashboard: menú lateral y encabezado nuevos (tarea 30, parte 1)
+
+Abraham (con Claude). Rama `feature/dashboard-menu`.
+
+- Se reemplazan las pestañas de arriba por el **menú lateral de los bocetos aprobados** (`components/Menu.tsx` y `components/pantallas.tsx`):
+  - **Monitoreo:** Resumen, Planta, Oficinas, Alertas con contador e Histórico.
+  - **Gestión:** Umbrales, Usuarios y Auditoría.
+  - **Sistema:** Estado de las sedes.
+
+  Cada rol ve solo lo suyo según sus permisos. El admin de sede ve la etiqueta "Sede: Planta/Oficinas" y "Gestión · Planta".
+- **Pie del menú:** estado de cada sede ("al día", "subiendo N pendientes" o "sin datos desde dd/mm") y el usuario con su rol y sede, el botón Salir y *Activar MFA* (operarios).
+- **Encabezado:** título de la pantalla, sede y fecha, reloj, aviso de enlace y campana de alertas.
+- La pantalla elegida queda en la dirección (`#planta`, `#alertas`…), así que al recargar no se pierde. En celular el menú se abre con ☰.
+- Histórico, Umbrales, Usuarios, Auditoría y Estado muestran por ahora un aviso "próximamente": se agregan en las partes 2 a 6.
+- Se borró `Encabezado.tsx`, que quedó reemplazado.
+- **Revisión visual:** capturas con Playwright para admin general, admin de Planta y operario, en escritorio y en celular (390 px), con el menú abierto y cerrado.
