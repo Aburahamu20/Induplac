@@ -116,6 +116,7 @@ En plantas industriales, la información de consumos suele estar dispersa en bol
 * **SQLite (Edge):** crudo reciente, intervalos pendientes de sincronizar, alertas locales y réplica de intervalos para el dashboard offline.
 * **DynamoDB:** serie de tiempo de intervalos de 15 min por local y variable, y **alertas**.
 * **RDS PostgreSQL:** **configuración**: permisos por usuario (enlazados al usuario de Cognito), umbrales y catálogo de locales/dispositivos. Históricos agregados para reportes, a futuro.
+* **Umbrales (decisión 2026-11-03):** RDS es la fuente y ahí se editan (vía `induplac-config`). Al guardar, se copian a la tabla DynamoDB `induplac-umbrales`, que es la que lee `induplac-api` para las alertas, porque está fuera de la VPC. Si RDS está apagado, las alertas siguen con la última copia. `induplac-config` llega a DynamoDB por un punto de enlace Gateway de la VPC, que es gratis.
 * **Cognito:** cuentas, claves temporales y MFA.
 * **Cambio del 2026-10-19:** las alertas pasaron de RDS a DynamoDB para que se sigan guardando aunque RDS esté apagado (RDS se enciende solo para configurar y para la demo).
 * **Por qué dos bases en la nube (no por volumen):** DynamoDB on-demand cuesta ~\$0 y está siempre disponible, por lo que se puede **apagar RDS sin cortar la ingesta**; además, Lambda escribe en DynamoDB por API HTTP sin agotar conexiones, mientras que RDS necesita JOINs e integridad para RBAC y reportes. Alternativa evaluada: solo PostgreSQL (+ TimescaleDB), más simple pero pierde esas dos ventajas.
@@ -186,7 +187,7 @@ MVP EJECUTABLE (al 2026-10-21):
 ├── [OK] Cognito con MFA probado en el Learner Lab
 ├── [OK] Dashboard con login de Cognito y MFA (publicado en S3)
 ├── [PENDIENTE] Validar el token de Cognito en la API
-├── [PENDIENTE] Que induplac-api lea los umbrales desde RDS (con valores por defecto si RDS está apagado)
+├── [EN CURSO, tarea 28] induplac-api lee los umbrales de la copia en DynamoDB (RDS manda; valores por defecto si no hay copia)
 └── [DISEÑO] VPN Site-to-Site + API Gateway privada, VLANs y RTC (documentados, no se demuestran)
 ```
 
