@@ -739,3 +739,7 @@ Abraham (con Claude). Rama `feature/dashboard-umbrales`.
 - **Revisión visual:** escritorio (ver, editar, simular y guardar) y celular, con datos simulados. Build y lint sin errores.
 
 **Corrección (03/11):** en el Histórico, una semana sin datos mostraba "0 kWh, ▼ 100 % vs. la semana anterior". Ahora muestra "—" y "Sin datos en este período", sin porcentaje, porque no tener datos no es lo mismo que no consumir. Si el período anterior no tiene datos, se avisa en vez de comparar.
+
+**Corrección (03/11, con datos reales):** al ver octubre contra septiembre aparecieron dos errores:
+1. **El "+72 % vs. septiembre" era falso.** Septiembre tiene datos solo desde la mitad del mes, y la comparación se alineaba por orden de llegada, no por día. Ahora cada valor se ubica por su posición en el período (hora del día, día desde el inicio o mes del año). El % se calcula **solo con los días que tienen datos en los dos períodos**, y la tarjeta dice cuántos se compararon.
+2. **El 21/10 aparecía con 1.189 kWh, inflado.** Ese día tiene datos solo hasta las 13:34, pero el kW promedio del día se multiplicaba por 24. Ahora en día, semana y mes la energía se pide **por hora**: kWh = suma de los kW promedio de cada hora, exacto aunque el día esté incompleto. En el año se pide por día, porque por hora pasaría el máximo de 2.000 puntos de la API. Las horas que cubre cada punto se calculan con la menor separación entre puntos, para que un hueco sin datos no infle el resultado.
