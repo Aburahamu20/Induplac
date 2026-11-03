@@ -256,6 +256,56 @@ def ingesta(evento):
     return respuesta(200, {"recibidos": len(registros), "alertas": alertas})
 
 
+MARCA_EDGE = "edge-recibido"  # partición con los ids del Edge ya recibidos (para no duplicar)
+
+
+def recibir_auditoria_edge(evento):
+    """La auditoría local del Edge (tarea 29) entra a la cadena de la nube, sin perder lo original.
+
+    Cada registro se agrega con origen=edge y, en el detalle, la hora y el hash que tenía en el
+    Edge, si ese hash es correcto (nadie lo cambió en la Raspberry) y si su cadena local siguió
+    sin huecos. Reenviar el mismo registro no lo duplica. Usa la clave del Edge, no un token.
+    """
+    cab = {k.lower(): v for k, v in (evento.get("headers") or {}).items()}
+    if not CLAVE_INGESTA or cab.get("x-induplac-key") != CLAVE_INGESTA:
+        return error(401, "NO_AUTORIZADO", "Clave de ingesta inválida.")
+    try:
+        cuerpo = json.loads(evento.get("body") or "{}")
+    except ValueError:
+        return error(400, "PARAMETROS", "El cuerpo no es JSON válido.")
+    edge_id = str(cuerpo.get("edge_id") or "edge")[:60]
+    t = AUDIT.t
+    cabeza = t.get_item(Key={"sede": auditoria.CABECERA, "id": f"edge:{edge_id}"}, ConsistentRead=True).get("Item")
+    ultimo_edge = cabeza["ultimo_hash"] if cabeza else None
+    recibidos = duplicados = alterados = 0
+    for r in cuerpo.get("registros") or []:
+        rid = str(r.get("id", ""))
+        if not rid or "Item" in t.get_item(Key={"sede": MARCA_EDGE, "id": f"{edge_id}:{rid}"}):
+            duplicados += 1
+            continue
+        hash_ok = auditoria.calcular_hash(r) == r.get("hash")
+        cadena_ok = ultimo_edge is None or r.get("hash_anterior") == ultimo_edge
+        if r.get("hash_anterior") == auditoria.GENESIS and ultimo_edge is not None:
+            cadena_ok = False  # la cadena del Edge volvió a empezar: alguien borró su base
+        try:
+            detalle = json.loads(r.get("detalle") or "{}")
+        except ValueError:
+            detalle, hash_ok = {"original": r.get("detalle")}, False
+        sede = r.get("sede") if r.get("sede") in auditoria.SEDES else "general"
+        detalle["_edge"] = {"edge_id": edge_id, "id": rid, "ts": r.get("ts"), "hash": r.get("hash"),
+                            "hash_ok": hash_ok, "cadena_ok": cadena_ok}
+        auditoria.registrar(AUDIT, sede, str(r.get("usuario") or "?"), str(r.get("rol") or "?"),
+                            str(r.get("accion") or "?"), str(r.get("objeto") or ""), detalle, origen="edge")
+        t.put_item(Item={"sede": MARCA_EDGE, "id": f"{edge_id}:{rid}", "recibido": iso(datetime.now(timezone.utc))})
+        t.put_item(Item={"sede": auditoria.CABECERA, "id": f"edge:{edge_id}", "ultimo_hash": r.get("hash"), "ultimo_id": rid})
+        ultimo_edge = r.get("hash")
+        recibidos += 1
+        alterados += 0 if (hash_ok and cadena_ok) else 1
+    if alterados:
+        print(f"AVISO auditoría del Edge {edge_id}: {alterados} registros con hash o cadena inválidos")
+    return respuesta(200, {"recibidos": recibidos, "duplicados": duplicados, "alterados": alterados})
+
+
 def guardar_alerta(local_id, variable, valor, umbral, regla, inicio):
     """Upsert por local + variable + inicio_intervalo: la misma alerta nunca se duplica (ADR-06)."""
     T_ALE.update_item(
@@ -283,8 +333,9 @@ def guardar_alerta_edge(local_id, a):
     expr = "SET #v=:v, #n=:n, #x=:x, #u=:u, #r=:r, #i=:i, #o=:o, #e=if_not_exists(#e, :e)"
     valores[":e"] = "activa"
     if a.get("estado") == "reconocida":
-        expr = expr.replace("#e=if_not_exists(#e, :e)", "#e=:e, reconocida_en=:t")
+        expr = expr.replace("#e=if_not_exists(#e, :e)", "#e=:e, reconocida_en=:t, reconocida_por=:p, comentario=:c")
         valores[":e"], valores[":t"] = "reconocida", a.get("reconocida_en")
+        valores[":p"], valores[":c"] = a.get("reconocida_por"), a.get("comentario")
     T_ALE.update_item(
         Key={"local_id": local_id, "id": a["id"]},
         UpdateExpression=expr,
@@ -637,6 +688,8 @@ def lambda_handler(evento, _contexto):
             return respuesta(200, {"ok": True})
         if metodo == "POST" and ruta == "/intervalos":
             return ingesta(evento)
+        if metodo == "POST" and ruta == "/auditoria/edge":
+            return recibir_auditoria_edge(evento)
         # Todo /api/* pasa por el authorizer JWT: sin grupo o sede válidos no se ve nada
         quien = perfil(evento) if ruta.startswith("/api/") else None
         if ruta.startswith("/api/") and not quien:

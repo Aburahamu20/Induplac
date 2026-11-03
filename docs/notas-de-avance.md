@@ -650,3 +650,29 @@ Los umbrales estaban en RDS, pero `induplac-api`, que genera las alertas, está 
 - [ ] Pantalla de Umbrales en el dashboard (Fase 5).
 
 **Corrección (03/11, madrugada):** `induplac-config` no se conectaba a RDS: `AttributeError: module 'scramp' has no attribute 'make_channel_binding'`. El problema venía de antes de este cambio, del deploy de `lambdas` del 02/11. `requirements.txt` solo fijaba `pg8000==1.31.5`, que pide `scramp>=1.4.5`, y pip instaló la `scramp 1.5.0` nueva, que ya no trae esa función. Ahora se fijan las versiones exactas de todas las dependencias y el CI instala `requirements.txt` y revisa que `scramp` sea compatible. Rama `fix/config-scramp`.
+
+---
+
+## 2026-11-03 — Auditoría local del Edge (tarea 29, Fase 4)
+
+Abraham (con Claude). Rama `feature/auditoria-edge`.
+
+- **`edge/auditoria_local.py` (nuevo):** tabla `auditoria_local` en SQLite con la **misma cadena de hashes** que la nube: mismos campos y mismo formato, para que la nube pueda comprobarlos. Tiene una cadena por Edge, y cada registro dice de qué sede es. Los *triggers* impiden borrar o editar desde la aplicación; si alguien los quita y toca la base, `verificar()` lo detecta.
+- **Qué se audita en planta, también sin internet:**
+  - Reconocer alertas, ahora con comentario y una sola vez, igual que en la nube.
+  - Cuenta bloqueada por claves malas.
+  - Crear usuarios, y resetear clave y MFA desde la consola (`usuarios.py`).
+- **API local:** `GET /api/auditoria` para quien administra usuarios, con la integridad y los pendientes de subir.
+- **Sincronización:** al reconectar, el Edge sube la auditoría a `POST /auditoria/edge` después de los intervalos. La nube la agrega a su cadena con `origen: "edge"` y guarda la hora y el hash originales, más dos marcas:
+  - `hash_ok`: el registro no se cambió en la Raspberry.
+  - `cadena_ok`: no falta ninguno ni se reinició la base del Edge.
+
+  Si el Edge reintenta, no se duplica.
+- Las alertas reconocidas en planta suben con `reconocida_por` y `comentario`.
+- **Pruebas:**
+  - 8 nuevas en el Edge (`tests/test_auditoria_local.py`). Edge: **61 en total**, todas pasan.
+  - 6 nuevas en la nube (`tests/test_auditoria_edge.py`), incluida una que revisa que el Edge y la nube usen los mismos campos del hash. Nube: **46 en total**, todas pasan.
+
+### Siguen abiertos
+- [ ] Desplegar `lambdas` y probar de punta a punta con el Edge corriendo: reconocer offline, reconectar y ver el registro en `induplac-auditoria`.
+- [ ] Que el Edge descargue los umbrales de la nube al sincronizar (hoy usa los suyos, fijos).

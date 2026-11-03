@@ -46,7 +46,7 @@ def calcular_hash(reg):
     return hashlib.sha256(base.encode("utf-8")).hexdigest()
 
 
-def registrar(repo, sede, usuario, rol, accion, objeto, detalle=None, ahora=None, intentos=5):
+def registrar(repo, sede, usuario, rol, accion, objeto, detalle=None, ahora=None, intentos=5, origen="nube"):
     """Agrega un registro al final de la cadena de `sede` y lo devuelve."""
     if sede not in SEDES:
         raise ValueError(f"Sede de auditoría inválida: {sede}")
@@ -68,7 +68,7 @@ def registrar(repo, sede, usuario, rol, accion, objeto, detalle=None, ahora=None
             "accion": accion,
             "objeto": objeto,
             "detalle": json.dumps(detalle or {}, sort_keys=True, ensure_ascii=False, default=str),
-            "origen": "nube",
+            "origen": origen,
             "hash_anterior": anterior,
         }
         reg["hash"] = calcular_hash(reg)

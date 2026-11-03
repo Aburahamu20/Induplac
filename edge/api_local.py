@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, unquote, urlsplit
 
+import auditoria_local
 import auth_local
 import config
 import db
@@ -172,7 +173,8 @@ def actual(ctx: Contexto, u: dict, local_id: str) -> dict:
 
 
 def _alerta_json(a: dict) -> dict:
-    campos = ("id", "local_id", "variable", "valor", "umbral", "regla", "inicio_intervalo", "estado", "reconocida_en")
+    campos = ("id", "local_id", "variable", "valor", "umbral", "regla", "inicio_intervalo", "estado", "reconocida_en",
+              "reconocida_por", "comentario")
     return {**{k: a[k] for k in campos}, "nivel": "critico", "origen": "edge"}
 
 
@@ -192,16 +194,40 @@ def lista_alertas(u: dict, q: dict) -> list[dict]:
     return [_alerta_json(a) for a in items[:200]]
 
 
-def reconocer(u: dict, id_alerta: str) -> dict:
+MAX_COMENTARIO = 500
+
+
+def reconocer(ctx: "Contexto", u: dict, id_alerta: str, cuerpo: dict | None = None) -> dict:
     _permiso(u, "reconocer_alertas")
     local_id = id_alerta.split(":", 1)[0]
     if local_id not in NOMBRES:
         raise ErrorApi(404, "ALERTA_NO_EXISTE", "Alerta inexistente.")
     _local(u, local_id)
-    a = db.reconocer_alerta(id_alerta, reglas.iso(time.time()))
+    comentario = str((cuerpo or {}).get("comentario") or "").strip()
+    if len(comentario) > MAX_COMENTARIO:
+        raise ErrorApi(400, "PARAMETROS", f"El comentario puede tener hasta {MAX_COMENTARIO} caracteres.")
+    a = db.reconocer_alerta(id_alerta, reglas.iso(time.time()), u["usuario"], comentario or None)
     if not a:
         raise ErrorApi(404, "ALERTA_NO_EXISTE", "Alerta inexistente.")
+    if a["ya_reconocida"]:
+        raise ErrorApi(409, "YA_RECONOCIDA", "Esta alerta ya fue reconocida.")
+    auditoria_local.registrar(local_id, u["usuario"], u["rol"], "alerta.reconocida", id_alerta, {
+        "variable": a["variable"], "valor": a["valor"], "comentario": comentario or None,
+        "sin_internet": ctx.enlace.estado == "offline",
+    })
     return _alerta_json(a)
+
+
+def ver_auditoria(u: dict, q: dict) -> dict:
+    """Auditoría local (también sin internet). Solo quien administra usuarios."""
+    _permiso(u, "gestionar_usuarios")
+    sedes = _locales_visibles(u) + (["general"] if set(_locales_visibles(u)) >= set(NOMBRES) else [])
+    problemas = auditoria_local.verificar()
+    return {
+        "registros": auditoria_local.lista(sedes, _fecha(q, "desde", False), _fecha(q, "hasta", False)),
+        "integridad": {"edge": {"estado": "alterada" if problemas else "ok", "problemas": problemas}},
+        "pendientes_de_subir": auditoria_local.contar_pendientes(),
+    }
 
 
 def _clave_grupo(inicio: str, agrupacion: str) -> str:
@@ -347,7 +373,9 @@ def despachar(ctx: Contexto, metodo: str, ruta: str, q: dict, cuerpo: dict, auto
     if metodo == "GET" and partes == ["alertas"]:
         return 200, lista_alertas(u, q)
     if metodo == "POST" and len(partes) == 3 and partes[0] == "alertas" and partes[2] == "reconocer":
-        return 200, reconocer(u, partes[1])
+        return 200, reconocer(ctx, u, partes[1], cuerpo)
+    if metodo == "GET" and partes == ["auditoria"]:
+        return 200, ver_auditoria(u, q)
     if metodo == "GET" and partes == ["historico"]:
         return 200, historico(ctx, u, q)
     if config.DEMO and metodo == "POST" and partes == ["demo", "enlace"]:

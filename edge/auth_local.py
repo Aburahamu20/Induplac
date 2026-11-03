@@ -309,6 +309,9 @@ def _fallo(u: dict) -> None:
         db.ejecutar("UPDATE usuarios SET fallos=0, bloqueado_hasta=? WHERE usuario=?",
                     (int(time.time() + config.BLOQUEO_MIN * 60), u["usuario"]))
         db.ejecutar("DELETE FROM desafios WHERE usuario=?", (u["usuario"],))
+        import auditoria_local  # aquí para evitar importaciones circulares al crear las tablas
+        auditoria_local.registrar("general", u["usuario"], u["rol"], "sesion.bloqueada", u["usuario"],
+                                  {"intentos": config.INTENTOS_BLOQUEO, "minutos": config.BLOQUEO_MIN})
     else:
         db.ejecutar("UPDATE usuarios SET fallos=? WHERE usuario=?", (fallos, u["usuario"]))
 
