@@ -745,3 +745,7 @@ Abraham (con Claude). Rama `feature/dashboard-umbrales`.
 2. **El 21/10 aparecía con 1.189 kWh, inflado.** Ese día tiene datos solo hasta las 13:34, pero el kW promedio del día se multiplicaba por 24. Ahora en día, semana y mes la energía se pide **por hora**: kWh = suma de los kW promedio de cada hora, exacto aunque el día esté incompleto. En el año se pide por día, porque por hora pasaría el máximo de 2.000 puntos de la API. Las horas que cubre cada punto se calculan con la menor separación entre puntos, para que un hueco sin datos no infle el resultado.
 
 **Ajuste (03/11):** con datos reales, entre el 18 y el 21/10 hay pocas horas con datos, mientras que los mismos días de septiembre están completos. Comparar "días con datos" seguía dando un % falso (▼ 66 %). Ahora, cuando los datos vienen por hora, la comparación es **hora con hora**: solo se suman las horas que existen en los dos períodos, y la tarjeta dice cuántas compara. Cuando vienen por día (agua, año), compara día con día.
+
+**Ajustes (03/11):**
+- El ícono del calendario se veía oscuro sobre el fondo oscuro. Ahora la página declara `color-scheme: dark`, así los controles del navegador (calendario, listas) usan el tema oscuro.
+- Si hay muy pocos datos en común entre los dos períodos, el % no se muestra: se necesita al menos el 25 % de lo que se ve, y como mínimo 24 horas (3 en la vista de un día). En su lugar dice "Muy pocos datos en común para comparar". Con datos reales, octubre contra septiembre tenía 5 horas en común y daba "▲ 127 %".
