@@ -695,3 +695,26 @@ Abraham (con Claude). Rama `feature/dashboard-menu`.
 - Histórico, Umbrales, Usuarios, Auditoría y Estado muestran por ahora un aviso "próximamente": se agregan en las partes 2 a 6.
 - Se borró `Encabezado.tsx`, que quedó reemplazado.
 - **Revisión visual:** capturas con Playwright para admin general, admin de Planta y operario, en escritorio y en celular (390 px), con el menú abierto y cerrado.
+
+---
+
+## 2026-11-03 — Dashboard: pantalla Histórico (tarea 30, parte 2)
+
+Abraham (con Claude). Rama `feature/dashboard-historico`.
+
+- **`components/Historico.tsx` (nuevo):** la pantalla Histórico de los bocetos.
+- **Filtros:**
+  - **Variable:** energía en kWh o agua en m³.
+  - **Período:** día, semana, mes o año, con **selector de fecha**, así se puede ver por ejemplo un día de hace 3 meses.
+  - **Comparar con:** el período anterior, el mismo período del año pasado o nada.
+  - **Sedes**, si el usuario ve las dos.
+- **Tarjetas:** total por sede con el % de cambio contra la comparación, y la hora, el día o el mes de mayor consumo.
+- **Gráfico por sede**, cada una con su escala: línea de color de verde (bajo) a rojo (alto) como en los bocetos, y la comparación punteada en azul.
+- **Descargar CSV** con lo que muestra la pantalla.
+- **Cuidados con los datos:**
+  - La energía llega como kW promedio por hora o por día y se convierte a kWh (kW × horas que cubre cada punto).
+  - El período en curso llega solo hasta ahora, sin pedir datos del futuro.
+  - La comparación cubre el mismo largo que el actual: si el mes va en el día 3, se compara con los 3 primeros días del mes anterior.
+  - El último tramo, que todavía no termina, se dibuja punteado y con una nota.
+- La "Estación" de los bocetos queda fuera por ahora: necesita al menos un año de datos.
+- **Revisión visual:** capturas con datos simulados (admin general en semana y mes; admin de Planta en día y año; celular). Build y lint sin errores.

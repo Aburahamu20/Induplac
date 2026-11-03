@@ -9,6 +9,7 @@ import { Login } from './components/Login'
 import { PanelDemo } from './components/PanelDemo'
 import { avisoEnlace } from './components/estadoEnlace'
 import { usePolling } from './hooks/usePolling'
+import { VistaHistorico } from './components/Historico'
 import { VistaAlertas, VistaOficinas, VistaPlanta, VistaResumen } from './vistas'
 
 // Sesión guardada al recargar la página (si no expiró)
@@ -68,6 +69,7 @@ const SUBTITULO: Partial<Record<Pantalla, string>> = {
   resumen: 'Planta y Oficinas',
   planta: 'Panel principal',
   oficinas: 'Panel principal',
+  historico: 'Compara períodos',
 }
 
 function Dashboard() {
@@ -130,7 +132,8 @@ function Dashboard() {
           {pantalla === 'oficinas' && <VistaOficinas />}
           {pantalla === 'planta' && <VistaPlanta />}
           {pantalla === 'alertas' && <VistaAlertas />}
-          {pantalla && ['historico', 'umbrales', 'usuarios', 'auditoria', 'estado'].includes(pantalla) && (
+          {pantalla === 'historico' && <VistaHistorico />}
+          {pantalla && ['umbrales', 'usuarios', 'auditoria', 'estado'].includes(pantalla) && (
             <Proximamente nombre={nombreEntrada(pantalla, ctx)} />
           )}
         </main>
