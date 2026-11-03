@@ -10,6 +10,7 @@ import { PanelDemo } from './components/PanelDemo'
 import { avisoEnlace } from './components/estadoEnlace'
 import { usePolling } from './hooks/usePolling'
 import { VistaHistorico } from './components/Historico'
+import { VistaUmbrales } from './components/Umbrales'
 import { VistaAlertas, VistaOficinas, VistaPlanta, VistaResumen } from './vistas'
 
 // Sesión guardada al recargar la página (si no expiró)
@@ -133,7 +134,8 @@ function Dashboard() {
           {pantalla === 'planta' && <VistaPlanta />}
           {pantalla === 'alertas' && <VistaAlertas />}
           {pantalla === 'historico' && <VistaHistorico />}
-          {pantalla && ['umbrales', 'usuarios', 'auditoria', 'estado'].includes(pantalla) && (
+          {pantalla === 'umbrales' && <VistaUmbrales />}
+          {pantalla && ['usuarios', 'auditoria', 'estado'].includes(pantalla) && (
             <Proximamente nombre={nombreEntrada(pantalla, ctx)} />
           )}
         </main>
