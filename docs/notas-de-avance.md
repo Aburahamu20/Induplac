@@ -718,3 +718,22 @@ Abraham (con Claude). Rama `feature/dashboard-historico`.
   - El último tramo, que todavía no termina, se dibuja punteado y con una nota.
 - La "Estación" de los bocetos queda fuera por ahora: necesita al menos un año de datos.
 - **Revisión visual:** capturas con datos simulados (admin general en semana y mes; admin de Planta en día y año; celular). Build y lint sin errores.
+
+---
+
+## 2026-11-03 — Dashboard: pantalla Umbrales (tarea 30, parte 3)
+
+Abraham (con Claude). Rama `feature/dashboard-umbrales`.
+
+- **`src/api/admin.ts` (nuevo):** funciones de gestión que solo existen en la nube: umbrales, simulación, guardar y auditoría. Tiene una versión simulada en memoria para `npm run dev`. Las partes de Usuarios y Auditoría la van a reutilizar.
+- **`components/Umbrales.tsx` (nuevo):** la pantalla de los bocetos.
+  - **Tabla por sede**, con pestañas si el usuario ve las dos. Se editan la advertencia y la alerta, y se valida que la advertencia sea menor que la alerta.
+  - **"Cómo está hoy":** barra verde, amarilla y roja con el valor actual, que se mueve al editar.
+  - **Último cambio:** quién y cuándo, o "valor por defecto".
+  - **Botones:** *Descartar* y *Guardar N cambios*.
+  - **Estado de la base de configuración:** si RDS está apagado, se puede ver pero no editar.
+  - **"¿Cuántas alertas habrían saltado?":** la simulación con los últimos 30 días, que se recalcula al cambiar un valor.
+  - **"Últimos cambios":** sale de la auditoría.
+  - **En celular:** una tarjeta por variable en vez de la tabla.
+- **Pendiente:** el boceto decía "Guardar pide tu código MFA". Hoy el MFA se pide al entrar, porque es obligatorio para admins, pero no se vuelve a pedir al guardar. Queda como mejora.
+- **Revisión visual:** escritorio (ver, editar, simular y guardar) y celular, con datos simulados. Build y lint sin errores.
