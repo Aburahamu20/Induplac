@@ -85,6 +85,9 @@ interface Serie {
   local_id: LocalId
   valores: Map<number, number> // posición -> total
   etiquetas: Map<number, string>
+  // Cada dato tal como llegó (por hora o por día), para comparar solo lo que existe en los dos períodos
+  finos: Map<number, number>
+  horasPorDato: number
 }
 
 function agregar(r: HistoricoRespuesta | null | undefined, periodo: Periodo, variable: Variable, desde: Date): Serie[] {
@@ -92,6 +95,7 @@ function agregar(r: HistoricoRespuesta | null | undefined, periodo: Periodo, var
   return r.series.map((s) => {
     const valores = new Map<number, number>()
     const etiquetas = new Map<number, string>()
+    const finos = new Map<number, number>()
     // Horas que cubre cada punto: la menor separación entre puntos seguidos (1 = por hora, 24 = por día).
     // Se usa la menor porque puede haber huecos sin datos entre medio.
     const t = s.puntos.map((p) => new Date(p.inicio).getTime())
@@ -103,8 +107,10 @@ function agregar(r: HistoricoRespuesta | null | undefined, periodo: Periodo, var
       const c = casillero(periodo, new Date(p.inicio), desde)
       valores.set(c.pos, (valores.get(c.pos) ?? 0) + v)
       etiquetas.set(c.pos, c.etiqueta)
+      const f = Math.round((new Date(p.inicio).getTime() - desde.getTime()) / (horas * 3_600_000))
+      finos.set(f, (finos.get(f) ?? 0) + v)
     }
-    return { local_id: s.local_id, valores, etiquetas }
+    return { local_id: s.local_id, valores, etiquetas, finos, horasPorDato: horas }
   })
 }
 
@@ -276,11 +282,12 @@ export function VistaHistorico() {
           // Se compara solo lo que tiene datos en los DOS períodos (si septiembre empieza a mitad de mes,
           // se comparan esos días con los mismos días de octubre)
           const prev = seriesPrevias.find((x) => x.local_id === s.local_id)
-          const comunes = prev ? [...s.valores.keys()].filter((k) => prev.valores.has(k)) : []
-          const tc = comunes.reduce((a, k) => a + s.valores.get(k)!, 0)
-          const tp = comunes.reduce((a, k) => a + prev!.valores.get(k)!, 0)
+          // Hora con hora cuando los datos vienen por hora: un día con pocas horas no se compara con uno completo
+          const comunes = prev && prev.horasPorDato === s.horasPorDato ? [...s.finos.keys()].filter((k) => prev.finos.has(k)) : []
+          const tc = comunes.reduce((a, k) => a + s.finos.get(k)!, 0)
+          const tp = comunes.reduce((a, k) => a + prev!.finos.get(k)!, 0)
           const delta = tp ? ((tc - tp) / tp) * 100 : null
-          const unidadPos = periodoEfectivo === 'dia' ? 'horas' : periodoEfectivo === 'anio' ? 'meses' : 'días'
+          const unidadPos = s.horasPorDato === 1 ? 'horas' : 'días'
           return (
             <article key={s.local_id} className="rounded-lg border border-borde bg-panel p-4">
               <p className="text-sm text-tinta-2">
@@ -297,9 +304,9 @@ export function VistaHistorico() {
                 </p>
               )}
               {s.valores.size > 0 && tp === 0 && previo && <p className="mt-1 text-sm text-tinta-3">Sin datos en {nombrePrevio} para comparar</p>}
-              {tp > 0 && comunes.length < s.valores.size && (
+              {tp > 0 && comunes.length < s.finos.size && (
                 <p className="mt-1 text-xs text-tinta-3">
-                  Comparando {comunes.length} de {s.valores.size} {unidadPos}: los que tienen datos en los dos períodos
+                  Comparando {comunes.length.toLocaleString('es-CL')} de {s.finos.size.toLocaleString('es-CL')} {unidadPos}: {unidadPos === 'horas' ? 'las' : 'los'} que tienen datos en los dos períodos
                 </p>
               )}
               {periodoEfectivo !== 'dia' && completo.hasta > ahora && s.valores.size > 0 && (
