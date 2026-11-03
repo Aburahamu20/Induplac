@@ -64,36 +64,45 @@ function rango(periodo: Periodo, fecha: string, desplazar: Comparar = 'ninguno')
   return { desde, hasta }
 }
 
-// Clave del "casillero" (hora, día o mes) y su etiqueta para el eje
-function casillero(periodo: Periodo, inicio: Date): { clave: string; etiqueta: string } {
-  const p = new Intl.DateTimeFormat('es-CL', { ...ZONA, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false })
-    .formatToParts(inicio)
+// Fecha local (Chile) de un instante, como número de días, para contar días sin líos de horario de verano
+function partes(t: Date) {
+  return new Intl.DateTimeFormat('es-CL', { ...ZONA, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false })
+    .formatToParts(t)
     .reduce<Record<string, string>>((o, x) => ({ ...o, [x.type]: x.value }), {})
-  if (periodo === 'dia') return { clave: p.hour, etiqueta: `${p.hour}:00` }
-  if (periodo === 'anio') return { clave: p.month, etiqueta: MESES[Number(p.month) - 1] }
-  return { clave: `${p.month}-${p.day}`, etiqueta: `${Number(p.day)}/${Number(p.month)}` }
+}
+const diaNumero = (p: Record<string, string>) => Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day)) / 86_400_000
+
+// Posición dentro del período (hora del día, día desde el inicio o mes del año) y su etiqueta.
+// Con la posición, el período actual y el de comparación se alinean día con día.
+function casillero(periodo: Periodo, inicio: Date, desde: Date): { pos: number; etiqueta: string } {
+  const p = partes(inicio)
+  if (periodo === 'dia') return { pos: Number(p.hour) % 24, etiqueta: `${p.hour}:00` }
+  if (periodo === 'anio') return { pos: Number(p.month) - 1, etiqueta: MESES[Number(p.month) - 1] }
+  return { pos: diaNumero(p) - diaNumero(partes(desde)), etiqueta: `${Number(p.day)}/${Number(p.month)}` }
 }
 
 interface Serie {
   local_id: LocalId
-  valores: Map<string, number> // clave del casillero -> total
-  etiquetas: Map<string, string>
+  valores: Map<number, number> // posición -> total
+  etiquetas: Map<number, string>
 }
 
-function agregar(r: HistoricoRespuesta | null | undefined, periodo: Periodo, variable: Variable): Serie[] {
+function agregar(r: HistoricoRespuesta | null | undefined, periodo: Periodo, variable: Variable, desde: Date): Serie[] {
   if (!r) return []
   return r.series.map((s) => {
-    const valores = new Map<string, number>()
-    const etiquetas = new Map<string, string>()
-    // Horas que cubre cada punto: lo que separa a dos puntos seguidos (la API agrupa por hora o por día)
+    const valores = new Map<number, number>()
+    const etiquetas = new Map<number, string>()
+    // Horas que cubre cada punto: la menor separación entre puntos seguidos (1 = por hora, 24 = por día).
+    // Se usa la menor porque puede haber huecos sin datos entre medio.
     const t = s.puntos.map((p) => new Date(p.inicio).getTime())
-    const horas = t.length > 1 ? Math.max(1, Math.round((t[1] - t[0]) / 3_600_000)) : r.agrupacion === 'dia' ? 24 : 1
+    const difs = t.slice(1).map((x, i) => x - t[i]).filter((d) => d > 0)
+    const horas = difs.length ? Math.max(1, Math.round(Math.min(...difs) / 3_600_000)) : r.agrupacion === 'dia' ? 24 : 1
     for (const p of s.puntos) {
       const v = variable === 'energia' ? (p.promedio == null ? null : p.promedio * horas) : p.total
       if (v == null) continue
-      const c = casillero(periodo, new Date(p.inicio))
-      valores.set(c.clave, (valores.get(c.clave) ?? 0) + v)
-      etiquetas.set(c.clave, c.etiqueta)
+      const c = casillero(periodo, new Date(p.inicio), desde)
+      valores.set(c.pos, (valores.get(c.pos) ?? 0) + v)
+      etiquetas.set(c.pos, c.etiqueta)
     }
     return { local_id: s.local_id, valores, etiquetas }
   })
@@ -142,7 +151,8 @@ export function VistaHistorico() {
       variable: variable === 'energia' ? 'energia_kw' : 'agua_m3_dia',
       desde: r.desde.toISOString(),
       hasta: new Date(r.hasta.getTime() - 1).toISOString(),
-      agrupacion: variable === 'agua' || periodoEfectivo !== 'dia' ? 'dia' : 'hora',
+      // Energía por hora (exacta aunque un día tenga datos solo hasta mediodía); en el año, por día
+      agrupacion: variable === 'agua' || periodoEfectivo === 'anio' ? 'dia' : 'hora',
     })
   const deps = [variable, periodoEfectivo, fecha, comparar, sedes.join()]
   const { datos, error } = usePolling(() => (sedes.length ? consulta(actual) : Promise.resolve(undefined)), 120_000, deps)
@@ -152,8 +162,13 @@ export function VistaHistorico() {
     deps,
   )
 
-  const series = useMemo(() => agregar(datos, periodoEfectivo, variable), [datos, periodoEfectivo, variable])
-  const seriesPrevias = useMemo(() => agregar(datosPrevios, periodoEfectivo, variable), [datosPrevios, periodoEfectivo, variable])
+  const desdeMs = actual.desde.getTime()
+  const desdePrevioMs = previo?.desde.getTime() ?? 0
+  const series = useMemo(() => agregar(datos, periodoEfectivo, variable, new Date(desdeMs)), [datos, periodoEfectivo, variable, desdeMs])
+  const seriesPrevias = useMemo(
+    () => agregar(datosPrevios, periodoEfectivo, variable, new Date(desdePrevioMs)),
+    [datosPrevios, periodoEfectivo, variable, desdePrevioMs],
+  )
   const unidad = VARIABLES[variable].unidad
   const nombreActual = nombrePeriodo(periodoEfectivo, actual.desde)
   const nombrePrevio = previo ? nombrePeriodo(periodoEfectivo, previo.desde) : ''
@@ -162,12 +177,12 @@ export function VistaHistorico() {
   // Casillero con el mayor valor entre las sedes elegidas
   let pico: { sede: LocalId; etiqueta: string; valor: number } | null = null
   for (const s of series)
-    for (const [k, v] of s.valores) if (!pico || v > pico.valor) pico = { sede: s.local_id, etiqueta: s.etiquetas.get(k) ?? k, valor: v }
+    for (const [k, v] of s.valores) if (!pico || v > pico.valor) pico = { sede: s.local_id, etiqueta: s.etiquetas.get(k) ?? String(k), valor: v }
 
   const descargar = () => {
     const filas = [['sede', 'periodo', 'casillero', unidad]]
     for (const [lista, nombre] of [[series, nombreActual], [seriesPrevias, nombrePrevio]] as const)
-      for (const s of lista) for (const [k, v] of s.valores) filas.push([SEDES[s.local_id].nombre, nombre, s.etiquetas.get(k) ?? k, v.toFixed(2)])
+      for (const s of lista) for (const [k, v] of s.valores) filas.push([SEDES[s.local_id].nombre, nombre, s.etiquetas.get(k) ?? String(k), v.toFixed(2)])
     const url = URL.createObjectURL(new Blob([filas.map((f) => f.join(';')).join('\n')], { type: 'text/csv;charset=utf-8' }))
     const a = Object.assign(document.createElement('a'), { href: url, download: `induplac-historico-${variable}-${fecha}.csv` })
     a.click()
@@ -258,8 +273,14 @@ export function VistaHistorico() {
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {series.map((s) => {
           const t = total(s)
-          const tp = total(seriesPrevias.find((x) => x.local_id === s.local_id))
-          const delta = tp ? ((t - tp) / tp) * 100 : null
+          // Se compara solo lo que tiene datos en los DOS períodos (si septiembre empieza a mitad de mes,
+          // se comparan esos días con los mismos días de octubre)
+          const prev = seriesPrevias.find((x) => x.local_id === s.local_id)
+          const comunes = prev ? [...s.valores.keys()].filter((k) => prev.valores.has(k)) : []
+          const tc = comunes.reduce((a, k) => a + s.valores.get(k)!, 0)
+          const tp = comunes.reduce((a, k) => a + prev!.valores.get(k)!, 0)
+          const delta = tp ? ((tc - tp) / tp) * 100 : null
+          const unidadPos = periodoEfectivo === 'dia' ? 'horas' : periodoEfectivo === 'anio' ? 'meses' : 'días'
           return (
             <article key={s.local_id} className="rounded-lg border border-borde bg-panel p-4">
               <p className="text-sm text-tinta-2">
@@ -276,6 +297,11 @@ export function VistaHistorico() {
                 </p>
               )}
               {s.valores.size > 0 && tp === 0 && previo && <p className="mt-1 text-sm text-tinta-3">Sin datos en {nombrePrevio} para comparar</p>}
+              {tp > 0 && comunes.length < s.valores.size && (
+                <p className="mt-1 text-xs text-tinta-3">
+                  Comparando {comunes.length} de {s.valores.size} {unidadPos}: los que tienen datos en los dos períodos
+                </p>
+              )}
               {periodoEfectivo !== 'dia' && completo.hasta > ahora && s.valores.size > 0 && (
                 <p className="mt-1 text-xs text-tinta-3">Período en curso: hasta hoy</p>
               )}
@@ -331,10 +357,9 @@ function GraficoPeriodo({
   enCurso: boolean
 }) {
   // Eje común: los casilleros del período actual, en orden; la comparación se alinea por posición
-  const claves = [...serie.etiquetas.keys()]
-  const clavesPrevias = previa ? [...previa.etiquetas.keys()] : []
+  const claves = [...serie.etiquetas.keys()].sort((a, b) => a - b)
   const valores = claves.map((k) => serie.valores.get(k) ?? null)
-  const comparados = claves.map((_, i) => (previa && clavesPrevias[i] ? (previa.valores.get(clavesPrevias[i]) ?? null) : null))
+  const comparados = claves.map((k) => previa?.valores.get(k) ?? null)
   const numeros = valores.filter((v): v is number => v != null)
   const min = Math.min(...numeros)
   const max = Math.max(...numeros)
@@ -387,7 +412,7 @@ function GraficoPeriodo({
           <Line
             options={opciones}
             data={{
-              labels: claves.map((k) => serie.etiquetas.get(k) ?? k),
+              labels: claves.map((k) => serie.etiquetas.get(k) ?? String(k)),
               datasets: [
                 {
                   label: nombreActual,
