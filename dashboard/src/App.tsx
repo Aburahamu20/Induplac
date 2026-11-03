@@ -1,24 +1,15 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { conDemo, fuente, usaSimulacion, type LocalId } from './api'
 import { auth, authSimulada, type Permiso, type Sesion } from './auth'
 import { guardarSesion, sesionGuardada, SesionCtx, useSesion, type ContextoSesion } from './auth/sesion'
 import { fijarToken } from './auth/token'
-import { Encabezado } from './components/Encabezado'
+import { Cabecera, Menu, Proximamente } from './components/Menu'
+import { ENTRADAS, nombreEntrada, type Pantalla } from './components/pantallas'
 import { Login } from './components/Login'
 import { PanelDemo } from './components/PanelDemo'
 import { avisoEnlace } from './components/estadoEnlace'
 import { usePolling } from './hooks/usePolling'
 import { VistaAlertas, VistaOficinas, VistaPlanta, VistaResumen } from './vistas'
-
-type Pestana = 'resumen' | 'oficinas' | 'planta' | 'alertas'
-
-// Qué necesita cada pestaña para mostrarse (contrato §6.4)
-const PESTANAS: { id: Pestana; nombre: string; visible: (c: ContextoSesion) => boolean }[] = [
-  { id: 'resumen', nombre: 'Resumen general', visible: (c) => c.puede('ver_general') && c.ve('local1') && c.ve('local2') },
-  { id: 'oficinas', nombre: 'Oficinas administrativas', visible: (c) => c.puede('ver_actual') && c.ve('local2') },
-  { id: 'planta', nombre: 'Planta de fabricación', visible: (c) => c.puede('ver_actual') && c.ve('local1') },
-  { id: 'alertas', nombre: 'Alertas', visible: (c) => c.puede('ver_alertas') },
-]
 
 // Sesión guardada al recargar la página (si no expiró)
 function sesionInicial(): Sesion | null {
@@ -67,58 +58,83 @@ export default function App() {
   )
 }
 
+// La pantalla actual va en la dirección (#planta, #alertas...) para que recargar no te saque de ahí
+function leerHash(): Pantalla | null {
+  const h = location.hash.replace('#', '')
+  return ENTRADAS.some((e) => e.id === h) ? (h as Pantalla) : null
+}
+
+const SUBTITULO: Partial<Record<Pantalla, string>> = {
+  resumen: 'Planta y Oficinas',
+  planta: 'Panel principal',
+  oficinas: 'Panel principal',
+}
+
 function Dashboard() {
   const ctx = useSesion()
-  const visibles = PESTANAS.filter((p) => p.visible(ctx))
-  const [elegida, setPestana] = useState<Pestana | null>(null)
-  const pestana = visibles.find((p) => p.id === elegida)?.id ?? visibles[0]?.id
+  const visibles = ENTRADAS.filter((e) => e.visible(ctx))
+  const [elegida, setElegida] = useState<Pantalla | null>(leerHash)
+  const [menuAbierto, setMenuAbierto] = useState(false)
+  const pantalla = visibles.find((p) => p.id === elegida)?.id ?? visibles[0]?.id
+
+  useEffect(() => {
+    const alCambiar = () => setElegida(leerHash())
+    window.addEventListener('hashchange', alCambiar)
+    return () => window.removeEventListener('hashchange', alCambiar)
+  }, [])
+  const ir = (p: Pantalla) => {
+    location.hash = p
+    setElegida(p)
+    window.scrollTo({ top: 0 })
+  }
 
   // En simulación se consulta cada 1 s para que el showcase se vea fluido; contra la API, cada 5 s (contrato §2)
   const { datos: estado, error: errorEstado } = usePolling(() => fuente.estado(), usaSimulacion ? 1_000 : 5_000)
   const { datos: alertas } = usePolling(() => fuente.alertas({ estado: 'activa' }), 5_000)
   const misAlertas = alertas?.filter((a) => ctx.ve(a.local_id)) ?? []
-  const misLocales = estado?.locales.filter((l) => ctx.ve(l.local_id)) ?? []
+  const misLocales = (estado?.locales.filter((l) => ctx.ve(l.local_id)) ?? []).sort((a, b) => a.local_id.localeCompare(b.local_id))
 
-  // En la pestaña de una sede, el aviso es de esa sede; en las demás, de todas las que ve el usuario
+  // En la pantalla de una sede, el aviso es de esa sede; en las demás, de todas las que ve el usuario
   const localesAviso =
-    pestana === 'oficinas'
+    pantalla === 'oficinas'
       ? misLocales.filter((l) => l.local_id === 'local2')
-      : pestana === 'planta'
+      : pantalla === 'planta'
         ? misLocales.filter((l) => l.local_id === 'local1')
         : misLocales
   const aviso = avisoEnlace(localesAviso, estado?.origen, !!errorEstado)
+  const sedes = ctx.sesion.locales.length === 1 ? (ctx.ve('local1') ? 'Planta' : 'Oficinas') : 'Planta y Oficinas'
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-borde">
-        <Encabezado aviso={aviso} simulado={usaSimulacion} />
-        <nav className="mx-auto flex max-w-[1400px] gap-1 overflow-x-auto overflow-y-hidden px-4 pt-1 [scrollbar-width:none]">
-          {visibles.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => setPestana(p.id)}
-              className={`-mb-px flex items-center gap-2 whitespace-nowrap rounded-t-md border px-4 py-2 text-sm ${
-                pestana === p.id
-                  ? 'border-borde border-b-fondo bg-fondo font-bold text-tinta'
-                  : 'border-transparent text-tinta-2 hover:text-tinta'
-              }`}
-            >
-              {p.nombre}
-              {p.id === 'alertas' && misAlertas.length > 0 && (
-                <span className="rounded-full bg-critico px-1.5 text-xs font-bold text-white">{misAlertas.length}</span>
-              )}
-            </button>
-          ))}
-        </nav>
-      </header>
-
-      <main className="mx-auto max-w-[1400px] px-4 py-5">
-        {!pestana && <p className="py-10 text-center text-tinta-2">Tu usuario no tiene permisos para ver datos. Contacta al Administrador.</p>}
-        {pestana === 'resumen' && <VistaResumen />}
-        {pestana === 'oficinas' && <VistaOficinas />}
-        {pestana === 'planta' && <VistaPlanta />}
-        {pestana === 'alertas' && <VistaAlertas />}
-      </main>
+    <div className="lg:flex">
+      <Menu
+        actual={pantalla}
+        ir={ir}
+        alertasActivas={misAlertas.length}
+        locales={misLocales}
+        abierto={menuAbierto}
+        cerrar={() => setMenuAbierto(false)}
+      />
+      <div className="min-w-0 flex-1">
+        <Cabecera
+          titulo={pantalla ? nombreEntrada(pantalla, ctx) : 'Induplac'}
+          subtitulo={(pantalla && SUBTITULO[pantalla]) ?? sedes}
+          aviso={aviso}
+          simulado={usaSimulacion}
+          alertasActivas={misAlertas.length}
+          abrirMenu={() => setMenuAbierto(true)}
+          verAlertas={ctx.puede('ver_alertas') ? () => ir('alertas') : undefined}
+        />
+        <main className="px-4 py-5 lg:px-8">
+          {!pantalla && <p className="py-10 text-center text-tinta-2">Tu usuario no tiene permisos para ver datos. Contacta al Administrador.</p>}
+          {pantalla === 'resumen' && <VistaResumen />}
+          {pantalla === 'oficinas' && <VistaOficinas />}
+          {pantalla === 'planta' && <VistaPlanta />}
+          {pantalla === 'alertas' && <VistaAlertas />}
+          {pantalla && ['historico', 'umbrales', 'usuarios', 'auditoria', 'estado'].includes(pantalla) && (
+            <Proximamente nombre={nombreEntrada(pantalla, ctx)} />
+          )}
+        </main>
+      </div>
 
       {conDemo && <PanelDemo />}
     </div>
