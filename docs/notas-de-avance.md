@@ -612,3 +612,39 @@ Abraham (con Claude). Rama `feature/reconocer-comentario`.
 - **API:** `POST /api/alertas/{id}/reconocer` acepta un `comentario` opcional (hasta 500 caracteres) y guarda en la alerta `reconocida_por` y `comentario`. Además, **solo se puede reconocer una vez**: si ya estaba reconocida responde `409`, así nadie reescribe quién la reconoció ni lo que escribió. El comentario va también a la auditoría.
 - **Dashboard:** el botón *Reconocer alerta* abre un cuadro para escribir el comentario (opcional) y confirmar. Las alertas reconocidas muestran quién las reconoció y su comentario.
 - **Pruebas:** 1 nueva en `test_permisos.py`: largo máximo, guarda usuario y comentario, la segunda vez da 409 y una alerta inexistente da 404. **30 en total**, todas pasan. Dashboard: build y lint sin errores.
+
+---
+
+## 2026-11-03 — Umbrales editables y simulación (tarea 28, parte 4)
+
+Abraham (con Claude). Rama `feature/umbrales`.
+
+### Problema encontrado
+Los umbrales estaban en RDS, pero `induplac-api`, que genera las alertas, está fuera de la VPC y no llega a RDS: usaba valores escritos fijos en el código. Si alguien cambiaba un umbral en RDS, las alertas no se enteraban.
+
+### Decisión (Abraham, 03/11)
+**RDS manda + copia en DynamoDB.** Se editan en RDS vía `induplac-config` y al guardar se copian a la tabla `induplac-umbrales`, que es la que lee `induplac-api`. Si RDS está apagado, las alertas siguen funcionando con la última copia.
+
+### En la consola
+- **Punto de enlace Gateway de DynamoDB** `induplac-dynamodb` en la VPC de `induplac-config` (`vpc-06ad0d1e13b2f8e9e`, la predeterminada), con todas sus tablas de enrutamiento. Es gratis. Sin él, la Lambda de la VPC no llega a DynamoDB.
+- Tabla `induplac-umbrales` (PK `local_id`, SK `variable`).
+
+### En el código
+- **`backend/lambda_api/umbrales.py`:** catálogo de las 5 variables, valores por defecto, validación (la advertencia tiene que ser menor que la alerta, con rangos razonables) y lectura de la copia con un caché de 60 s.
+- **`backend/lambda_api/permisos.py`:** `perfil()` y los grupos salieron de `lambda_function.py` para que los use también `induplac-config`.
+- **`induplac-api`:**
+  - Las reglas de alerta y los niveles de las tarjetas usan la copia. La regla de energía ahora es "X % sobre el promedio de 4 semanas", con X configurable.
+  - `GET /api/umbrales` y `POST /api/umbrales/simulacion`: cuántas alertas habría dado un umbral en los últimos N días, comparado con el actual, usando los datos reales de DynamoDB. No necesita RDS.
+- **`induplac-config`:**
+  - `PUT /config/umbrales/{local}/{variable}` guarda en RDS, copia a DynamoDB y audita.
+  - `PUT /config/umbrales` copia todo, solo para el admin general.
+  - Los `GET` ahora filtran por la sede del token, y `OPTIONS` responde sin conectarse a RDS.
+- **`crear_tablas_rds.py`:** filas nuevas `energia_pct` y `agua_m3h`.
+- **Deploy:** el zip de `induplac-config` lleva `auditoria.py`, `permisos.py` y `umbrales.py`. **CI:** corre las pruebas de `induplac-config`.
+- **Pruebas:** `test_umbrales.py` (10) y `lambda_config/tests/test_config.py` (5, con un RDS falso). **45 en total**, todas pasan.
+
+### Siguen abiertos
+- [ ] Rutas `PUT` y `OPTIONS /config/{proxy+}` en API Gateway, más el authorizer en `GET`/`PUT /config/{proxy+}`.
+- [ ] Desplegar, encender RDS y probar: copiar todo, simular y cambiar un umbral.
+- [ ] El Edge todavía usa sus propios umbrales fijos: que los descargue al sincronizar (Fase 4).
+- [ ] Pantalla de Umbrales en el dashboard (Fase 5).

@@ -51,6 +51,9 @@ jobs:
         run: |
           pip install --quiet boto3
           python -m unittest discover -s tests -v
+      - name: Pruebas de induplac-config (umbrales con RDS falso)
+        working-directory: backend/lambda_config
+        run: python -m unittest discover -s tests -v
 
   secretos:
     name: Sin claves en el repositorio

@@ -14,6 +14,8 @@ Detrás de una API Gateway HTTP API. Implementa:
                             POST /api/usuarios
                             PATCH /api/usuarios/{u}
                             POST /api/usuarios/{u}/desactivar | activar | resetear-clave | resetear-mfa
+                            GET  /api/umbrales           (umbrales vigentes de sus sedes)
+                            POST /api/umbrales/simulacion (solo admins: cuántas alertas habría dado)
                             GET  /health
 
 Formato de la consulta: docs/api-dashboard.md. Formato de la ingesta: backend/README.md.
@@ -23,6 +25,7 @@ Variables de entorno:
   TABLA_ALERTAS     (por defecto induplac-alertas)
   TABLA_AUDITORIA   (por defecto induplac-auditoria)
   USER_POOL_ID      user pool de Cognito (por defecto el del lab de Felipe)
+  TABLA_UMBRALES    (por defecto induplac-umbrales): copia de los umbrales de RDS
   CLAVE_INGESTA     clave compartida con el Edge (nunca en el repo)
 
 Login: API Gateway valida el IdToken de Cognito (authorizer JWT `cognito-jwt` en
@@ -43,6 +46,7 @@ import boto3
 from boto3.dynamodb.conditions import Key
 
 import auditoria
+import umbrales as mod_umbrales
 import usuarios as mod_usuarios
 
 try:
@@ -85,12 +89,9 @@ LOCALES = [
 ]
 IDS_LOCALES = {l["local_id"] for l in LOCALES}
 
-# Umbrales (CONTEXTO §8.2). En el diseño final viven en RDS (umbrales_alerta).
-AGUA = {
-    "local1": {"normal": 10, "advertencia": 12, "critico": 14, "fuga": 0.3},
-    "local2": {"normal": 1.5, "advertencia": 2, "critico": 2.5, "fuga": 0.05},
-}
-ENERGIA_FIJA = {"advertencia": 45, "critico": 55}  # respaldo sin 4 semanas de historia
+# Umbrales (CONTEXTO §8.2): se editan en RDS y esta Lambda lee la copia en DynamoDB
+# (ver umbrales.py). Sin copia, se usan los valores por defecto de umbrales.py.
+UMB = mod_umbrales.Umbrales(dynamo.Table(os.environ.get("TABLA_UMBRALES", "induplac-umbrales")))
 META_MES, META_ANIO = 400, 5000
 MINUTOS_DESCONECTADO = 30
 
@@ -103,36 +104,9 @@ CORS = {
 
 # ---------------- quién es el usuario (token de Cognito) ----------------
 
-# Mismo criterio que el dashboard (dashboard/src/auth/cognito.ts): el grupo dice
-# qué puede hacer y custom:sede dice dónde. Si hay varios grupos, gana el primero.
-ORDEN_GRUPOS = ["admin-general", "administrador", "admin-sede", "jefe", "operario"]
-GRUPOS_TODAS_LAS_SEDES = {"admin-general", "administrador"}
-SEDES_COGNITO = {"planta": ["local1"], "oficinas": ["local2"], "todas": ["local1", "local2"]}
-PUEDEN_RECONOCER = {"admin-general", "administrador", "admin-sede", "jefe"}
-VEN_AUDITORIA = {"admin-general", "administrador", "admin-sede"}
-VEN_HISTORICO = {"admin-general", "administrador", "admin-sede", "jefe"}  # el operario solo ve lo actual
-
-
-def grupos_de(claims):
-    g = claims.get("cognito:groups") or []
-    if isinstance(g, str):  # API Gateway lo entrega como texto: "[jefe operario]"
-        g = g.strip("[]").replace(",", " ").split()
-    return list(g)
-
-
-def perfil(evento):
-    """Usuario, grupo y locales del token, o None si no hay sesión válida."""
-    claims = (evento.get("requestContext", {}).get("authorizer", {}).get("jwt", {}) or {}).get("claims") or {}
-    grupo = next((g for g in ORDEN_GRUPOS if g in grupos_de(claims)), None)
-    if not grupo:
-        return None
-    if grupo in GRUPOS_TODAS_LAS_SEDES:
-        locales = ["local1", "local2"]
-    else:
-        locales = SEDES_COGNITO.get(str(claims.get("custom:sede", "")).strip().lower())
-        if not locales:
-            return None
-    return {"usuario": claims.get("cognito:username") or claims.get("sub", "?"), "grupo": grupo, "locales": locales}
+from permisos import (  # noqa: E402
+    GRUPOS_TODAS_LAS_SEDES, PUEDEN_RECONOCER, VEN_AUDITORIA, VEN_HISTORICO, perfil, puede_configurar,
+)
 
 
 # ---------------- utilidades ----------------
@@ -211,19 +185,35 @@ def promedio_4_semanas(local_id, inicio):
 
 # ---------------- reglas de nivel (CONTEXTO §8.2) ----------------
 
-def nivel_energia(valor, referencia):
+def _nivel(valor, advertencia, alerta, incluye=False):
+    sobre = (lambda u: valor >= u) if incluye else (lambda u: valor > u)
+    if sobre(alerta):
+        return "critico"
+    return "advertencia" if advertencia is not None and sobre(advertencia) else "normal"
+
+
+def limites_energia(local_id, referencia):
+    """(advertencia, alerta) en kW: % sobre el promedio de 4 semanas, o el fijo de respaldo."""
     if referencia:
-        return "critico" if valor > referencia * 1.2 else "advertencia" if valor > referencia * 1.1 else "normal"
-    return "critico" if valor > ENERGIA_FIJA["critico"] else "advertencia" if valor > ENERGIA_FIJA["advertencia"] else "normal"
+        p = UMB.get(local_id, "energia_pct")
+        adv = None if p["advertencia"] is None else referencia * (1 + p["advertencia"] / 100)
+        return adv, referencia * (1 + p["alerta"] / 100)
+    f = UMB.get(local_id, "energia_kw")
+    return f["advertencia"], f["alerta"]
 
 
-def nivel_uv(uv):
-    return "critico" if uv >= 8 else "advertencia" if uv >= 6 else "normal"
+def nivel_energia(valor, referencia, local_id="local1"):
+    return _nivel(valor, *limites_energia(local_id, referencia))
+
+
+def nivel_uv(uv, local_id="local1"):
+    u = UMB.get(local_id, "uv")
+    return _nivel(uv, u["advertencia"], u["alerta"], incluye=True)
 
 
 def nivel_agua_dia(local_id, m3):
-    a = AGUA[local_id]
-    return "critico" if m3 > a["critico"] else "advertencia" if m3 > a["advertencia"] else "normal"
+    a = UMB.get(local_id, "agua_m3_dia")
+    return _nivel(m3, a["advertencia"], a["alerta"])
 
 
 def es_horario_fuga(dt):
@@ -309,25 +299,29 @@ def evaluar_alertas(local_id, r):
     kw = num(r.get("energia_kw"))
     if kw is not None:
         ref = promedio_4_semanas(local_id, inicio)
-        if nivel_energia(kw, ref) == "critico":
-            umbral = ref * 1.2 if ref else ENERGIA_FIJA["critico"]
-            regla = "20 % sobre el promedio de 4 semanas a la misma hora" if ref else f"Energía sobre {ENERGIA_FIJA['critico']} kW"
+        if nivel_energia(kw, ref, local_id) == "critico":
+            umbral = limites_energia(local_id, ref)[1]
+            pct = UMB.alerta(local_id, "energia_pct")
+            regla = (f"{pct:g} % sobre el promedio de 4 semanas a la misma hora" if ref
+                     else f"Energía sobre {umbral:g} kW")
             guardar_alerta(local_id, "energia_kw", kw, umbral, regla, inicio)
             n += 1
     uv = num(r.get("uv_max"))
-    if uv is not None and uv >= 8:
-        guardar_alerta(local_id, "uv_index", uv, 8, "UV mayor o igual a 8", inicio)
+    if uv is not None and local_id == "local1" and nivel_uv(uv, local_id) == "critico":
+        u = UMB.alerta(local_id, "uv")
+        guardar_alerta(local_id, "uv_index", uv, u, f"UV mayor o igual a {u:g}", inicio)
         n += 1
     caudal = num(r.get("agua_m3h"))
-    if caudal is not None and caudal > AGUA[local_id]["fuga"] and es_horario_fuga(leer_iso(inicio)):
-        guardar_alerta(local_id, "agua_m3h", caudal, AGUA[local_id]["fuga"],
-                       f"Posible fuga: caudal sobre {AGUA[local_id]['fuga']} m³/h fuera de horario", inicio)
+    fuga = UMB.alerta(local_id, "agua_m3h")
+    if caudal is not None and caudal > fuga and es_horario_fuga(leer_iso(inicio)):
+        guardar_alerta(local_id, "agua_m3h", caudal, fuga,
+                       f"Posible fuga: caudal sobre {fuga:g} m³/h fuera de horario", inicio)
         n += 1
     dia = agua_del_dia(local_id, inicio)
-    if dia > AGUA[local_id]["critico"]:
+    tope = UMB.alerta(local_id, "agua_m3_dia")
+    if dia > tope:
         dia_ini = iso(inicio_dia_chile(leer_iso(inicio)))
-        guardar_alerta(local_id, "agua_m3_dia", dia, AGUA[local_id]["critico"],
-                       f"Agua diaria sobre {AGUA[local_id]['critico']} m³", dia_ini)
+        guardar_alerta(local_id, "agua_m3_dia", dia, tope, f"Agua diaria sobre {tope:g} m³", dia_ini)
         n += 1
     return n
 
@@ -366,19 +360,19 @@ def actual(local_id, quien):
     ref = promedio_4_semanas(local_id, inicio)
     dia = agua_del_dia(local_id, inicio)
     caudal = num(u.get("agua_m3h")) or 0
-    fuga = caudal > AGUA[local_id]["fuga"] and es_horario_fuga(leer_iso(inicio))
+    fuga = caudal > UMB.alerta(local_id, "agua_m3h") and es_horario_fuga(leer_iso(inicio))
 
     v = [
-        {"id": "energia_kw", "valor": kw, "referencia": ref, "nivel": nivel_energia(kw, ref)},
+        {"id": "energia_kw", "valor": kw, "referencia": ref, "nivel": nivel_energia(kw, ref, local_id)},
         {"id": "agua_m3h", "valor": caudal, "referencia": None, "nivel": "critico" if fuga else "normal"},
-        {"id": "agua_m3_dia", "valor": dia, "referencia": AGUA[local_id]["normal"], "nivel": nivel_agua_dia(local_id, dia)},
+        {"id": "agua_m3_dia", "valor": dia, "referencia": mod_umbrales.AGUA_NORMAL[local_id], "nivel": nivel_agua_dia(local_id, dia)},
         {"id": "hh_sin_incidentes", "valor": num(u.get("hh_sin_incidentes")) or 0, "referencia": None, "nivel": "normal"},
         {"id": "dias_sin_incidentes", "valor": num(u.get("dias_sin_incidentes")) or 0, "referencia": None, "nivel": "normal"},
     ]
     if local_id == "local1":
         uv = num(u.get("uv_max")) or 0
         v += [
-            {"id": "uv_index", "valor": uv, "referencia": None, "nivel": nivel_uv(uv)},
+            {"id": "uv_index", "valor": uv, "referencia": None, "nivel": nivel_uv(uv, local_id)},
             {"id": "produccion_mes", "valor": num(u.get("produccion_mes")) or 0, "referencia": META_MES, "nivel": "normal"},
             {"id": "produccion_anual", "valor": num(u.get("produccion_anual")) or 0, "referencia": META_ANIO, "nivel": "normal"},
         ]
@@ -520,6 +514,81 @@ def historico(evento, quien):
     return respuesta(200, {"variable": variable, "agrupacion": agr, "series": series})
 
 
+# ---------------- umbrales: vigentes y simulación ----------------
+
+MAX_DIAS_SIMULACION = 90
+
+
+def simular(evento, quien):
+    """¿Cuántas alertas y advertencias habría dado un umbral en los últimos N días, comparado con el actual?"""
+    try:
+        c = json.loads(evento.get("body") or "{}")
+    except ValueError:
+        return error(400, "PARAMETROS", "El cuerpo no es JSON válido.")
+    local_id, variable = c.get("local_id"), c.get("variable")
+    if not puede_configurar(quien, local_id):
+        return error(403, "SIN_PERMISO", "Solo los administradores de esa sede simulan umbrales.")
+    try:
+        adv, alerta = mod_umbrales.validar(local_id, variable, c.get("advertencia"), c.get("alerta"))
+        dias = int(c.get("dias", 30))
+    except ValueError as e:
+        return error(400, "PARAMETROS", str(e))
+    if not 1 <= dias <= MAX_DIAS_SIMULACION:
+        return error(400, "PARAMETROS", f"dias debe estar entre 1 y {MAX_DIAS_SIMULACION}.")
+    hoy = datetime.now(timezone.utc)
+    desde = hoy - timedelta(days=dias)
+    # energia_pct necesita 4 semanas más atrás para el promedio
+    extra = timedelta(weeks=4) if variable == "energia_pct" else timedelta(0)
+    datos = intervalos(local_id, iso(desde - extra), iso(hoy))
+    actual = UMB.get(local_id, variable)
+    r = contar_eventos(variable, datos, desde, {"actual": (actual["advertencia"], actual["alerta"]),
+                                                 "propuesto": (adv, alerta)})
+    return respuesta(200, {
+        "local_id": local_id, "variable": variable, "dias": dias,
+        "desde": iso(desde), "hasta": iso(hoy), "unidad_evento": r.pop("unidad"),
+        "actual": {"advertencia": actual["advertencia"], "alerta": actual["alerta"], **r["actual"]},
+        "propuesto": {"advertencia": adv, "alerta": alerta, **r["propuesto"]},
+    })
+
+
+def contar_eventos(variable, datos, desde, escenarios):
+    """Cuenta, para cada escenario (advertencia, alerta), cuántos intervalos o días quedan en cada nivel."""
+    ventana = [i for i in datos if leer_iso(i["inicio_intervalo"]) >= desde]
+    muestras, unidad = [], "intervalos de 15 min"
+    if variable == "energia_pct":
+        kw = {i["inicio_intervalo"]: num(i.get("energia_kw")) for i in datos}
+        for i in ventana:
+            t = leer_iso(i["inicio_intervalo"])
+            previos = [kw.get(iso(t - timedelta(weeks=s))) for s in range(1, 5)]
+            if None in previos or kw.get(i["inicio_intervalo"]) is None or not sum(previos):
+                continue
+            ref = sum(previos) / 4
+            muestras.append((i["inicio_intervalo"], (kw[i["inicio_intervalo"]] / ref - 1) * 100, False))
+    elif variable == "energia_kw":
+        muestras = [(i["inicio_intervalo"], num(i.get("energia_kw")), False) for i in ventana if i.get("energia_kw") is not None]
+    elif variable == "uv":
+        muestras = [(i["inicio_intervalo"], num(i.get("uv_max")), True) for i in ventana if i.get("uv_max") is not None]
+    elif variable == "agua_m3h":
+        muestras = [(i["inicio_intervalo"], num(i.get("agua_m3h")), False) for i in ventana
+                    if i.get("agua_m3h") is not None and es_horario_fuga(leer_iso(i["inicio_intervalo"]))]
+    elif variable == "agua_m3_dia":
+        unidad, por_dia = "días", {}
+        for i in ventana:
+            d = iso(inicio_dia_chile(leer_iso(i["inicio_intervalo"])))
+            por_dia[d] = por_dia.get(d, 0) + (num(i.get("agua_m3")) or 0)
+        muestras = [(d, v, False) for d, v in sorted(por_dia.items())]
+    salida = {"unidad": unidad}
+    for nombre, (adv, alerta) in escenarios.items():
+        niveles = [(t, _nivel(v, adv, alerta, incluye)) for t, v, incluye in muestras]
+        salida[nombre] = {
+            "alertas": sum(1 for _, n in niveles if n == "critico"),
+            "advertencias": sum(1 for _, n in niveles if n == "advertencia"),
+            "evaluados": len(niveles),
+            "ultimas_alertas": [t for t, n in niveles if n == "critico"][-5:],
+        }
+    return salida
+
+
 def rutas_usuarios(metodo, partes, evento, quien):
     from urllib.parse import unquote
 
@@ -587,6 +656,10 @@ def lambda_handler(evento, _contexto):
             return historico(evento, quien)
         if metodo == "GET" and ruta == "/api/auditoria":
             return ver_auditoria(q, quien)
+        if metodo == "GET" and ruta == "/api/umbrales":
+            return respuesta(200, UMB.lista(quien["locales"]))
+        if metodo == "POST" and ruta == "/api/umbrales/simulacion":
+            return simular(evento, quien)
         if partes[:2] == ["api", "usuarios"]:
             return rutas_usuarios(metodo, partes, evento, quien)
         return error(404, "RUTA_NO_EXISTE", f"{metodo} {ruta}")

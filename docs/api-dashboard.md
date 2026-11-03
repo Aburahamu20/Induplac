@@ -224,6 +224,24 @@ Parámetros:
 - `integridad.<sede>.estado = "alterada"` si se cambió o borró algún registro desde la consola: cada registro guarda el hash del anterior. El dashboard debe mostrar *"Auditoría alterada"* con los `problemas`.
 - No existe ningún endpoint para editar ni borrar registros de auditoría.
 
+### 3.8. Umbrales (2026-11-03)
+
+Los umbrales se editan en **RDS** (Lambda `induplac-config`) y se copian a DynamoDB (`induplac-umbrales`). Las alertas usan esa copia; si RDS está apagado, siguen con la última copia y, si falta una variable, con los valores por defecto de `backend/lambda_api/umbrales.py`.
+
+| Variable | Qué mide | Advertencia / alerta por defecto |
+| :--- | :--- | :--- |
+| `energia_pct` | % sobre el promedio de 4 semanas a la misma hora (regla principal) | 10 / 20 % |
+| `energia_kw` | Respaldo fijo mientras no hay 4 semanas de historia | 45 / 55 kW |
+| `agua_m3_dia` | Agua consumida en el día | Planta 12 / 14; Oficinas 2 / 2,5 m³ |
+| `agua_m3h` | Posible fuga: caudal fuera de horario (solo hay umbral de alerta) | Planta 0,3; Oficinas 0,05 m³/h |
+| `uv` | Índice UV en el patio de carga (solo Planta) | 6 / 8 UVI |
+
+- `GET /api/umbrales`: umbrales vigentes de las sedes del usuario, con `origen` (`copia` o `defecto`) y quién los cambió por última vez.
+- `POST /api/umbrales/simulacion` (solo admins de esa sede): `{ "local_id", "variable", "advertencia"?, "alerta", "dias" }`, con `dias` de 1 a 90 (por defecto 30). Devuelve, para el umbral `actual` y el `propuesto`, cuántas `alertas` y `advertencias` habría dado con los datos reales del período, cuántos datos se evaluaron y las `ultimas_alertas`. La unidad es "intervalos de 15 min" o "días" (agua diaria).
+- `PUT /config/umbrales/{local_id}/{variable}` (solo admins de esa sede): `{ "advertencia"?, "alerta" }`. Guarda en RDS, copia a DynamoDB y audita (`umbral.modificado`, con el antes y el después). La advertencia tiene que ser menor que la alerta. Si la copia falla, responde `502` con `copiado: false`: quedó en RDS, pero las alertas siguen con el valor anterior.
+- `PUT /config/umbrales` (solo admin general): copia todos los umbrales de RDS a DynamoDB, por ejemplo la primera vez.
+- `/config/*` necesita **RDS encendido**: si está apagado → `503 RDS_NO_DISPONIBLE`.
+
 ## 4. Variables y unidades
 
 | `id` | Nombre en pantalla | Unidad | Local 1 | Local 2 | Tipo |

@@ -76,7 +76,11 @@ INSERT INTO umbrales (local_id, variable, advertencia, alerta, unidad) VALUES
     ('local1', 'agua_m3_dia', 12,  14,  'm3/dia'),
     ('local1', 'uv',          6,   8,   'UVI'),
     ('local2', 'energia_kw',  45,  55,  'kW'),
-    ('local2', 'agua_m3_dia', 2,   2.5, 'm3/dia')
+    ('local2', 'agua_m3_dia', 2,   2.5, 'm3/dia'),
+    ('local1', 'energia_pct', 10,  20,  '%'),      -- sobre el promedio de 4 semanas (regla principal)
+    ('local2', 'energia_pct', 10,  20,  '%'),
+    ('local1', 'agua_m3h',    NULL, 0.3,  'm3/h'), -- posible fuga fuera de horario
+    ('local2', 'agua_m3h',    NULL, 0.05, 'm3/h')
 ON CONFLICT DO NOTHING;
 
 -- Los cognito_sub de ejemplo se reemplazan por los reales (Cognito -> Users -> usuario -> "User ID (Sub)")
