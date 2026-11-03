@@ -22,6 +22,11 @@
   --color-planta: #e8663a;
 }
 
+/* Tema oscuro también para los controles del navegador (ícono del calendario, listas, barras) */
+:root {
+  color-scheme: dark;
+}
+
 body {
   @apply bg-fondo text-tinta font-sans antialiased;
 }

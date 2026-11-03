@@ -286,7 +286,10 @@ export function VistaHistorico() {
           const comunes = prev && prev.horasPorDato === s.horasPorDato ? [...s.finos.keys()].filter((k) => prev.finos.has(k)) : []
           const tc = comunes.reduce((a, k) => a + s.finos.get(k)!, 0)
           const tp = comunes.reduce((a, k) => a + prev!.finos.get(k)!, 0)
-          const delta = tp ? ((tc - tp) / tp) * 100 : null
+          // Con muy pocos datos en común el % no dice nada (ej. 5 horas de un mes): no se muestra
+          const minimo = Math.max(s.horasPorDato === 1 && periodoEfectivo !== 'dia' ? 24 : 3, Math.ceil(s.finos.size * 0.25))
+          const suficiente = comunes.length >= minimo
+          const delta = tp && suficiente ? ((tc - tp) / tp) * 100 : null
           const unidadPos = s.horasPorDato === 1 ? 'horas' : 'días'
           return (
             <article key={s.local_id} className="rounded-lg border border-borde bg-panel p-4">
@@ -304,7 +307,12 @@ export function VistaHistorico() {
                 </p>
               )}
               {s.valores.size > 0 && tp === 0 && previo && <p className="mt-1 text-sm text-tinta-3">Sin datos en {nombrePrevio} para comparar</p>}
-              {tp > 0 && comunes.length < s.finos.size && (
+              {tp > 0 && !suficiente && (
+                <p className="mt-1 text-sm text-tinta-3">
+                  Muy pocos datos en común con {nombrePrevio} para comparar ({comunes.length} {unidadPos})
+                </p>
+              )}
+              {tp > 0 && suficiente && comunes.length < s.finos.size && (
                 <p className="mt-1 text-xs text-tinta-3">
                   Comparando {comunes.length.toLocaleString('es-CL')} de {s.finos.size.toLocaleString('es-CL')} {unidadPos}: {unidadPos === 'horas' ? 'las' : 'los'} que tienen datos en los dos períodos
                 </p>
