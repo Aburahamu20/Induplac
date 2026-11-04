@@ -27,6 +27,13 @@
   color-scheme: dark;
 }
 
+/* Letra un poco más grande en todo el panel (pedido del equipo, 04/11).
+   Todo Tailwind usa rem, así que escala junto. En % para respetar el tamaño que
+   cada persona tenga configurado en su navegador. */
+html {
+  font-size: 112.5%;
+}
+
 body {
   @apply bg-fondo text-tinta font-sans antialiased;
 }

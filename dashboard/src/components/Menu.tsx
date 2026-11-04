@@ -59,7 +59,7 @@ export function Menu({
           <div className="grid h-9 w-9 place-items-center rounded-lg bg-oficinas text-sm font-bold text-white">IP</div>
           <div className="leading-tight">
             <p className="font-display text-lg font-bold">Induplac</p>
-            <p className="text-[11px] text-tinta-2">Panel IoT</p>
+            <p className="text-xs text-tinta-2">Panel IoT</p>
           </div>
         </div>
 
@@ -79,7 +79,7 @@ export function Menu({
             if (!entradas.length) return null
             return (
               <div key={g.id} className="mt-3">
-                <p className="px-2 pb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-tinta-3">{g.titulo}</p>
+                <p className="px-2 pb-1 text-xs font-bold uppercase tracking-[0.14em] text-tinta-3">{g.titulo}</p>
                 {entradas.map((e) => {
                   const marca = marcaDe(e.id)
                   const activa = actual === e.id
@@ -100,7 +100,7 @@ export function Menu({
                         <span className="rounded-full bg-critico px-1.5 text-xs font-bold text-white">{alertasActivas}</span>
                       )}
                       {marca?.marca && (
-                        <span className="flex items-center gap-1 text-[11px] font-bold text-aviso">
+                        <span className="flex items-center gap-1 text-xs font-bold text-aviso">
                           <span className="h-1.5 w-1.5 rounded-full bg-aviso" />
                           {marca.marca}
                         </span>
@@ -131,7 +131,7 @@ export function Menu({
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-planta/20 text-sm font-bold text-planta">{iniciales}</div>
           <div className="min-w-0 flex-1 leading-tight">
             <p className="truncate text-sm font-bold">{sesion.usuario}</p>
-            <p className="truncate text-[11px] text-tinta-2">
+            <p className="truncate text-xs text-tinta-2">
               {NOMBRE_ROL[sesion.rol]} · {nombreSedes(sesion.locales)}
             </p>
           </div>
@@ -198,7 +198,7 @@ export function Cabecera({
         <h1 className="font-display text-2xl font-bold leading-tight">{titulo}</h1>
         <p className="text-sm text-tinta-2">
           {subtitulo} · {dia}
-          {simulado && <span className="ml-2 rounded bg-borde px-1.5 py-0.5 text-[10px]">DATOS SIMULADOS</span>}
+          {simulado && <span className="ml-2 rounded bg-borde px-1.5 py-0.5 text-[0.6875rem]">DATOS SIMULADOS</span>}
         </p>
       </div>
       <span className="hidden text-sm tabular-nums text-tinta-2 sm:inline">

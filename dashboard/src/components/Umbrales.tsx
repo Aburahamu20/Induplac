@@ -190,7 +190,7 @@ export function VistaUmbrales() {
                   <Campo valor={b?.alerta ?? String(u.alerta)} unidad={u.unidad} activo={editable} onChange={(v) => cambiar(u, 'alerta', v)} />
                 </div>
               </div>
-              {err && <p className="mt-1 text-[11px] text-critico">{err}</p>}
+              {err && <p className="mt-1 text-xs text-critico">{err}</p>}
               {h && !(u.variable === 'energia_kw' && hoy.sinRespaldo) && (
                 <div className="mt-3">
                   <Medidor valor={h.valor} advertencia={b ? num(b.advertencia) : u.advertencia} alerta={b ? (num(b.alerta) ?? u.alerta) : u.alerta} unidad={u.unidad} texto={h.texto} dec={INFO[u.variable].dec} />
@@ -203,7 +203,7 @@ export function VistaUmbrales() {
 
       {/* Tabla de umbrales */}
       <section className="hidden overflow-x-auto rounded-lg border border-borde bg-panel md:block">
-        <table className="w-full min-w-[860px] text-sm">
+        <table className="w-full min-w-[54rem] text-sm">
           <thead>
             <tr className="border-b border-borde text-left text-xs">
               <th className="px-4 py-3 font-bold text-tinta-2">Variable</th>
@@ -236,8 +236,8 @@ export function VistaUmbrales() {
                   </td>
                   <td className="px-3 py-3">
                     <Campo valor={b?.alerta ?? String(u.alerta)} unidad={u.unidad} activo={editable} onChange={(v) => cambiar(u, 'alerta', v)} />
-                    {cambiado && !err && <p className="mt-1 text-[11px] text-oficinas">Antes: {fmt(u.advertencia)} / {fmt(u.alerta)} · sin guardar</p>}
-                    {err && <p className="mt-1 text-[11px] text-critico">{err}</p>}
+                    {cambiado && !err && <p className="mt-1 text-xs text-oficinas">Antes: {fmt(u.advertencia)} / {fmt(u.alerta)} · sin guardar</p>}
+                    {err && <p className="mt-1 text-xs text-critico">{err}</p>}
                   </td>
                   <td className="px-3 py-3">
                     {u.variable === 'energia_kw' && hoy.sinRespaldo ? (
@@ -395,7 +395,7 @@ function Simulacion({ sede, umbrales, borrador }: { sede: LocalId; umbrales: Umb
           })}
         </tbody>
       </table>
-      <p className="mt-2 text-[11px] text-tinta-3">Cuenta intervalos de 15 min (o días, para el agua diaria) que habrían quedado en alerta.</p>
+      <p className="mt-2 text-xs text-tinta-3">Cuenta intervalos de 15 min (o días, para el agua diaria) que habrían quedado en alerta.</p>
     </section>
   )
 }
