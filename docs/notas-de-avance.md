@@ -749,3 +749,20 @@ Abraham (con Claude). Rama `feature/dashboard-umbrales`.
 **Ajustes (03/11):**
 - El ícono del calendario se veía oscuro sobre el fondo oscuro. Ahora la página declara `color-scheme: dark`, así los controles del navegador (calendario, listas) usan el tema oscuro.
 - Si hay muy pocos datos en común entre los dos períodos, el % no se muestra: se necesita al menos el 25 % de lo que se ve, y como mínimo 24 horas (3 en la vista de un día). En su lugar dice "Muy pocos datos en común para comparar". Con datos reales, octubre contra septiembre tenía 5 horas en común y daba "▲ 127 %".
+
+---
+
+## 2026-11-04 — Dashboard: pantalla Usuarios y permisos (tarea 30, parte 4)
+
+Abraham (con Claude). Rama `feature/dashboard-usuarios`.
+
+- **`src/api/admin.ts`:** se agregan las funciones de usuarios (listar, crear, cambiar rol o sede, desactivar, activar, resetear clave y resetear MFA), que usan las rutas de la API (`docs/api-dashboard.md` §6.4). La versión simulada trae 7 cuentas de ejemplo y filtra igual que la API: un admin de sede ve solo jefes, operarios y admins de su sede.
+- **`components/Usuarios.tsx` (nuevo):** la pantalla de los bocetos 01-General-5 y 02-Planta-5.
+  - **Arriba:** botón *+ Nuevo usuario* y cuatro tarjetas: cuentas activas, administradores, cuentas que aún no entran (clave temporal pendiente) y desactivadas.
+  - **Filtros:** buscador, chips por sede (solo el admin general) y chips por rol, más *Desactivados*.
+  - **Lista:** iniciales, rol, sede, estado y lo que puede hacer cada rol (Ver, Reconocer, Histórico, Umbrales, Usuarios, Auditoría). Los permisos salen del rol, no se editan uno por uno.
+  - **Detalle:** cambiar rol y sede; *Resetear clave*, que muestra la clave temporal una sola vez; *Resetear MFA*, para quien perdió el celular; y *Desactivar* o *Reactivar*. Las cuentas se desactivan, no se borran, para que la auditoría siga mostrando quién hizo qué.
+  - **Nuevo usuario:** usuario, correo, rol y sede. Solo se ofrecen las sedes que calzan con el rol. Un admin de sede solo crea jefes u operarios de su sede.
+  - **Reglas visibles:** nadie cambia su propia cuenta desde aquí, y un admin de sede no puede tocar a los admins.
+  - **Diferencia con el boceto:** Cognito no entrega el último acceso ni si la cuenta ya activó el MFA, así que se muestra la fecha de creación y si la cuenta ya entró por primera vez.
+- **Revisión visual:** admin general y admin de Planta en escritorio, y celular, con datos simulados. Build y lint sin errores.
