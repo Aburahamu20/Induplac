@@ -780,3 +780,20 @@ Abraham (con Claude). Rama `fix/dashboard-letra`.
 - **Textos que no crecían:** los que estaban fijos en px (etiquetas de 10 y 11 px) se pasaron a `rem`. Los gráficos de Chart.js suben de 12 a 14 px.
 - **Efecto secundario aceptado:** el menú lateral fijo aparece desde unos 1150 px de ancho en vez de 1024, porque los cortes de pantalla también están en `rem`. Más abajo se abre con ☰.
 - **Revisión visual:** Resumen, Usuarios, Umbrales e Histórico en escritorio, y Resumen en celular. Build y lint sin errores.
+
+---
+
+## 2026-11-04 — Dashboard: pantalla Auditoría (tarea 30, parte 5)
+
+Abraham (con Claude). Rama `feature/dashboard-auditoria`.
+
+- **`components/Auditoria.tsx` (nuevo):** la pantalla de quién hizo qué, sobre `GET /api/auditoria` (`docs/api-dashboard.md` §3.7 y §3.7b).
+  - **Revisión de la cadena:** si todo está bien, una franja verde dice *"Cadena de registros íntegra"* con cada sede revisada. Si la API marca una sede como `alterada`, aparece un aviso rojo, *"Auditoría alterada"*, con los problemas y un enlace al registro. Ese registro queda marcado en rojo en la lista.
+  - **Tarjetas:** registros del período, alertas reconocidas, cambios de umbrales y cambios en cuentas y bloqueos.
+  - **Filtros:** período (hoy, 7 días, 30 días o fechas a elección), sede (solo el admin general, incluida *General*), tipo (alertas, umbrales, cuentas, inicios de sesión) y buscador por usuario, cuenta o texto.
+  - **Lista en palabras simples:** cada acción se lee como una frase, por ejemplo *"Cambió el umbral de índice UV: alerta 8 → 7 UVI"* o *"Reconoció una alerta crítica de consumo eléctrico (valor 58,4)"*. Cada fila muestra quién, con qué rol, en qué sede, si vino del Edge y si fue sin internet.
+  - **Detalle:** fecha completa, quién, sede, sobre qué y desde dónde. También el comentario de la alerta, una tabla antes/después para umbrales y cambios de rol o sede, las revisiones del Edge (`hash_ok` y `cadena_ok`) y el hash del registro y del anterior.
+  - **Descargar CSV:** exporta lo filtrado (separado por `;`, con tildes legibles en Excel), útil para el informe.
+  - No hay ningún botón para editar ni borrar registros: la API tampoco lo permite.
+- **`api/admin.ts`:** la versión simulada trae 12 registros de ejemplo de los últimos días y filtra por fecha, sede, acción, usuario y rol, igual que la API. Para ensayar el aviso rojo en la demo con datos simulados, en la consola del navegador: `localStorage.setItem('induplac-demo-auditoria-alterada', 'local1')` y recargar. Con `removeItem` vuelve a la normalidad.
+- **Revisión visual:** admin general (detalle de umbral y de un registro del Edge), admin de Planta con la cadena alterada, y celular. Se probaron los filtros de período: 7 días muestra 11 registros, 30 días 12 y hoy 3. Build y lint sin errores.
