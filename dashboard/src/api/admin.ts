@@ -1,7 +1,8 @@
-// Funciones de GESTIÓN (solo admins): umbrales, auditoría y, más adelante, usuarios.
+// Funciones de GESTIÓN (solo admins): umbrales, auditoría y usuarios.
 // Van aparte de la "fuente" de datos de monitoreo porque solo existen en la nube
 // (docs/api-dashboard.md §3.7, §3.8 y §6.4). En modo simulado se guardan en memoria.
 
+import { sesionGuardada } from '../auth/sesion'
 import { obtenerToken } from '../auth/token'
 import type { LocalId } from './tipos'
 
@@ -47,7 +48,26 @@ export interface RespuestaAuditoria {
   truncado: boolean
 }
 
+export type Grupo = 'admin-general' | 'admin-sede' | 'jefe' | 'operario' | 'administrador'
+export type SedeCognito = 'planta' | 'oficinas' | 'todas'
+
+export interface Usuario {
+  usuario: string
+  grupo: Grupo | null
+  sede: SedeCognito | null
+  habilitado: boolean
+  estado: string // FORCE_CHANGE_PASSWORD = todavía no entra por primera vez
+  creado: string | null
+}
+
+export type AccionUsuario = 'desactivar' | 'activar' | 'resetear-clave' | 'resetear-mfa'
+
 export interface Admin {
+  usuarios(): Promise<Usuario[]>
+  crearUsuario(d: { usuario: string; email: string; grupo: Grupo; sede: SedeCognito }): Promise<Usuario>
+  modificarUsuario(usuario: string, d: { grupo?: Grupo; sede?: SedeCognito }): Promise<Usuario>
+  // resetear-clave devuelve la clave temporal UNA vez, para que el admin se la entregue
+  accionUsuario(usuario: string, accion: AccionUsuario): Promise<Usuario & { clave_temporal?: string }>
   umbrales(): Promise<UmbralVigente[]>
   // ¿Se puede editar? (la configuración vive en RDS, que a veces está apagado)
   configDisponible(): Promise<boolean>
@@ -81,6 +101,22 @@ class AdminApi implements Admin {
 
   umbrales() {
     return this.pedir<UmbralVigente[]>(`${this.api}/umbrales`)
+  }
+
+  usuarios() {
+    return this.pedir<Usuario[]>(`${this.api}/usuarios`)
+  }
+
+  crearUsuario(d: { usuario: string; email: string; grupo: Grupo; sede: SedeCognito }) {
+    return this.pedir<Usuario>(`${this.api}/usuarios`, 'POST', d)
+  }
+
+  modificarUsuario(usuario: string, d: { grupo?: Grupo; sede?: SedeCognito }) {
+    return this.pedir<Usuario>(`${this.api}/usuarios/${encodeURIComponent(usuario)}`, 'PATCH', d)
+  }
+
+  accionUsuario(usuario: string, accion: AccionUsuario) {
+    return this.pedir<Usuario & { clave_temporal?: string }>(`${this.api}/usuarios/${encodeURIComponent(usuario)}/${accion}`, 'POST', {})
   }
 
   async configDisponible() {
@@ -117,6 +153,67 @@ const CATALOGO: { variable: VariableUmbral; nombre: string; unidad: string; con_
 ]
 
 class AdminSimulado implements Admin {
+  private cuentas: Usuario[] = [
+    ['abraham.castro', 'admin-general', 'todas', 'CONFIRMED'],
+    ['felipe.murua', 'admin-general', 'todas', 'CONFIRMED'],
+    ['admin.planta', 'admin-sede', 'planta', 'CONFIRMED'],
+    ['admin.oficinas', 'admin-sede', 'oficinas', 'CONFIRMED'],
+    ['jefe.planta', 'jefe', 'planta', 'CONFIRMED'],
+    ['operario.planta', 'operario', 'planta', 'CONFIRMED'],
+    ['nuevo.operario', 'operario', 'planta', 'FORCE_CHANGE_PASSWORD'],
+  ].map(([usuario, grupo, sede, estado], i) => ({
+    usuario, grupo: grupo as Grupo, sede: sede as SedeCognito, estado, habilitado: true,
+    creado: new Date(Date.now() - (20 - i) * 86_400_000).toISOString(),
+  }))
+
+  private auditar(accion: string, objeto: string, detalle: Record<string, unknown>) {
+    const ahora = new Date().toISOString()
+    this.registros.unshift({ sede: 'general', id: `${ahora}#demo`, ts: ahora, usuario: 'demo', rol: 'admin-general', accion, objeto, detalle, origen: 'nube', hash: '', hash_anterior: '' })
+  }
+
+  private buscar(usuario: string) {
+    const u = this.cuentas.find((c) => c.usuario === usuario)
+    if (!u) throw new Error('Usuario inexistente.')
+    return u
+  }
+
+  async usuarios() {
+    // Igual que la API: un admin de sede ve solo jefes, operarios y admins de SU sede
+    const s = sesionGuardada()
+    const general = !s || s.rol === 'admin_general' || s.rol === 'administrador' || s.locales.length > 1
+    const miSede = s?.locales[0] === 'local1' ? 'planta' : 'oficinas'
+    return this.cuentas
+      .filter((c) => general || (c.grupo !== 'admin-general' && c.grupo !== 'administrador' && c.sede === miSede))
+      .map((c) => ({ ...c }))
+  }
+
+  async crearUsuario(d: { usuario: string; email: string; grupo: Grupo; sede: SedeCognito }) {
+    if (this.cuentas.some((c) => c.usuario === d.usuario)) throw new Error('Ese usuario ya existe.')
+    const u: Usuario = { usuario: d.usuario, grupo: d.grupo, sede: d.sede, habilitado: true, estado: 'FORCE_CHANGE_PASSWORD', creado: new Date().toISOString() }
+    this.cuentas.push(u)
+    this.auditar('usuario.creado', d.usuario, { grupo: d.grupo, sede: d.sede })
+    return { ...u }
+  }
+
+  async modificarUsuario(usuario: string, d: { grupo?: Grupo; sede?: SedeCognito }) {
+    const u = this.buscar(usuario)
+    this.auditar('usuario.modificado', usuario, { antes: { grupo: u.grupo, sede: u.sede }, despues: { grupo: d.grupo ?? u.grupo, sede: d.sede ?? u.sede } })
+    Object.assign(u, d)
+    return { ...u }
+  }
+
+  async accionUsuario(usuario: string, accion: AccionUsuario) {
+    const u = this.buscar(usuario)
+    if (accion === 'desactivar') u.habilitado = false
+    if (accion === 'activar') u.habilitado = true
+    this.auditar(`usuario.${{ desactivar: 'desactivado', activar: 'activado', 'resetear-clave': 'clave_reseteada', 'resetear-mfa': 'mfa_reseteado' }[accion]}`, usuario, {})
+    if (accion === 'resetear-clave') {
+      u.estado = 'FORCE_CHANGE_PASSWORD'
+      return { ...u, clave_temporal: 'Demo-Temporal-1!' }
+    }
+    return { ...u }
+  }
+
   private valores = new Map<string, { advertencia: number | null; alerta: number; actualizado: string | null; por: string | null }>()
   private registros: RegistroAuditoria[] = []
 
