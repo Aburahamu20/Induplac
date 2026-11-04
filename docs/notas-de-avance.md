@@ -797,3 +797,7 @@ Abraham (con Claude). Rama `feature/dashboard-auditoria`.
   - No hay ningún botón para editar ni borrar registros: la API tampoco lo permite.
 - **`api/admin.ts`:** la versión simulada trae 12 registros de ejemplo de los últimos días y filtra por fecha, sede, acción, usuario y rol, igual que la API. Para ensayar el aviso rojo en la demo con datos simulados, en la consola del navegador: `localStorage.setItem('induplac-demo-auditoria-alterada', 'local1')` y recargar. Con `removeItem` vuelve a la normalidad.
 - **Revisión visual:** admin general (detalle de umbral y de un registro del Edge), admin de Planta con la cadena alterada, y celular. Se probaron los filtros de período: 7 días muestra 11 registros, 30 días 12 y hoy 3. Build y lint sin errores.
+
+**Corrección (04/11, con datos reales):** al desplegar aparecieron dos frases mal armadas:
+- *"Copió local1:energia_kw,local1:agua_m3_dia,… umbrales"*: la nube guarda `copiados` como lista y no como número. Ahora dice *"Copió 5 umbrales de RDS a DynamoDB"*, y el detalle muestra cuáles (sede y variable).
+- *"Cambió el umbral de índice UV: sin cambios UVI"*: era un guardado sin cambiar valores. Ahora dice *"Guardó el umbral de índice UV sin cambiar los valores (alerta 8 UVI)"*. Además, antes y después se comparan como números, porque la nube puede devolver `"8"` u `8.0` para el mismo valor.

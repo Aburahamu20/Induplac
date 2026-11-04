@@ -164,7 +164,7 @@ const EJEMPLOS_AUDITORIA: RegistroAuditoria[] = (() => {
     [2.3, 'local1', 'abraham.castro', 'admin-general', 'usuario.modificado', 'jefe.planta', { antes: { grupo: 'jefe', sede: 'todas' }, despues: { grupo: 'jefe', sede: 'planta' } }],
     [2.8, 'general', 'operario.planta', 'operario', 'sesion.bloqueada', 'operario.planta', { intentos: 5, minutos: 15, _edge: { edge_id: 'rpi-planta', hash_ok: true, cadena_ok: true } }, 'edge'],
     [3.5, 'local1', 'admin.planta', 'admin-sede', 'usuario.clave_reseteada', 'operario.planta', {}],
-    [4.1, 'general', 'felipe.murua', 'admin-general', 'umbral.sincronizado', 'umbrales', { copiados: 9 }],
+    [4.1, 'general', 'felipe.murua', 'admin-general', 'umbral.sincronizado', 'umbrales', { copiados: ['local1:energia_pct', 'local1:energia_kw', 'local1:agua_m3_dia', 'local1:agua_m3h', 'local1:uv', 'local2:energia_pct', 'local2:energia_kw', 'local2:agua_m3_dia', 'local2:agua_m3h'] }],
     [5.0, 'local2', 'felipe.murua', 'admin-general', 'umbral.modificado', 'local2:agua_m3_dia', { antes: { advertencia: 2, alerta: 2.5 }, despues: { advertencia: 1.8, alerta: 2.5 }, unidad: 'm³/día', copiado: true }],
     [6.2, 'local2', 'admin.oficinas', 'admin-sede', 'usuario.mfa_reseteado', 'admin.oficinas.2', {}],
     [8.5, 'local1', 'abraham.castro', 'admin-general', 'usuario.desactivado', 'practicante.planta', { grupo: 'operario' }],

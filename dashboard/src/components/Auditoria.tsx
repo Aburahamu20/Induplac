@@ -61,6 +61,7 @@ const hora = (iso: string) => new Date(iso).toLocaleString('es-CL', { timeZone: 
 const horaLarga = (iso: string) =>
   new Date(iso).toLocaleString('es-CL', { timeZone: ZONA, weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
 const categoria = (r: RegistroAuditoria) => r.accion.split('.')[0]
+const distinto = (a: unknown, b: unknown) => (a == null || b == null ? a != b : Number(a) !== Number(b))
 const num = (v: unknown) => (v == null ? '—' : String(v).replace('.', ','))
 
 type Cambio = { advertencia?: number | null; alerta?: number; grupo?: string; sede?: string }
@@ -77,13 +78,16 @@ function frase(r: RegistroAuditoria): string {
     }
     case 'umbral.modificado': {
       const variable = r.objeto.split(':')[1]
+      const unidad = d.unidad ? ` ${d.unidad}` : ''
       const partes = []
-      if (antes.alerta !== despues.alerta) partes.push(`alerta ${num(antes.alerta)} → ${num(despues.alerta)}`)
-      if (antes.advertencia !== despues.advertencia) partes.push(`advertencia ${num(antes.advertencia)} → ${num(despues.advertencia)}`)
-      return `Cambió el umbral de ${VARIABLE[variable] ?? variable}: ${partes.join(', ') || 'sin cambios'}${d.unidad ? ` ${d.unidad}` : ''}`
+      if (distinto(antes.alerta, despues.alerta)) partes.push(`alerta ${num(antes.alerta)} → ${num(despues.alerta)}`)
+      if (distinto(antes.advertencia, despues.advertencia)) partes.push(`advertencia ${num(antes.advertencia)} → ${num(despues.advertencia)}`)
+      return partes.length
+        ? `Cambió el umbral de ${VARIABLE[variable] ?? variable}: ${partes.join(', ')}${unidad}`
+        : `Guardó el umbral de ${VARIABLE[variable] ?? variable} sin cambiar los valores (alerta ${num(despues.alerta)}${unidad})`
     }
     case 'umbral.sincronizado':
-      return `Copió ${num(d.copiados)} umbrales de RDS a DynamoDB`
+      return `Copió ${Array.isArray(d.copiados) ? d.copiados.length : num(d.copiados)} umbrales de RDS a DynamoDB`
     case 'usuario.creado':
       return d.grupo
         ? `Creó la cuenta ${r.objeto} como ${GRUPO[String(d.grupo)] ?? d.grupo} (${SEDE_COGNITO[String(d.sede)] ?? d.sede})`
@@ -391,11 +395,23 @@ function Detalle({ r, problemas }: { r: RegistroAuditoria; problemas: { tipo: st
                 <tr key={k} className="border-t border-borde/60">
                   <td className="py-1.5 capitalize text-tinta-2">{k === 'grupo' ? 'rol' : k}</td>
                   <td className="py-1.5">{num(antes[k])}</td>
-                  <td className={`py-1.5 ${antes[k] !== despues[k] ? 'font-bold text-oficinas' : ''}`}>{num(despues[k])}</td>
+                  <td className={`py-1.5 ${distinto(antes[k], despues[k]) ? 'font-bold text-oficinas' : ''}`}>{num(despues[k])}</td>
                 </tr>
               ))}
           </tbody>
         </table>
+      )}
+      {Array.isArray(d.copiados) && (
+        <div className="text-sm">
+          <p className="mb-1 text-xs text-tinta-2">Umbrales copiados</p>
+          <div className="flex flex-wrap gap-1.5">
+            {(d.copiados as string[]).map((c) => (
+              <span key={c} className="rounded border border-borde px-1.5 py-0.5 text-xs text-tinta-2">
+                {NOMBRE_SEDE[c.split(':')[0]] ?? c.split(':')[0]} · {VARIABLE[c.split(':')[1]] ?? c.split(':')[1]}
+              </span>
+            ))}
+          </div>
+        </div>
       )}
       {d.copiado === false && <p className="text-sm text-aviso">Quedó guardado en RDS, pero la copia a DynamoDB falló: las alertas siguieron con el valor anterior.</p>}
 
