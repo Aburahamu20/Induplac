@@ -801,3 +801,25 @@ Abraham (con Claude). Rama `feature/dashboard-auditoria`.
 **Corrección (04/11, con datos reales):** al desplegar aparecieron dos frases mal armadas:
 - *"Copió local1:energia_kw,local1:agua_m3_dia,… umbrales"*: la nube guarda `copiados` como lista y no como número. Ahora dice *"Copió 5 umbrales de RDS a DynamoDB"*, y el detalle muestra cuáles (sede y variable).
 - *"Cambió el umbral de índice UV: sin cambios UVI"*: era un guardado sin cambiar valores. Ahora dice *"Guardó el umbral de índice UV sin cambiar los valores (alerta 8 UVI)"*. Además, antes y después se comparan como números, porque la nube puede devolver `"8"` u `8.0` para el mismo valor.
+
+---
+
+## 2026-11-04 — Dashboard: pantalla Estado de las sedes (tarea 30, parte 6)
+
+Abraham (con Claude). Rama `feature/dashboard-estado`. Con esta parte quedan las 7 pantallas de los bocetos en el dashboard.
+
+- **`components/Estado.tsx` (nuevo):** responde "¿está llegando todo bien?" sin entrar a AWS ni a la Raspberry. La ven todos los roles, cada uno solo con sus sedes.
+  - **Una tarjeta por sede:**
+    - Estado en una palabra (*Al día*, *Subiendo*, *Sin datos* o *Sin nube*) y una explicación en palabras simples. Desde la nube, *Sin datos desde el dd/mm hh:mm*; en el Edge, *Sin conexión con la nube* con los pendientes.
+    - Último dato ("hace 5 min", que avanza solo) y alertas activas.
+    - En el Edge, también los pendientes por subir y la última subida a la nube.
+    - **Datos recibidos en las últimas 24 h:** una barra con 24 casillas, verdes si esa hora tiene datos y grises si no. Sale del histórico por hora de energía y muestra los cortes de un vistazo.
+    - **Sensores, último valor:** energía, climatización, iluminación, caudal y UV con su último valor. Los indicadores como tableros u horas hombre no se muestran, porque no son sensores.
+  - **Sistema:**
+    - Si el servidor responde y en cuántos ms (medido desde el navegador).
+    - Dónde corre el panel (nube, Edge o simulación).
+    - Si la hora del equipo está desfasada 2 minutos o más respecto del servidor.
+    - Para quien edita umbrales en la nube, si RDS está encendido, con el recordatorio de apagarlo.
+  - Al pie, una explicación de qué pasa si se corta internet en planta.
+- **`App.tsx`:** la pantalla usa el mismo `GET /api/estado` que ya consulta el panel, sin pedirlo dos veces. Se borró `Proximamente`, que ya no se usa.
+- **Revisión visual:** admin general con las dos sedes al día; Planta sin internet usando el panel de demo; y operaria de Planta en celular. Build y lint sin errores.

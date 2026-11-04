@@ -227,16 +227,3 @@ export function Cabecera({
     </header>
   )
 }
-
-export function Proximamente({ nombre }: { nombre: string }) {
-  return (
-    <div className="grid place-items-center rounded-xl border border-dashed border-borde px-6 py-20 text-center">
-      <div>
-        <p className="font-display text-xl font-bold">{nombre}</p>
-        <p className="mt-2 max-w-md text-sm text-tinta-2">
-          Esta pantalla está aprobada en los bocetos y se agrega en las próximas partes del rediseño. La API ya la soporta.
-        </p>
-      </div>
-    </div>
-  )
-}
