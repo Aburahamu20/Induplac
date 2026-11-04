@@ -766,3 +766,5 @@ Abraham (con Claude). Rama `feature/dashboard-usuarios`.
   - **Reglas visibles:** nadie cambia su propia cuenta desde aquí, y un admin de sede no puede tocar a los admins.
   - **Diferencia con el boceto:** Cognito no entrega el último acceso ni si la cuenta ya activó el MFA, así que se muestra la fecha de creación y si la cuenta ya entró por primera vez.
 - **Revisión visual:** admin general y admin de Planta en escritorio, y celular, con datos simulados. Build y lint sin errores.
+
+**Corrección (04/11):** la prueba `test_actual_usa_el_intervalo_en_curso` del Edge fallaba si el CI corría entre las 00:00 y las 01:00 de Chile. La prueba crea un intervalo cerrado "hace 1 hora", que a esa hora cae el día anterior y no suma al agua de hoy. El código estaba bien. Ahora la prueba calcula el valor esperado según la hora real.
