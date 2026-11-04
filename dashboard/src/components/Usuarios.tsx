@@ -136,7 +136,7 @@ export function VistaUsuarios() {
 
       {error && <p className="rounded-md border border-critico/40 bg-critico/10 px-3 py-2 text-sm text-critico">No se pudieron cargar las cuentas: {error}</p>}
 
-      <div className="grid items-start gap-4 xl:grid-cols-[1fr_380px]">
+      <div className="grid items-start gap-4 xl:grid-cols-[1fr_24rem]">
         <ul className="grid gap-2">
           {filtradas.map((u) => (
             <li key={u.usuario}>
@@ -162,7 +162,7 @@ export function VistaUsuarios() {
                     {TODOS_PERMISOS.map((p) => (
                       <span
                         key={p}
-                        className={`rounded border border-borde px-1.5 py-0.5 text-[11px] ${u.grupo && ROL[u.grupo].permisos.includes(p) ? 'text-tinta-2' : 'text-tinta-3 line-through opacity-60'}`}
+                        className={`rounded border border-borde px-1.5 py-0.5 text-xs ${u.grupo && ROL[u.grupo].permisos.includes(p) ? 'text-tinta-2' : 'text-tinta-3 line-through opacity-60'}`}
                       >
                         {p}
                       </span>
@@ -316,7 +316,7 @@ function Detalle({ u, esGeneral, miSede, yo, alCambiar }: { u: Usuario; esGenera
             </span>
           ))}
         </div>
-        {(grupo === 'jefe' || grupo?.startsWith('admin')) && <p className="mt-1.5 text-[11px] text-tinta-3">Con este rol el MFA es obligatorio.</p>}
+        {(grupo === 'jefe' || grupo?.startsWith('admin')) && <p className="mt-1.5 text-xs text-tinta-3">Con este rol el MFA es obligatorio.</p>}
       </div>
 
       {cambiado && puedeTocar && (
@@ -369,7 +369,7 @@ function Detalle({ u, esGeneral, miSede, yo, alCambiar }: { u: Usuario; esGenera
         </div>
       )}
       {mensaje && <p className={`text-sm ${mensaje.tono === 'ok' ? 'text-ok' : 'text-critico'}`}>{mensaje.texto}</p>}
-      <p className="text-[11px] text-tinta-3">Cada cambio queda en la Auditoría. Las cuentas se desactivan, no se borran.</p>
+      <p className="text-xs text-tinta-3">Cada cambio queda en la Auditoría. Las cuentas se desactivan, no se borran.</p>
     </aside>
   )
 }

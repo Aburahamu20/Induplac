@@ -768,3 +768,15 @@ Abraham (con Claude). Rama `feature/dashboard-usuarios`.
 - **Revisión visual:** admin general y admin de Planta en escritorio, y celular, con datos simulados. Build y lint sin errores.
 
 **Corrección (04/11):** la prueba `test_actual_usa_el_intervalo_en_curso` del Edge fallaba si el CI corría entre las 00:00 y las 01:00 de Chile. La prueba crea un intervalo cerrado "hace 1 hora", que a esa hora cae el día anterior y no suma al agua de hoy. El código estaba bien. Ahora la prueba calcula el valor esperado según la hora real.
+
+---
+
+## 2026-11-04 — Dashboard: letra más grande (tarea 30, ajuste)
+
+Abraham (con Claude). Rama `fix/dashboard-letra`.
+
+- **Por qué:** al equipo le costaba leer las letras del panel.
+- **Qué cambió:** la letra base del panel pasó de 16 a 18 px (112,5 %). Tailwind trabaja en `rem`, así que textos, botones, espacios y tarjetas crecen en la misma proporción. El tamaño está en %, para respetar si alguien tiene una letra más grande configurada en su navegador.
+- **Textos que no crecían:** los que estaban fijos en px (etiquetas de 10 y 11 px) se pasaron a `rem`. Los gráficos de Chart.js suben de 12 a 14 px.
+- **Efecto secundario aceptado:** el menú lateral fijo aparece desde unos 1150 px de ancho en vez de 1024, porque los cortes de pantalla también están en `rem`. Más abajo se abre con ☰.
+- **Revisión visual:** Resumen, Usuarios, Umbrales e Histórico en escritorio, y Resumen en celular. Build y lint sin errores.

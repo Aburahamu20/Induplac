@@ -91,7 +91,7 @@ export function PanelDemo() {
                 className="rounded-md border border-critico/40 bg-critico/10 px-2 py-2 text-left hover:bg-critico/20"
               >
                 <span className="block text-xs font-bold text-critico">{i.etiqueta}</span>
-                <span className="block text-[11px] text-tinta-2">{i.detalle}</span>
+                <span className="block text-xs text-tinta-2">{i.detalle}</span>
               </button>
             ))}
           </div>

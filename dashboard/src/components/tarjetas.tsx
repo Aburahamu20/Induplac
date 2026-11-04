@@ -129,7 +129,7 @@ export function TarjetaUv({ titulo, v }: { titulo: string; v: ValorVariable }) {
             />
           ))}
         </div>
-        <div className="mt-1 flex justify-between text-[11px] text-tinta-3">
+        <div className="mt-1 flex justify-between text-xs text-tinta-3">
           {['1', '3', '5', '7', '9', '11+'].map((n) => (
             <span key={n}>{n}</span>
           ))}

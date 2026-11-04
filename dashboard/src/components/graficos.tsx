@@ -23,6 +23,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarEleme
 ChartJS.defaults.color = '#a3aab6'
 ChartJS.defaults.font.family = '"Atkinson Hyperlegible", system-ui, sans-serif'
 ChartJS.defaults.borderColor = '#2a2f39'
+ChartJS.defaults.font.size = 14 // va a la par con la letra más grande del panel
 
 const hora = (iso: string) =>
   new Date(iso).toLocaleTimeString('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit', hour12: false })
