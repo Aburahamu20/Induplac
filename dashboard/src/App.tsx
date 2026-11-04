@@ -3,7 +3,7 @@ import { conDemo, fuente, usaSimulacion, type LocalId } from './api'
 import { auth, authSimulada, type Permiso, type Sesion } from './auth'
 import { guardarSesion, sesionGuardada, SesionCtx, useSesion, type ContextoSesion } from './auth/sesion'
 import { fijarToken } from './auth/token'
-import { Cabecera, Menu, Proximamente } from './components/Menu'
+import { Cabecera, Menu } from './components/Menu'
 import { ENTRADAS, nombreEntrada, type Pantalla } from './components/pantallas'
 import { Login } from './components/Login'
 import { PanelDemo } from './components/PanelDemo'
@@ -13,6 +13,7 @@ import { VistaHistorico } from './components/Historico'
 import { VistaUmbrales } from './components/Umbrales'
 import { VistaUsuarios } from './components/Usuarios'
 import { VistaAuditoria } from './components/Auditoria'
+import { VistaEstado } from './components/Estado'
 import { VistaAlertas, VistaOficinas, VistaPlanta, VistaResumen } from './vistas'
 
 // Sesión guardada al recargar la página (si no expiró)
@@ -139,9 +140,7 @@ function Dashboard() {
           {pantalla === 'umbrales' && <VistaUmbrales />}
           {pantalla === 'usuarios' && <VistaUsuarios />}
           {pantalla === 'auditoria' && <VistaAuditoria />}
-          {pantalla && ['estado'].includes(pantalla) && (
-            <Proximamente nombre={nombreEntrada(pantalla, ctx)} />
-          )}
+          {pantalla === 'estado' && <VistaEstado estado={estado} errorEstado={errorEstado} />}
         </main>
       </div>
 
