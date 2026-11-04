@@ -152,6 +152,29 @@ const CATALOGO: { variable: VariableUmbral; nombre: string; unidad: string; con_
   { variable: 'uv', nombre: 'Índice UV en el patio de carga', unidad: 'UVI', con_advertencia: true, locales: ['local1'], defecto: { local1: [6, 8] } },
 ]
 
+// Registros de ejemplo para el modo simulado (la nube guarda los reales en induplac-auditoria)
+const EJEMPLOS_AUDITORIA: RegistroAuditoria[] = (() => {
+  const hex = (n: number) => Array.from({ length: n }, (_, i) => ((n * 7 + i * 13) % 16).toString(16)).join('')
+  const filas: [number, RegistroAuditoria['sede'], string, string, string, string, Record<string, unknown>, ('nube' | 'edge')?][] = [
+    [0.1, 'local1', 'jefe.planta', 'jefe', 'alerta.reconocida', 'local1:energia_kw:demo-1', { variable: 'energia_kw', nivel: 'critico', valor: '58.4', comentario: 'Arranque de la prensa 2, revisado con mantención.' }],
+    [0.4, 'local1', 'admin.planta', 'admin-sede', 'umbral.modificado', 'local1:uv', { antes: { advertencia: 6, alerta: 8 }, despues: { advertencia: 6, alerta: 7 }, unidad: 'UVI', copiado: true }],
+    [0.9, 'local1', 'operario.planta', 'operario', 'alerta.reconocida', 'local1:agua_m3h:demo-2', { variable: 'agua_m3h', valor: '0.42', comentario: 'Llave del baño de bodega abierta, cerrada.', sin_internet: true, _edge: { edge_id: 'rpi-planta', hash_ok: true, cadena_ok: true } }, 'edge'],
+    [1.2, 'general', 'abraham.castro', 'admin-general', 'usuario.creado', 'nuevo.operario', { grupo: 'operario', sede: 'planta' }],
+    [1.6, 'local2', 'admin.oficinas', 'admin-sede', 'alerta.reconocida', 'local2:agua_m3_dia:demo-3', { variable: 'agua_m3_dia', nivel: 'advertencia', valor: '2.1', comentario: null }],
+    [2.3, 'local1', 'abraham.castro', 'admin-general', 'usuario.modificado', 'jefe.planta', { antes: { grupo: 'jefe', sede: 'todas' }, despues: { grupo: 'jefe', sede: 'planta' } }],
+    [2.8, 'general', 'operario.planta', 'operario', 'sesion.bloqueada', 'operario.planta', { intentos: 5, minutos: 15, _edge: { edge_id: 'rpi-planta', hash_ok: true, cadena_ok: true } }, 'edge'],
+    [3.5, 'local1', 'admin.planta', 'admin-sede', 'usuario.clave_reseteada', 'operario.planta', {}],
+    [4.1, 'general', 'felipe.murua', 'admin-general', 'umbral.sincronizado', 'umbrales', { copiados: 9 }],
+    [5.0, 'local2', 'felipe.murua', 'admin-general', 'umbral.modificado', 'local2:agua_m3_dia', { antes: { advertencia: 2, alerta: 2.5 }, despues: { advertencia: 1.8, alerta: 2.5 }, unidad: 'm³/día', copiado: true }],
+    [6.2, 'local2', 'admin.oficinas', 'admin-sede', 'usuario.mfa_reseteado', 'admin.oficinas.2', {}],
+    [8.5, 'local1', 'abraham.castro', 'admin-general', 'usuario.desactivado', 'practicante.planta', { grupo: 'operario' }],
+  ]
+  return filas.map(([dias, sede, usuario, rol, accion, objeto, detalle, origen], i) => {
+    const ts = new Date(Date.now() - dias * 86_400_000).toISOString()
+    return { sede, id: `${ts}#${hex(8)}${i}`, ts, usuario, rol, accion, objeto, detalle, origen: origen ?? 'nube', hash: hex(64 - i), hash_anterior: hex(63 - i) }
+  })
+})()
+
 class AdminSimulado implements Admin {
   private cuentas: Usuario[] = [
     ['abraham.castro', 'admin-general', 'todas', 'CONFIRMED'],
@@ -265,9 +288,33 @@ class AdminSimulado implements Admin {
     return { copiado: true }
   }
 
-  async auditoria(q: { sede?: string; accion?: string }): Promise<RespuestaAuditoria> {
-    const registros = this.registros.filter((r) => (!q.sede || r.sede === q.sede) && (!q.accion || r.accion === q.accion))
-    return { registros, integridad: {}, truncado: false }
+  async auditoria(q: { desde?: string; hasta?: string; sede?: string; accion?: string; usuario?: string }): Promise<RespuestaAuditoria> {
+    // Igual que la API: admin general ve local1, local2 y general; admin de sede solo la suya
+    const s = sesionGuardada()
+    const general = !s || s.rol === 'admin_general' || s.rol === 'administrador' || s.locales.length > 1
+    const visibles = general ? ['local1', 'local2', 'general'] : [s.locales[0]]
+    const desde = q.desde ? new Date(q.desde).getTime() : Date.now() - 7 * 86_400_000
+    const hasta = q.hasta ? new Date(q.hasta).getTime() : Date.now() + 60_000
+    const registros = [...this.registros, ...EJEMPLOS_AUDITORIA]
+      .filter((r) => visibles.includes(r.sede) && (!q.sede || r.sede === q.sede))
+      .filter((r) => (!q.accion || r.accion === q.accion) && (!q.usuario || r.usuario === q.usuario))
+      .filter((r) => +new Date(r.ts) >= desde && +new Date(r.ts) <= hasta)
+      .sort((a, b) => b.ts.localeCompare(a.ts))
+    // Solo para ensayar la demo: localStorage 'induplac-demo-auditoria-alterada' = 'local1' muestra esa sede alterada
+    let alterada: string | null = null
+    try {
+      alterada = localStorage.getItem('induplac-demo-auditoria-alterada')
+    } catch {
+      alterada = null
+    }
+    const integridad: RespuestaAuditoria['integridad'] = {}
+    for (const sede of q.sede ? [q.sede] : visibles) {
+      const victima = sede === alterada ? registros.find((r) => r.sede === sede) : undefined
+      integridad[sede] = victima
+        ? { estado: 'alterada', problemas: [{ id: victima.id, tipo: 'modificado', mensaje: 'El registro fue cambiado después de guardarse.' }] }
+        : { estado: 'ok', problemas: [] }
+    }
+    return { registros, integridad, truncado: false }
   }
 }
 

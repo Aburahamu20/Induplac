@@ -12,6 +12,7 @@ import { usePolling } from './hooks/usePolling'
 import { VistaHistorico } from './components/Historico'
 import { VistaUmbrales } from './components/Umbrales'
 import { VistaUsuarios } from './components/Usuarios'
+import { VistaAuditoria } from './components/Auditoria'
 import { VistaAlertas, VistaOficinas, VistaPlanta, VistaResumen } from './vistas'
 
 // Sesión guardada al recargar la página (si no expiró)
@@ -137,7 +138,8 @@ function Dashboard() {
           {pantalla === 'historico' && <VistaHistorico />}
           {pantalla === 'umbrales' && <VistaUmbrales />}
           {pantalla === 'usuarios' && <VistaUsuarios />}
-          {pantalla && ['auditoria', 'estado'].includes(pantalla) && (
+          {pantalla === 'auditoria' && <VistaAuditoria />}
+          {pantalla && ['estado'].includes(pantalla) && (
             <Proximamente nombre={nombreEntrada(pantalla, ctx)} />
           )}
         </main>
