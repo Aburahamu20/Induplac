@@ -749,3 +749,5 @@ Abraham (con Claude). Rama `feature/dashboard-umbrales`.
 **Ajustes (03/11):**
 - El ícono del calendario se veía oscuro sobre el fondo oscuro. Ahora la página declara `color-scheme: dark`, así los controles del navegador (calendario, listas) usan el tema oscuro.
 - Si hay muy pocos datos en común entre los dos períodos, el % no se muestra: se necesita al menos el 25 % de lo que se ve, y como mínimo 24 horas (3 en la vista de un día). En su lugar dice "Muy pocos datos en común para comparar". Con datos reales, octubre contra septiembre tenía 5 horas en común y daba "▲ 127 %".
+
+**Corrección (04/11):** la prueba `test_actual_usa_el_intervalo_en_curso` del Edge fallaba si el CI corría entre las 00:00 y las 01:00 de Chile. La prueba crea un intervalo cerrado "hace 1 hora", que a esa hora cae el día anterior y no suma al agua de hoy. El código estaba bien. Ahora la prueba calcula el valor esperado según la hora real.

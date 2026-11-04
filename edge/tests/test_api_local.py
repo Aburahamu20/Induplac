@@ -255,6 +255,8 @@ class Endpoints(Servidor):
                                                      "agua_m3": 0.1, "uv_max": 5.0, "hh_sin_incidentes": 1800,
                                                      "dias_sin_incidentes": 60, "produccion_mes": 300, "produccion_anual": 3400})
         cls.en_curso = reglas.iso(reglas.inicio_de(ahora))
+        # Entre 00:00 y 01:00 de Chile el intervalo cerrado cae el día anterior y no suma al agua de hoy
+        cls.agua_hoy = 0.3 if reglas.inicio_de(ahora - 3600) >= reglas.inicio_dia_chile(ahora) else 0.2
         cls.abiertos["local1"] = {"inicio_intervalo": cls.en_curso, "energia_kw": 60.0, "agua_m3h": 0.5, "agua_m3": 0.2,
                                   "uv_max": 6.5, "hh_sin_incidentes": 1801, "dias_sin_incidentes": 60,
                                   "produccion_mes": 301, "produccion_anual": 3401}
@@ -284,7 +286,7 @@ class Endpoints(Servidor):
         self.assertEqual(v["energia_kw"]["valor"], 60.0)
         self.assertEqual(v["energia_kw"]["nivel"], "critico")  # sobre 55 kW sin 4 semanas de historia
         self.assertEqual(v["uv_index"]["nivel"], "advertencia")
-        self.assertAlmostEqual(v["agua_m3_dia"]["valor"], 0.3, places=3)  # cerrado + en curso (mismo día en Chile)
+        self.assertAlmostEqual(v["agua_m3_dia"]["valor"], self.agua_hoy, places=3)  # cerrado (si es de hoy en Chile) + en curso
         self.assertEqual(v["produccion_mes"]["referencia"], 400)
 
     def test_actual_sin_datos_es_503(self):
