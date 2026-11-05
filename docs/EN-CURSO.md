@@ -76,6 +76,7 @@ Pauta del profesor: ver [`docs/pauta-entrega.md`](pauta-entrega.md). Lo marcado 
 | 16 | Informe del proyecto actualizado | 13 | 🔵 En revisión | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-21 | Claude Docs + Word | Borrador completo (14 secciones, diagrama de arquitectura y Carta Gantt), también en Word. Falta confirmar el formato con el profe y si existe el de la Nota 1. |
 | 17 | Presentación PowerPoint (consolida todo, en el orden que pide el profe) | 1 | 🔵 En revisión | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-21 | Claude Slides | 10 diapositivas con notas para quien presenta; se descarga en .pptx o PDF. Bárbara la comparte con el grupo. |
 | 18 | Guion y ensayo de la demo del prototipo | 11 | 🟢 Libre | | | | Depende de las tareas 1 a 4. |
+| 32 | DevSecOps (Nota 3, actividad 3.2.2): revisión de dependencias, SAST y DAST con ZAP en el CI + quality gate | 8 | 🟡 En curso | Abraham (con Claude) | 2026-11-05 | `feature/devsecops-ci` | npm audit, pip-audit, Bandit + Semgrep y ZAP baseline contra el build del dashboard. |
 
 ---
 
