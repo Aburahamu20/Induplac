@@ -5,10 +5,10 @@
 
 ```mermaid
 flowchart LR
-    A["1 · Desarrollo<br/>rama feature/*<br/>pruebas locales"] -->|"git push + Pull Request"| B["2 · Prueba<br/>GitHub Actions (CI)<br/>automático"]
+    A["1 · Desarrollo<br/>rama feature/*<br/>pruebas locales"] -->|"git push + Pull Request"| B["2 · Prueba y seguridad<br/>GitHub Actions (CI)<br/>build · pruebas · secretos<br/>dependencias · SAST · DAST ZAP"]
     B -->|"checks ✅"| C["3 · Validación<br/>plantilla de PR<br/>+ revisión de un compañero"]
-    C -->|"merge a main"| D["4 · Despliegue<br/>Deploy: dashboard → S3<br/>Lambdas → AWS"]
-    B -->|"❌ falla"| A
+    C -->|"merge a main"| D["4 · Despliegue<br/>Deploy: dashboard → S3<br/>Lambdas → AWS<br/>+ /health"]
+    B -->|"❌ falla un control"| A
     C -->|"cambios pedidos"| A
 ```
 
@@ -30,13 +30,31 @@ flowchart LR
 
 ## 2. Prueba automática (CI)
 
-Al abrir un Pull Request, **GitHub Actions** corre solo `ci.yml`, con tres trabajos en paralelo:
+Al abrir un Pull Request, **GitHub Actions** corre solo `ci.yml`. Los trabajos baratos corren en paralelo y el escaneo con ZAP solo corre si el dashboard compila (*fail fast*):
 
 | Trabajo | Qué revisa | Por qué |
 | :--- | :--- | :--- |
 | **Dashboard** | `npm ci`, `oxlint` (calidad del código), `tsc` (tipos) y `vite build` | Si no compila, no se puede publicar en S3 |
-| **Edge y Lambdas** | Sintaxis de todo el Python y **15 pruebas** del Edge | Protege lo que se demuestra: validación de rangos, descarte de duplicados (también si el ESP32 se reinicia) y las reglas de alerta: UV ≥ 8, energía sobre 55 kW, fuga de agua solo fuera de horario, id único por alerta |
-| **Secretos** | `gitleaks` busca claves, tokens y contraseñas en el código | Ley 19.628 y capa de seguridad: ninguna credencial al repositorio |
+| **Edge y Lambdas** | Sintaxis de todo el Python y las pruebas unitarias e integración con dobles (Edge, auditoría, `induplac-config` con RDS falso) | Protege lo que se demuestra: validación de rangos, descarte de duplicados, reglas de alerta, cadena de hashes de la auditoría y umbrales |
+| **Secretos** | `gitleaks` busca claves, tokens y contraseñas en todo el historial | Ley 19.628 y capa de seguridad: ninguna credencial al repositorio |
+| **Dependencias** | `npm audit --audit-level=high` (dashboard) y `pip-audit` (Edge e `induplac-config`) | Una librería con CVE conocido es la forma más común de heredar una vulnerabilidad |
+| **SAST** | `Bandit` (Python) y `Semgrep` con reglas de Python, TypeScript, React y secretos | Busca patrones inseguros en el código antes de ejecutarlo: inyección SQL, XSS, `eval`, claves en el código |
+| **DAST (ZAP)** | `zap-baseline.py` (spider + reglas pasivas) contra el build del dashboard levantado **en el mismo runner** con datos simulados | Revisa la aplicación funcionando: cabeceras, cookies, librerías JS vulnerables. Solo pasivo, y solo contra un sistema propio y aislado |
+
+### Quality gate (qué bloquea)
+
+| Control | Bloquea el PR | Queda solo como aviso |
+| :--- | :--- | :--- |
+| Build, lint y pruebas | Cualquier error o prueba fallida | — |
+| `gitleaks` | Cualquier secreto | — |
+| `npm audit` / `pip-audit` | Vulnerabilidad alta o crítica (npm) / cualquier CVE conocido (pip) | Severidad media o baja en npm |
+| `Bandit` | Severidad **y** confianza altas | Severidad media (se revisa a mano en el log) |
+| `Semgrep` | Cualquier hallazgo | — |
+| ZAP | Reglas en `FAIL` de [`.zap/rules.tsv`](../.zap/rules.tsv): librería JS vulnerable (10003), cookies sin `HttpOnly`/`Secure`, CORS mal configurado | Reglas en `WARN` (cabeceras faltantes, anti-CSRF): se revisan en el reporte, que queda como artefacto `reporte-zap` |
+
+> Una alerta automática es un **indicio**, no una vulnerabilidad confirmada. Ejemplo real (05/11): Bandit marca 9 avisos de severidad media; los de "posible inyección SQL" (`B608`) son consultas que solo arman los `?` de los parámetros o usan nombres de tabla fijos, así que se revisaron y no son explotables. Por eso no bloquean, pero se miran en cada PR.
+
+**Pendiente (diseño):** S3 no agrega cabeceras de seguridad (`X-Content-Type-Options`, CSP, anti-clickjacking). En producción se pondría CloudFront delante del bucket con una *response headers policy*; el Learner Lab no lo incluye en la demo.
 
 Si un trabajo falla, el PR muestra **❌** y vuelve al paso 1.
 
@@ -72,12 +90,13 @@ Las credenciales del Learner Lab **vencen cada ~4 horas** y **no se pueden crear
 
 1. **Variables** (*Settings → Secrets and variables → Actions → Variables*): `S3_BUCKET`, `VITE_API_URL` (`https://<api-id>.execute-api.us-east-1.amazonaws.com/api`) y `VITE_COGNITO_CLIENT_ID`.
 2. **Secretos** (misma pantalla → *Secrets*): las 3 credenciales del Learner Lab. Se actualizan cada vez que se despliega.
-3. **Regla de `main`**: exigir los checks *Dashboard*, *Edge y Lambdas* y *Sin claves en el repositorio*, y 1 aprobación.
+3. **Regla de `main`**: exigir los checks *Dashboard*, *Edge y Lambdas*, *Sin claves en el repositorio*, *Dependencias sin vulnerabilidades conocidas*, *Análisis estático de seguridad (SAST)* y *DAST con OWASP ZAP*, y 1 aprobación.
 
 > El login con Cognito (`login: cognito` en *Run workflow*) requiere el PR #20 mergeado. Con `login: simulada` se publica el login de demo.
 
 ## Evidencia para la presentación
 
 - Pestaña **Actions** del repositorio: historial de ejecuciones de CI.
-- Cualquier PR: sección *Checks* con los tres trabajos en ✅.
+- Cualquier PR: sección *Checks* con los seis trabajos en ✅.
+- Ejecución de CI: artefacto **`reporte-zap`** (HTML y JSON del escaneo de ZAP).
 - Ejecución de **Deploy**: el log muestra el `aws s3 sync`, la actualización de las Lambdas y el `/health` final.
