@@ -823,3 +823,19 @@ Abraham (con Claude). Rama `feature/dashboard-estado`. Con esta parte quedan las
   - Al pie, una explicación de qué pasa si se corta internet en planta.
 - **`App.tsx`:** la pantalla usa el mismo `GET /api/estado` que ya consulta el panel, sin pedirlo dos veces. Se borró `Proximamente`, que ya no se usa.
 - **Revisión visual:** admin general con las dos sedes al día; Planta sin internet usando el panel de demo; y operaria de Planta en celular. Build y lint sin errores.
+
+---
+
+## 2026-11-05 — DevSecOps en el CI (tarea 32, Nota 3)
+
+Abraham (con Claude). Rama `feature/devsecops-ci`. Base para la actividad 3.2.2 (pipeline CI/CD con controles de seguridad y ZAP).
+
+- **`ci.yml`, tres trabajos nuevos:**
+  - **Dependencias:** `npm audit --audit-level=high` en el dashboard y `pip-audit` en `edge/requirements.txt` y `backend/lambda_config/requirements.txt`. Hoy: 0 vulnerabilidades.
+  - **SAST:** Bandit (Python) y Semgrep (`p/python`, `p/typescript`, `p/react`, `p/secrets`). Hoy: Semgrep 0 hallazgos con 261 reglas; Bandit 0 altos y 9 medios, revisados a mano: los `B608` (posible SQL injection) son `IN (?,?,…)` armados solo con marcadores y nombres de tabla fijos, `B310` es `urlopen` a la URL de la API del `.env` y `B104` es el `0.0.0.0` de la API local (a propósito, para la red de planta). No son explotables.
+  - **DAST:** ZAP baseline (`ghcr.io/zaproxy/zaproxy:stable`, solo pasivo) contra el build del dashboard con datos simulados, levantado con `vite preview` dentro del runner. Solo corre si el trabajo *Dashboard* pasa. El reporte queda como artefacto `reporte-zap`.
+- **Quality gate** en `docs/devops.md` §2 y reglas de ZAP en `.zap/rules.tsv` (FAIL: librería JS vulnerable, cookies inseguras, CORS; WARN: cabeceras y anti-CSRF).
+- **Decidido:** las alertas automáticas de severidad media no bloquean, se revisan; lo alto/crítico sí bloquea.
+- **Pendiente:**
+  - Agregar los 3 checks nuevos a la regla de `main` (*Settings → Branches*).
+  - Diseño: cabeceras de seguridad con CloudFront delante de S3 (S3 solo no las pone).
