@@ -74,7 +74,7 @@ Pauta del profesor: ver [`docs/pauta-entrega.md`](pauta-entrega.md). Lo marcado 
 | 13 | Planificación: Scrum del MVP (backlog, sprints) + PMI con las 5 fases | 9 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #12 | En `docs/scrum-pmi.md`. PO: Abraham · SM: Bárbara (21/10). **Falta:** si hubo reuniones fijas (§4). |
 | 14 | Carta Gantt hasta la puesta en marcha (responsables, duración, dependencias, hitos) | 10 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-14 | PR #11 | En `docs/roles-raci-gantt.md` §3. RDS agregado el 19/10 (PR #15). Columna *Estado*, pipeline y MVP de punta a punta el 21/10 (PR #25). |
 | 15 | Conclusiones y defensa: problema, beneficios, limitaciones, siguientes pasos | 12 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-19 | PR #14 | En `docs/conclusiones.md` (incluye preguntas probables de la defensa). |
-| 16 | Informe del proyecto actualizado | 13 | 🔵 En revisión | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-21 | Claude Docs + Word | Borrador completo (14 secciones, diagrama de arquitectura y Carta Gantt), también en Word. Falta confirmar el formato con el profe y si existe el de la Nota 1. |
+| 16 | Informe del proyecto actualizado | 13 | ✅ Listo | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-21 | Claude Docs + Word | Entregado al profesor (Nota 2), confirmado por Bárbara el 14/11. |
 | 17 | Presentación PowerPoint (consolida todo, en el orden que pide el profe) | 1 | 🔵 En revisión | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-21 | Claude Slides | 10 diapositivas con notas para quien presenta; se descarga en .pptx o PDF. Bárbara la comparte con el grupo. |
 | 18 | Guion y ensayo de la demo del prototipo | 11 | 🟢 Libre | | | | Depende de las tareas 1 a 4. |
 | 32 | DevSecOps (Nota 3, actividad 3.2.2): revisión de dependencias, SAST y DAST con ZAP en el CI + quality gate | 8 | ✅ Listo | Abraham (con Claude) | 2026-11-05 | [PR #59](https://github.com/Aburahamu20/Induplac/pull/59) | npm audit, pip-audit, Bandit + Semgrep y ZAP baseline contra el build del dashboard. |
@@ -117,3 +117,4 @@ Pauta del profesor: ver [`docs/pauta-entrega.md`](pauta-entrega.md). Lo marcado 
 | Código del Edge, dashboard y backend subido a `main` (tareas 1, 4 y 5) | Abraham (con Claude) | 2026-10-21 | PR #18 |
 | Documentación al día con lo del 20/10: Gantt con Estado, RACI, tareas, Cloud, Scrum y conclusiones | Bárbara Saavedra (con Claude) | 2026-10-21 | PR #25 |
 | API local del Edge y login de planta (tarea 22) | Abraham (con Claude) | 2026-10-29 | PR #30 |
+| Informe del proyecto de la Nota 2, entregado (tarea 16) | Bárbara Saavedra (con Claude) | 2026-11-14 | Claude Docs + Word |
