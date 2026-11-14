@@ -1,0 +1,11 @@
+# Reglas de ZAP baseline para Induplac (docs/devops.md, quality gate).
+# FAIL = bloquea el PR. WARN = queda en el reporte y se revisa a mano. IGNORE = no aplica.
+# Columnas separadas por TAB: id, acción, (nombre).
+10003	FAIL	(Vulnerable JS Library)
+10010	FAIL	(Cookie No HttpOnly Flag)
+10011	FAIL	(Cookie Without Secure Flag)
+10098	FAIL	(Cross-Domain Misconfiguration)
+10202	WARN	(Absence of Anti-CSRF Tokens)
+10021	WARN	(X-Content-Type-Options Header Missing)
+10038	WARN	(Content Security Policy Header Not Set)
+10020	WARN	(Missing Anti-clickjacking Header)

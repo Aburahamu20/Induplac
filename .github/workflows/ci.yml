@@ -1,6 +1,9 @@
 # CI — Prueba y validación automáticas (docs/devops.md, pasos 2 y 3).
 # Corre en cada Pull Request hacia main y en cada push a main.
 # Si un job falla, el PR muestra ❌ y no se debe mergear.
+# Controles de seguridad (DevSecOps, tarea 32): secretos, dependencias, SAST y DAST con ZAP.
+# Orden de bloqueo (fail fast): los jobs baratos corren en paralelo; ZAP solo corre
+# si el dashboard compila, y el quality gate está en docs/devops.md §2.
 
 name: CI
 
@@ -71,3 +74,74 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  dependencias:
+    name: Dependencias sin vulnerabilidades conocidas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Dashboard (npm audit, bloquea con severidad alta o crítica)
+        working-directory: dashboard
+        run: npm audit --audit-level=high
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Edge e induplac-config (pip-audit, bloquea con cualquier CVE conocido)
+        run: |
+          pip install --quiet pip-audit
+          pip-audit -r edge/requirements.txt
+          pip-audit -r backend/lambda_config/requirements.txt
+
+  sast:
+    name: Análisis estático de seguridad (SAST)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet bandit semgrep
+      - name: Bandit (Python; bloquea severidad y confianza altas, el resto queda en el log)
+        run: |
+          bandit -r edge backend -x '*/tests/*' -ll || true
+          bandit -r edge backend -x '*/tests/*' -lll -iii
+      - name: Semgrep (Python, TypeScript y React; bloquea cualquier hallazgo)
+        run: semgrep scan --config p/python --config p/typescript --config p/react --config p/secrets --error --metrics=off edge backend dashboard/src
+
+  dast:
+    name: DAST con OWASP ZAP (baseline, solo pasivo)
+    needs: dashboard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - name: Build del dashboard con datos simulados
+        working-directory: dashboard
+        run: |
+          npm ci
+          npm run build
+      - name: Levantar el dashboard en el runner (sistema propio, aislado)
+        working-directory: dashboard
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4173 --strictPort > ../preview.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4173/ > /dev/null && exit 0; sleep 1; done
+          cat ../preview.log; exit 1
+      - name: ZAP baseline (spider + reglas pasivas; FAIL de .zap/rules.tsv bloquea, WARN no)
+        run: |
+          mkdir -p zap && cp .zap/rules.tsv zap/ && chmod 777 zap
+          docker run --rm --network host -v "$PWD/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py -t http://127.0.0.1:4173/ -c rules.tsv -I -m 1 \
+            -r reporte-zap.html -J reporte-zap.json
+      - name: Guardar el reporte de ZAP
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-zap
+          path: zap/reporte-zap.*
