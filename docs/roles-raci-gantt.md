@@ -61,6 +61,10 @@
 | Bárbara | Modelo Cloud y tecnologías con su aporte | Sprint 3 | Listo (PR #13) |
 | Bárbara | Conclusiones y defensa | Sprint 3 | Listo (PR #14) |
 | Bárbara | Actualización de la documentación con lo construido el 20/10 | Sprint 3 | Listo (PR #25) |
+| Bárbara | Nota 3 · Product Backlog, sprints y Kanban (tarea 37) | Sprint 6 | En revisión (PR #62) |
+| Bárbara | Nota 3 · Lluvia de ideas y diagrama de afinidad (tarea 39) | Sprint 6 | En revisión (PR #62) |
+| Bárbara | Documentación al día con lo construido hasta el 14/11 (tarea 24) | Sprint 6 | En revisión |
+| Bárbara | Nota 3 · PowerPoint (tarea 17) | Sprint 7 | Pendiente (espera las partes del equipo, 19/11) |
 | Bárbara | Capacitación de usuarios del dashboard | Implementación | Pendiente |
 ---
 
@@ -93,6 +97,8 @@
 ## 3. Carta Gantt (tareas 13 y 14)
 
 Semana 1 = **lunes 05/10/2026**. **S1–S3:** desarrollo del MVP con Scrum (ya en ejecución). **S4–S12:** implementación en Induplac con las fases PMI hasta la puesta en marcha. ■ = semana de trabajo · ◆ = hito.
+
+> **Nota (14/11/2026):** en la práctica, las semanas 4 a 7 se usaron para una segunda versión del MVP (roles por sede, auditoría, dashboard de 7 pantallas y DevSecOps; ver [`nota-3/backlog.md`](nota-3/backlog.md)). La implementación PMI de esta Gantt sigue siendo el plan hipotético para Induplac: sus fechas se correrían al momento de aprobarse el proyecto y se ajustarán con el roadmap de transferencia tecnológica (tarea 38).
 
 | ID | Tarea | Responsable | Sprint / Fase | Inicio | Fin | Depende de | Estado | S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 | S9 | S10 | S11 | S12 |
 |---|---|---|---|---|---|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|

@@ -25,9 +25,9 @@ Una **plataforma IoT híbrida**: sensores que envían datos por MQTT a una Raspb
 | **Protección de los operarios** | Alerta de UV alto en tiempo real. |
 | **La planta nunca queda ciega** | El Edge sigue funcionando sin internet y se sincroniza al volver, sin perder ni duplicar datos. |
 | **Costo casi cero** | Servicios serverless que se pagan por uso; RDS se apaga cuando no se usa. |
-| **Seguridad y privacidad** | Login obligatorio, MFA para quien modifica, VLANs separadas y ningún dato personal de los operarios (Ley 19.628). |
+| **Seguridad y privacidad** | Login obligatorio, MFA para jefes y administradores, permisos por rol y sede, auditoría que nadie puede borrar y ningún dato personal de los operarios (Ley 19.628). |
 | **Crece fácilmente** | Agregar un local nuevo es replicar el mismo Edge. |
-| **Cambios sin romper lo que funciona** | En cada cambio, GitHub Actions prueba solo las reglas de alerta y compila el dashboard antes de aceptarlo. |
+| **Cambios sin romper lo que funciona** | En cada cambio, GitHub Actions prueba las reglas de alerta, compila el dashboard y revisa la seguridad (claves, librerías, código y ZAP) antes de aceptarlo. |
 
 ## 4. Limitaciones
 
@@ -35,12 +35,14 @@ Una **plataforma IoT híbrida**: sensores que envían datos por MQTT a una Raspb
 - **La VPN queda solo como diseño:** en la demo la conexión va por HTTPS con una clave de ingesta, por el costo y las restricciones del Learner Lab (no permite crear usuarios IAM).
 - **Hora sin internet (RTC):** también queda como diseño; no aplica en Wokwi.
 - **Dependencia del Learner Lab:** presupuesto de USD 100 y servicios que hay que encender para las pruebas.
-- **Las alertas solo se ven en el dashboard:** todavía no llegan por correo ni por celular.
+- **Las alertas solo se ven en el dashboard:** todavía no llegan por correo ni por celular (la app para el celular está en el backlog).
+- **Dos listas de usuarios:** los de la nube están en Cognito y los de planta se crean aparte en el Edge; unificarlas queda como mejora.
+- **En el Learner Lab no se puede impedir el borrado desde la consola de AWS:** la auditoría lo detecta (cadena de hashes) y se puede recuperar (PITR), pero en una cuenta real se sumaría una regla IAM que lo prohíba.
 
 ## 5. Siguientes pasos
 
 1. **Piloto real** en el Local 1 con sensores físicos (corriente y caudalímetros) y una Raspberry Pi.
-2. **Que la Lambda de ingesta lea los umbrales desde RDS** y que la API valide el token de Cognito.
+2. **Terminar la seguridad de la API:** que valide el token de Cognito en todas las rutas (tarea 20) y que el Edge use los mismos umbrales que la nube (tarea 44). Los umbrales desde RDS ya funcionan (tarea 21).
 3. **Activar la VPN** Site-to-Site en una cuenta AWS de producción.
 4. **Notificaciones** por correo o Telegram (Amazon SNS).
 5. **Históricos comparables** (por ejemplo, este invierno contra el anterior).

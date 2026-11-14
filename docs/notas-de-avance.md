@@ -875,3 +875,18 @@ Abraham (con Claude). Rama `docs/readme-al-dia`.
 - **Tarea 21 ✅:** ya estaba hecha dentro de la tarea 28 (PR #42) y probada con datos reales el 04/11.
 - **Tarea 44 nueva (Abraham):** que el Edge descargue los umbrales de la nube al sincronizar.
 - **Pendiente:** `docs/ciberseguridad.md` todavía describe 3 roles (Operario / Jefe / Administrador); hay que pasarlo a los 4 grupos.
+
+---
+
+## 2026-11-14 (tarde) — Documentación de Bárbara al día (tarea 24, Bárbara con Claude)
+
+Sus documentos no se actualizaban desde el 23/10. Se pusieron al día con lo construido hasta el 14/11:
+- **`cloud-tecnologias.md`:** API local del Edge con login de planta y auditoría local; DynamoDB con auditoría, PITR y protección contra borrado; Cognito con 4 grupos y `custom:sede`, MFA por rol; dashboard de 7 pantallas; nueva fila DevSecOps (gitleaks, npm audit / pip-audit, Bandit / Semgrep, ZAP) y `main` protegida.
+- **`conclusiones.md`:** beneficios de seguridad y calidad al día; dos limitaciones nuevas (dos listas de usuarios, Cloud vs. Edge, y que el Learner Lab no deja prohibir el borrado desde la consola); siguiente paso 2 cambiado a las tareas 20 y 44 (los umbrales desde RDS ya están).
+- **`scrum-pmi.md`:** sprints 4 a 7 y enlace al backlog de la Nota 3; reuniones fijas resueltas (no se nombran ceremonias aparte).
+- **`roles-raci-gantt.md`:** tareas de Bárbara de la Nota 3 y nota en la Gantt: las semanas 4 a 7 se usaron para la versión 2 del MVP y la implementación PMI queda como plan hipotético que se ajustará con el roadmap (tarea 38).
+
+### Pendiente
+- [ ] El Excel `docs/nota-2/Induplac_Roles_Equipo.xlsx` no se tocó; si se presenta en la Nota 3, actualizarlo igual que el texto.
+- [ ] Fortaleza y rol de Lisandra (espera el aviso de Bárbara).
+
