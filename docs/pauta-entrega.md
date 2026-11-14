@@ -1,5 +1,7 @@
 # 🎯 Pauta y borradores
 
+> 🆕 **Entrega vigente: Nota 3 (25/11/2026) → [`nota-3.md`](nota-3.md).** Este documento es la pauta de la entrega anterior.
+
 > Resumen de lo que pide el profesor Marco Antonio Perelli para esta entrega, y borradores de roles, RACI y Gantt para que el equipo los ajuste.
 > **Las tareas para repartir están en [`docs/EN-CURSO.md`](EN-CURSO.md)** (tareas 9 a 18).
 >

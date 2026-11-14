@@ -8,6 +8,7 @@ Este directorio contiene la especificación técnica completa de la plataforma *
 
 | Documento | Descripción |
 | :--- | :--- |
+| **[nota-3.md](nota-3.md)** | **Entrega vigente (Nota 3, 25/11/2026):** pauta del profe, criterios, qué falta, reparto y fechas. |
 | **[CONTEXTO.md](CONTEXTO.md)** | **Documento maestro de contexto:** visión, decisiones de diseño, requisitos, restricciones y roadmap. |
 | **[arquitectura.md](arquitectura.md)** | Arquitectura híbrida (Edge + Cloud), integración Wokwi/ESP32, esquema SQLite y DynamoDB + RDS. |
 | **[ciberseguridad.md](ciberseguridad.md)** | Estrategia de defensa en 5 capas, modelo STRIDE, matriz RBAC y cumplimiento Ley 19.628 (Chile). |

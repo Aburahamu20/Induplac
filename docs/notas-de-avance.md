@@ -849,3 +849,13 @@ Abraham (con Claude). PR #59 mergeado y tarea 32 ✅.
 - **Hecho:** ruleset `proteger-main` activo sobre `main`: exige los 6 checks del CI (incluidos Dependencias, SAST y DAST con ZAP), bloquea borrar la rama y el *force push*.
 - **Decidido:** bypass solo para *Repository admin*. El resto del equipo ya no puede hacer commits directos a `main`: reservan la tarea en su rama/PR o le piden la reserva a Abraham.
 - **Pendiente:** Ansible (actividad 3.3.1) para la Nota 3.
+
+---
+
+## 2026-11-13 — Nota 3: pauta, tareas y reparto en el repo
+
+Abraham (con Claude). Rama `docs/nota-3`.
+
+- **Hecho:** `docs/nota-3.md` con la pauta del profe (correo del 11/11), los 8 criterios con su peso, qué existe y qué falta en cada uno, el reparto sugerido y las fechas. Tareas **33 a 43** nuevas en EN-CURSO (🟢, con responsable sugerido). Cada criterio se entrega en `docs/nota-3/`.
+- **Cambió la forma de reservar:** `main` está protegida, así que la reserva se hace como primer commit de la rama + PR abierto de inmediato (AGENTS.md, CLAUDE.md, GEMINI.md, CONTRIBUTING.md y EN-CURSO actualizados).
+- **Pendiente:** confirmar el reparto en el grupo. Los criterios 5 a 8 valen 60 % de la nota y están por hacer.
