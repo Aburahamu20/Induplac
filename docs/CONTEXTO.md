@@ -179,7 +179,7 @@ DISEÑADO Y DOCUMENTADO:
 ├── [OK] Especificación del Modo Offline y Retención
 └── [OK] Estructura limpia del repositorio Git con convenciones profesionales
 
-MVP EJECUTABLE (al 2026-10-21):
+MVP EJECUTABLE (al 2026-11-14):
 ├── [OK] Dashboard en 'dashboard/' (React + Vite + Tailwind), publicado en S3
 ├── [OK] ESP32 en Wokwi en 'simulation/wokwi-local1/' publicando al broker EMQX
 ├── [OK] Agente Edge en 'edge/' (MQTT -> SQLite -> 15 min -> alertas offline -> sync)
@@ -187,7 +187,10 @@ MVP EJECUTABLE (al 2026-10-21):
 ├── [OK] Cognito con MFA probado en el Learner Lab
 ├── [OK] Dashboard con login de Cognito y MFA (publicado en S3)
 ├── [PENDIENTE] Validar el token de Cognito en la API
-├── [EN CURSO, tarea 28] induplac-api lee los umbrales de la copia en DynamoDB (RDS manda; valores por defecto si no hay copia)
+├── [OK, tarea 21] induplac-api lee los umbrales de la copia en DynamoDB (RDS manda; valores por defecto si no hay copia)
+├── [OK, tarea 30] Dashboard con 7 pantallas por rol y sede (04/11)
+├── [OK, tarea 32] CI con DevSecOps y main protegida (13/11)
+├── [PENDIENTE, tarea 44] El Edge descarga los umbrales de la nube al sincronizar
 └── [DISEÑO] VPN Site-to-Site + API Gateway privada, VLANs y RTC (documentados, no se demuestran)
 ```
 
@@ -195,7 +198,7 @@ MVP EJECUTABLE (al 2026-10-21):
 
 ## 7. Roadmap y Próximos Pasos Priorizados
 
-> **Estado al 2026-10-21:** pasos 1 a 4 funcionando (demo del 21/10). El paso 5 queda como diseño. Siguientes: umbrales desde RDS en `induplac-api` y validar el token de Cognito en la API.
+> **Estado al 2026-11-14:** pasos 1 a 4 funcionando (demo del 21/10) y umbrales desde RDS listos (tarea 21). El paso 5 queda como diseño. Siguientes: MFA por rol (31), validar el token en `/config/*` (20), umbrales en el Edge (44) y la Nota 3 ([`nota-3.md`](nota-3.md)).
 
 ```mermaid
 flowchart LR

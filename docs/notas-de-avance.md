@@ -859,3 +859,19 @@ Abraham (con Claude). Rama `docs/nota-3`.
 - **Hecho:** `docs/nota-3.md` con la pauta del profe (correo del 11/11), los 8 criterios con su peso, qué existe y qué falta en cada uno, el reparto sugerido y las fechas. Tareas **33 a 43** nuevas en EN-CURSO (🟢, con responsable sugerido). Cada criterio se entrega en `docs/nota-3/`.
 - **Cambió la forma de reservar:** `main` está protegida, así que la reserva se hace como primer commit de la rama + PR abierto de inmediato (AGENTS.md, CLAUDE.md, GEMINI.md, CONTRIBUTING.md y EN-CURSO actualizados).
 - **Pendiente:** confirmar el reparto en el grupo. Los criterios 5 a 8 valen 60 % de la nota y están por hacer.
+
+---
+
+## 2026-11-14 — README al día (tarea 45) y tarea 21 cerrada
+
+Abraham (con Claude). Rama `docs/readme-al-dia`.
+
+- **README** (estaba al 21/10):
+  - Encabezado con el `<div>` de apertura que faltaba, badge de fase "Nota 3" y aviso de la Nota 3.
+  - §9 y §10 reescritas: dashboard tipo app con las 7 pantallas, y roles con los 4 grupos de Cognito + sede (antes decía "tres dashboards" y 3 roles).
+  - §16 sin la tabla de roles antigua y con DevSecOps.
+  - §17 estructura, §18 tecnologías (Cognito, CI/CD, DevSecOps, Ansible), §19 lo hecho después del Sprint 3, §22 roadmap, §24 contribución con `main` protegida y §25 estado actual.
+- **CONTEXTO:** §6 y §7 al 14/11.
+- **Tarea 21 ✅:** ya estaba hecha dentro de la tarea 28 (PR #42) y probada con datos reales el 04/11.
+- **Tarea 44 nueva (Abraham):** que el Edge descargue los umbrales de la nube al sincronizar.
+- **Pendiente:** `docs/ciberseguridad.md` todavía describe 3 roles (Operario / Jefe / Administrador); hay que pasarlo a los 4 grupos.

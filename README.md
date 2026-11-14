@@ -1,3 +1,5 @@
+<div align="center">
+
 # 🏭 Induplac IoT
 
 ## Plataforma IoT para el monitoreo energético y operacional
@@ -8,7 +10,7 @@
 
 ![Estado](https://img.shields.io/badge/Estado-MVP%20funcionando-brightgreen)
 [![CI](https://github.com/Aburahamu20/Induplac/actions/workflows/ci.yml/badge.svg)](https://github.com/Aburahamu20/Induplac/actions/workflows/ci.yml)
-![Fase](https://img.shields.io/badge/Fase-MVP-blue)
+![Fase](https://img.shields.io/badge/Fase-Nota%203-blue)
 ![Asignatura](https://img.shields.io/badge/Asignatura-Problemáticas%20Globales%20y%20Prototipado-purple)
 ![IoT](https://img.shields.io/badge/IoT-ESP32-green)
 ![Cloud](https://img.shields.io/badge/Cloud-AWS-orange)
@@ -22,7 +24,9 @@
 >
 > 📌 La versión vigente de las decisiones está en **[docs/CONTEXTO.md](docs/CONTEXTO.md)**. Si algo de este README no coincide, manda CONTEXTO.
 >
-> 🚧 **¿Vas a trabajar en algo?** Revisa y reserva la tarea en **[docs/EN-CURSO.md](docs/EN-CURSO.md)** antes de empezar, para no rehacer trabajo de otro. Las IA deben seguir **[AGENTS.md](AGENTS.md)**.
+> 🎓 **Entrega vigente: Nota 3 (miércoles 25/11/2026).** Pauta, criterios, qué falta y quién hace qué en **[docs/nota-3.md](docs/nota-3.md)**.
+>
+> 🚧 **¿Vas a trabajar en algo?** Revisa y reserva la tarea en **[docs/EN-CURSO.md](docs/EN-CURSO.md)** antes de empezar, para no rehacer trabajo de otro. `main` está protegida: todo entra por rama + Pull Request con el CI en verde. Las IA deben seguir **[AGENTS.md](AGENTS.md)**.
 
 ---
 
@@ -35,7 +39,7 @@
 | **Sección** | 002V |
 | **Docente** | Marco Antonio Perelli |
 | **Institución** | Duoc UC |
-| **Fase** | Prototipo / MVP |
+| **Fase** | MVP funcionando · preparando la Nota 3 (25/11/2026) |
 | **Contexto** | Empresa real |
 | **Datos utilizados** | Ficticios |
 | **Arquitectura** | IoT + Edge + Cloud |
@@ -68,7 +72,7 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 | **Edge** | `cd edge` → copiar `.env.example` a `.env` → `py edge_gateway.py` (sin Wokwi: `py simular_esp32.py`) | [README](edge/README.md) |
 | **Backend AWS** | API Gateway + Lambdas + DynamoDB + RDS en el Learner Lab. Prueba: `curl <API>/health` y `curl <API>/config/umbrales` | [README](backend/README.md) |
 | **Dashboard** | `cd dashboard` → `npm install` → `npm run dev` (o el build publicado en S3) | `dashboard/.env.example` |
-| **Pruebas automáticas** | `cd edge` → `py -m unittest discover -s tests -v` (también corren solas en cada PR) | [DevOps](docs/devops.md) |
+| **Pruebas automáticas** | `cd edge` → `py -m unittest discover -s tests -v` (también corren solas en cada PR, junto con los controles de seguridad) | [DevOps](docs/devops.md) |
 
 > Las claves (broker, ingesta, RDS) **no están en el repositorio**: van en archivos `.env` locales o en variables de AWS y GitHub.
 
@@ -76,6 +80,7 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 
 | Tema | Documento |
 |---|---|
+| **Nota 3: pauta, criterios, reparto y fechas** | [`docs/nota-3.md`](docs/nota-3.md) |
 | Decisiones vigentes (fuente de verdad) | [`docs/CONTEXTO.md`](docs/CONTEXTO.md) |
 | El proyecto explicado en simple | [`docs/GUIA-EQUIPO.md`](docs/GUIA-EQUIPO.md) |
 | Decisiones técnicas (ADR-01 a ADR-10) | [`docs/decisiones-tecnicas.md`](docs/decisiones-tecnicas.md) |
@@ -87,9 +92,9 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 | Roles, RACI y Gantt | [`docs/roles-raci-gantt.md`](docs/roles-raci-gantt.md) · [Excel](docs/planificacion/Induplac_Roles_Equipo.xlsx) |
 | Scrum y PMI | [`docs/scrum-pmi.md`](docs/scrum-pmi.md) |
 | Modelo Cloud y tecnologías | [`docs/cloud-tecnologias.md`](docs/cloud-tecnologias.md) |
-| Pipeline DevOps | [`docs/devops.md`](docs/devops.md) |
+| Pipeline DevOps y DevSecOps (CI, seguridad, quality gate, despliegue) | [`docs/devops.md`](docs/devops.md) |
 | Conclusiones y defensa | [`docs/conclusiones.md`](docs/conclusiones.md) |
-| Pauta de la entrega y su estado | [`docs/pauta-entrega.md`](docs/pauta-entrega.md) |
+| Pauta de la entrega anterior y su estado | [`docs/pauta-entrega.md`](docs/pauta-entrega.md) |
 | Tablero de tareas · bitácora | [`docs/EN-CURSO.md`](docs/EN-CURSO.md) · [`docs/notas-de-avance.md`](docs/notas-de-avance.md) |
 
 ---
@@ -351,101 +356,62 @@ Un índice UV de **8 o superior** se considera una condición de riesgo para per
 
 ---
 
-# 🖥️ 9. Dashboards
+# 🖥️ 9. Dashboard (panel tipo app)
 
-La plataforma tendrá **tres dashboards funcionales**:
+El dashboard es un **panel con menú lateral**, no una pantalla única. Implementa los bocetos aprobados por el equipo el 01/11 (tarea 30, terminada el 04/11). Cada rol ve solo las pantallas y sedes que le corresponden.
 
 ```text
-                    INDUPLAC IoT
-                         │
-          ┌──────────────┴──────────────┐
-          │                             │
-      MONITOREO                      AUDITORÍA
-          │                             │
-    ┌─────┴─────┐                 Dashboard General
-    │           │
- Local 1      Local 2
+┌──────────────────────┬──────────────────────────────────────────────┐
+│ INDUPLAC IoT         │ Resumen · Sede: Todas · 14/11  🕑  🔔 2       │
+│                      ├──────────────────────────────────────────────┤
+│ MONITOREO            │                                              │
+│  • Resumen           │  ⚡ Energía     💧 Agua     ☀ UV     🏭 Prod. │
+│  • Planta            │  [al día]      [al día]   [antiguo] [al día] │
+│  • Oficinas          │                                              │
+│  • Alertas (2)       │  Gráfico de consumo · alertas activas        │
+│  • Histórico         │                                              │
+│ GESTIÓN              │                                              │
+│  • Umbrales          │                                              │
+│  • Usuarios          │                                              │
+│  • Auditoría         │                                              │
+│ SISTEMA              │                                              │
+│  • Estado de sedes   │                                              │
+│ ──────────────────── │                                              │
+│ Planta: al día       │                                              │
+│ Oficinas: al día     │                                              │
+│ Abraham · admin      │                                              │
+└──────────────────────┴──────────────────────────────────────────────┘
 ```
+
+| Pantalla | Qué muestra |
+|---|---|
+| **Resumen, Planta y Oficinas** | Tarjetas KPI (energía, agua, UV, producción, HH) con su estado: *al día*, *dato antiguo* o *sin datos*; gráfico y alertas activas |
+| **Alertas** | Alertas activas e historial; jefes y admins las reconocen con un comentario |
+| **Histórico** | Compara día con día y hora con hora; no compara si un período no tiene datos |
+| **Umbrales** | Editar los umbrales de su sede y **simular** cuántas alertas habría dado el valor nuevo con los datos reales |
+| **Usuarios y permisos** | Crear cuentas con clave temporal, desactivarlas y reenviar la invitación; los permisos salen del rol |
+| **Auditoría** | Quién hizo qué, cuándo y desde dónde (nube o Edge, con o sin internet), en frases simples |
+| **Estado de las sedes** | ¿Está llegando todo bien? Último dato, datos de las últimas 24 h, sensores, pendientes por subir, hora del equipo y si RDS está encendido |
+
+- El mismo panel corre **en la nube** (S3) y **en el Edge** de planta, para seguir viendo los datos sin internet.
+- En celular, el menú se abre con ☰. Próximo paso decidido: una **PWA** sobre AWS (CONTEXTO).
 
 ---
 
-## 🏭 Dashboard — Local 1
+# 🏢 10. Roles, sedes y permisos
 
-Muestra el estado actual del primer local:
+Los permisos salen del **grupo de Cognito** (qué puede hacer) y del atributo **`custom:sede`** (dónde): `planta`, `oficinas` o `todas`. El usuario no puede cambiarse de sede.
 
-- Electricidad.
-- Agua.
-- Producción.
-- HH.
-- UV.
-- Alertas.
-- Estado de conexión.
-- Estado de sensores.
-- Última sincronización.
-- Registros pendientes.
+| Rol (grupo) | Sedes | Ver actual | Histórico | Reconocer alertas | Umbrales, usuarios y auditoría | MFA |
+|---|---|:---:|:---:|:---:|:---:|:---:|
+| **Admin general** (`admin-general`) | Todas | ✅ | ✅ | ✅ | ✅ todas las sedes | Obligatorio |
+| **Admin de sede** (`admin-sede`) | La suya | ✅ | ✅ | ✅ | ✅ solo su sede | Obligatorio |
+| **Jefe** (`jefe`) | La suya | ✅ | ✅ | ✅ | ❌ | Obligatorio |
+| **Operario** (`operario`) | La suya | ✅ | ❌ | ❌ | ❌ | Opcional |
 
-### Diseño visual base
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ INDUPLAC · LOCAL 1                    🟢 ONLINE              │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ⚡ ELECTRICIDAD       💧 AGUA          🏭 PRODUCCIÓN        │
-│                                                             │
-│      50 kW             1.250 L            132 / 1.240       │
-│      ⚠ +25%            ✓ NORMAL            MES / AÑO        │
-│                                                             │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  🦺 HH SIN INCIDENTES                ☀ ÍNDICE UV             │
-│                                                             │
-│       45.320                           8 ⚠ ALTO              │
-│                                                             │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│              ⚡ CONSUMO ELÉCTRICO                           │
-│                  [ GRÁFICO ]                               │
-│                                                             │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│ ⚠ ALERTAS ACTIVAS                                           │
-│                                                             │
-├─────────────────────────────────────────────────────────────┤
-│ 🟢 SISTEMA   Internet ✓   AWS ✓   ESP32 ✓                  │
-│ Última sincronización: 13:58     Pendientes: 0              │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🏭 Dashboard — Local 2
-
-Utiliza la misma estructura visual y funcional del Local 1, mostrando exclusivamente la información correspondiente al segundo local.
-
-Esto permite mantener una interfaz consistente entre ambos puntos.
-
----
-
-# 🏢 10. Dashboard General / Auditoría
-
-El Dashboard General tendrá una función diferente.
-
-No solamente mostrará datos actuales, sino que permitirá obtener una **visión consolidada de ambos locales**.
-
-### Información principal
-
-```text
-⚡ Energía total
-💧 Agua total
-🏭 Producción
-🦺 HH
-☀️ UV
-🚨 Alertas
-🟢 Estado de locales
-```
-
-También permitirá comparar períodos históricos.
+- **Login obligatorio** siempre, con o sin internet (ADR-09). Las cuentas nuevas tienen una **clave temporal** que se cambia en el primer ingreso.
+- **MFA (TOTP, Microsoft Authenticator):** Cognito queda en modo *Opcional* y el dashboard obliga el registro a jefes y admins (tarea 31).
+- Los registros de **auditoría y alertas no se pueden borrar**.
 
 ---
 
@@ -704,18 +670,16 @@ flowchart LR
 4. **Capa 4 — Control de Acceso en Dashboard:**
    - **Login obligatorio** para ver el dashboard, con o sin internet (ADR-09).
    - **Clave temporal** creada por el Administrador y **cambio obligatorio** en el primer ingreso; nadie puede ver la clave personal.
-   - **Permisos por usuario:** el rol es una plantilla que el Administrador ajusta.
-   - **MFA (Microsoft Authenticator)** obligatorio para quien tenga permisos de modificación.
+   - **Permisos por rol y sede:** 4 grupos de Cognito y el atributo `custom:sede` (sección 10).
+   - **MFA (Microsoft Authenticator)** obligatorio para jefes y admins, opcional para operarios.
 
-| Rol (plantilla) | Ver su sede | Ver ambas sedes e histórico | Reconocer alertas | Umbrales y usuarios | MFA |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Operario** | ✅ | ❌ | ❌ | ❌ | No |
-| **Jefe de Mantenimiento/Operaciones** | ✅ | ✅ | ✅ | ❌ | Sí |
-| **Administrador** | ✅ | ✅ | ✅ | ✅ | Sí |
+Los roles y permisos vigentes están en la **sección 10** (4 grupos de Cognito + sede).
 
 5. **Capa 5 — Privacidad y Cumplimiento Normativo (Ley 19.628 - Chile):**
    - Las métricas de Horas Hombre (HH) son estrictamente agregadas y anónimas (ej. `trabajadores_activos: 12`, `hh_turno: 96`).
    - No se almacenan nombres, RUTs ni datos personales de los colaboradores de Induplac.
+
+**Seguridad en el desarrollo (DevSecOps):** cada Pull Request pasa por detección de secretos (`gitleaks`), revisión de dependencias (`npm audit`, `pip-audit`), análisis estático (Bandit, Semgrep) y un escaneo pasivo con **OWASP ZAP** del dashboard. Si un control encuentra algo grave, el PR no puede entrar a `main` ([`docs/devops.md`](docs/devops.md)).
 
 > 📖 Consulta la documentación técnica completa en [**`docs/ciberseguridad.md`**](docs/ciberseguridad.md).
 
@@ -729,19 +693,22 @@ Induplac/
 ├── README.md
 ├── AGENTS.md · CLAUDE.md · GEMINI.md   ← reglas para asistentes de IA
 ├── CONTRIBUTING.md
+├── .github/workflows/  ← CI (pruebas + seguridad) y despliegue
+├── .zap/rules.tsv      ← qué alertas de OWASP ZAP bloquean un PR
 │
 ├── docs/
 │   ├── CONTEXTO.md            ← fuente de verdad de las decisiones
 │   ├── EN-CURSO.md            ← tablero: quién hace qué
 │   ├── notas-de-avance.md     ← bitácora de sesiones
 │   ├── GUIA-EQUIPO.md         ← el proyecto explicado en simple
-│   ├── pauta-entrega.md       ← pauta de la entrega
+│   ├── nota-3.md              ← entrega vigente: pauta, criterios, reparto
+│   ├── pauta-entrega.md       ← pauta de la entrega anterior
 │   ├── roles-raci-gantt.md    ← roles, RACI y Carta Gantt (+ Excel en planificacion/)
 │   ├── scrum-pmi.md · cloud-tecnologias.md · conclusiones.md
 │   ├── api-dashboard.md       ← contrato entre el dashboard y la API
 │   ├── broker-mqtt.md         ← broker de la simulación
 │   ├── decisiones-tecnicas.md ← ADR-01 a ADR-10
-│   ├── devops.md              ← pipeline: CI con GitHub Actions y despliegue
+│   ├── devops.md              ← pipeline: CI, DevSecOps, quality gate y despliegue
 │   ├── modo-offline.md
 │   ├── ciberseguridad.md
 │   └── arquitectura.md
@@ -768,13 +735,16 @@ Induplac/
 | **Cómputo cloud** | AWS Lambda (Python 3.12): `induplac-api` y `induplac-config` | ✅ Funcionando |
 | **Base de datos cloud** | Amazon DynamoDB on-demand (intervalos y alertas) | ✅ Funcionando |
 | **Base de datos relacional** | Amazon RDS PostgreSQL (permisos, umbrales, catálogo), solo accesible desde la Lambda | ✅ Funcionando (se enciende para configurar y para la demo) |
-| **Autenticación** | Amazon Cognito con MFA TOTP (grupos administrador / jefe / operario) | ✅ Conectado al dashboard |
+| **Autenticación** | Amazon Cognito: 4 grupos (`admin-general`, `admin-sede`, `jefe`, `operario`) + `custom:sede`, MFA TOTP según el rol | ✅ Conectado al dashboard y a la API |
 | **Dashboard** | React + TypeScript (Vite, Tailwind CSS, Chart.js) | ✅ Funcionando |
 | **Hosting del dashboard** | Amazon S3 (HTTPS) | ✅ Funcionando |
 | **Conectividad cloud** | VPN Site-to-Site IPsec + API Gateway privada | Diseño, no se demuestra |
 | **Redes en planta** | VLANs segmentadas, *Zero Inbound Ports* | Diseño |
 | **Hora sin internet** | RTC DS3231 + la Pi como servidor NTP (ADR-10) | Diseño |
-| **Control de versiones** | Git + GitHub (ramas y Pull Requests) | En uso |
+| **Control de versiones** | Git + GitHub (ramas, Pull Requests y `main` protegida con el ruleset `proteger-main`) | En uso |
+| **CI/CD** | GitHub Actions: build, lint, pruebas y despliegue a S3 y Lambda con verificación `/health` | ✅ En uso |
+| **DevSecOps** | `gitleaks`, `npm audit`, `pip-audit`, Bandit, Semgrep y OWASP ZAP (baseline) en cada PR | ✅ En uso (desde el 13/11) |
+| **Configuración de equipos** | Ansible: playbook baseline del Edge | En desarrollo (Nota 3, tarea 33) |
 | **Documentación** | Markdown + Mermaid | En uso |
 
 ---
@@ -788,6 +758,8 @@ Scrum con tres sprints de una semana (detalle en [`docs/scrum-pmi.md`](docs/scru
 | **Sprint 1** (05–09/10) | Diseño y documentación | Arquitectura híbrida, decisiones (ADR) y estructura del repositorio ✅ |
 | **Sprint 2** (12–16/10) | Captura y visualización | Broker EMQX, backend en AWS y dashboard con datos simulados ✅ |
 | **Sprint 3** (19–23/10) | Integración híbrida y demo | Wokwi, Edge con modo offline, RDS, Cognito y **demo del 21/10** ✅ |
+
+**Después del Sprint 3:** roles por sede en Cognito (tarea 26), endpoints de gestión (reconocer alertas, usuarios y simulación de umbrales, tarea 28), auditoría local del Edge (tarea 29), dashboard rediseñado con 7 pantallas (tarea 30) y DevSecOps en el CI (tarea 32). Ahora: **Nota 3** ([`docs/nota-3.md`](docs/nota-3.md)).
 
 **Cómo se trabaja:** cada tarea se reserva en [`docs/EN-CURSO.md`](docs/EN-CURSO.md), se hace en su rama y entra a `main` por Pull Request con la plantilla, revisión y CI en verde ([`docs/devops.md`](docs/devops.md)).
 
@@ -858,9 +830,19 @@ Las reglas de las pruebas 2, 3 y 4 también se prueban solas en cada Pull Reques
 [✓] RDS + Lambda de configuración
 [✓] Cognito con MFA (probado)            (tarea 6)
 [✓] Wokwi → Edge → AWS de punta a punta
-[ ] Demostración final                   (21/10)
+[✓] Demostración del prototipo          (21/10)
 [✓] Cognito en el dashboard (21/10)
-[ ] Umbrales desde RDS en induplac-api
+[✓] Umbrales desde RDS en induplac-api   (tarea 21, 04/11)
+[✓] Roles por sede y endpoints de gestión (tareas 26 y 28)
+[✓] Auditoría (nube y Edge offline)      (tarea 29)
+[✓] Dashboard con 7 pantallas            (tarea 30, 04/11)
+[✓] DevSecOps en el CI + main protegida  (tarea 32, 13/11)
+[ ] MFA por rol                          (tarea 31)
+[ ] Token de Cognito también en /config (tarea 20; /api ya lo valida)
+[ ] Edge descarga los umbrales de la nube (tarea 44)
+[ ] Ansible para configurar el Edge      (tarea 33)
+[ ] Nota 3                               (25/11)
+[ ] App para celular (PWA sobre AWS)
 ```
 
 ---
@@ -884,41 +866,40 @@ Una futura implementación podría incorporar:
 
 # 🤝 24. Contribución
 
-Para mantener el proyecto ordenado:
-
-1. Crear una rama para cada funcionalidad.
-2. Utilizar nombres descriptivos.
-3. Realizar commits claros.
-4. Documentar cambios importantes.
-5. Evitar subir credenciales o claves.
-6. Realizar Pull Request antes de integrar cambios importantes.
-7. Mantener actualizada la documentación.
-
-Ejemplo:
+`main` está **protegida** (ruleset `proteger-main`): nada entra sin Pull Request y los 6 checks del CI en verde.
 
 ```text
-feature/dashboard-local
-feature/mqtt-esp32
-feature/offline-mode
-feature/aws-integration
-feature/cybersecurity
+reservar en EN-CURSO ──► rama feature/ fix/ docs/ ──► commits ──► Pull Request
+   (1er commit de la rama)                                   │
+                                     CI: pruebas + seguridad ✅ + revisión
+                                                             │
+                                                    merge a main ──► bitácora
 ```
+
+1. Revisa [`docs/EN-CURSO.md`](docs/EN-CURSO.md). Si la tarea está libre, resérvala como **primer commit de tu rama** y abre el PR de inmediato (puede ser *draft*).
+2. Trabaja en tu rama con commits `feat:`, `fix:`, `docs:`, `refactor:` o `test:`.
+3. Completa la plantilla del PR y agrega una entrada en [`docs/notas-de-avance.md`](docs/notas-de-avance.md).
+4. Nunca subas credenciales ni `.env`. Avisa en el grupo con el link al PR.
+
+Detalle en [`CONTRIBUTING.md`](CONTRIBUTING.md). Las IA siguen [`AGENTS.md`](AGENTS.md).
 
 ---
 
 # ⚠️ 25. Estado actual
 
-> ✅ **MVP funcionando para la demo** · Última actualización: 2026-10-21
+> ✅ **MVP funcionando · preparando la Nota 3 (25/11)** · Última actualización: 2026-11-14
 
 **Funcionando:**
 - Cadena completa: `Wokwi (ESP32) → EMQX → Edge (SQLite, 15 min, alertas offline) → API Gateway → Lambda → DynamoDB → dashboard en S3`.
-- Dashboard con login, clave temporal, MFA TOTP, permisos por usuario y panel de demostración del corte de red.
-- RDS PostgreSQL con la configuración, leído por la Lambda `induplac-config` (`GET /config/umbrales`).
-- **Login del dashboard con Cognito y MFA** (cuentas del equipo, permisos por grupo).
+- **Dashboard con 7 pantallas** por rol y sede: resumen, alertas con reconocimiento, histórico, umbrales con simulación, usuarios, auditoría y estado de las sedes.
+- **Cognito** con 4 grupos y sede, login con clave temporal y MFA.
+- **Umbrales:** se editan en RDS y se copian a DynamoDB, que es lo que usa la API para las alertas.
+- **Auditoría** en la nube y en el Edge (también sin internet, se sube al reconectar).
+- **CI/CD con DevSecOps:** pruebas, secretos, dependencias, SAST y OWASP ZAP en cada PR; `main` protegida.
 
 **Dashboard en la nube:** [induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html](https://induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html) (login con Cognito y MFA).
 
-**Siguiente:** que `induplac-api` lea los umbrales desde RDS y valide el token de Cognito.
+**En curso:** MFA por rol (tarea 31), validar el token en `/config` (tarea 20), Wokwi para la demo (tarea 23), umbrales en el Edge (tarea 44) y la **Nota 3**: Ansible y los criterios de gestión y calidad (tareas 33 a 43, [`docs/nota-3.md`](docs/nota-3.md)).
 
 El estado de cada tarea está en [`docs/EN-CURSO.md`](docs/EN-CURSO.md) y el detalle de cada sesión en [`docs/notas-de-avance.md`](docs/notas-de-avance.md). Los datos son ficticios.
 
