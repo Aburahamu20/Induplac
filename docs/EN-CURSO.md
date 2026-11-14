@@ -82,9 +82,9 @@ Pauta del profesor: ver [`docs/pauta-entrega.md`](pauta-entrega.md). Lo marcado 
 | 34 | Nota 3 · API REST: diagrama cliente-servidor + demo de envío y consulta con curl/Postman | API REST (3) | 🟢 Libre | | | | Sugerido: Abraham y Felipe. Detalle en [`nota-3.md`](nota-3.md). |
 | 35 | Nota 3 · Backend: recibe → valida → procesa → almacena → entrega, y por qué Lambda | Backend (4) | 🟢 Libre | | | | Sugerido: Felipe. Detalle en [`nota-3.md`](nota-3.md). |
 | 36 | Nota 3 · 5 Porqués del problema de Induplac | Problema (1) | 🟢 Libre | | | | Sugerido: Lisandra. Detalle en [`nota-3.md`](nota-3.md). |
-| 37 | Nota 3 · Product Backlog con historias de usuario priorizadas + EN-CURSO como Kanban | Ágil/Lean (5) | 🟢 Libre | | | | Sugerido: Bárbara. Detalle en [`nota-3.md`](nota-3.md). |
+| 37 | Nota 3 · Product Backlog con historias de usuario priorizadas + EN-CURSO como Kanban | Ágil/Lean (5) | 🟡 En curso | Bárbara Saavedra (`barbaraantoniaa`) | 2026-11-14 | `docs/nota3-agil-equipo` | Detalle en [`nota-3.md`](nota-3.md). |
 | 38 | Nota 3 · Roadmap de transferencia tecnológica (validación a mejora continua) | Transferencia (6) | 🟢 Libre | | | | Sugerido: Lisandra. Detalle en [`nota-3.md`](nota-3.md). |
-| 39 | Nota 3 · SIPOC o diagrama de afinidad + qué decisiones cambió | Gestión del equipo (7) | 🟢 Libre | | | | Sugerido: Bárbara. Detalle en [`nota-3.md`](nota-3.md). |
+| 39 | Nota 3 · SIPOC o diagrama de afinidad + qué decisiones cambió | Gestión del equipo (7) | 🟡 En curso | Bárbara Saavedra (`barbaraantoniaa`) | 2026-11-14 | `docs/nota3-agil-equipo` | Detalle en [`nota-3.md`](nota-3.md). |
 | 40 | Nota 3 · Diagrama de Ishikawa (causa-efecto) | Calidad (8) | 🟢 Libre | | | | Sugerido: Lisandra. Detalle en [`nota-3.md`](nota-3.md). |
 | 41 | Nota 3 · Plan de pruebas e inspección (desde las pruebas del CI) | Calidad (8) | 🟢 Libre | | | | Sugerido: Abraham. Detalle en [`nota-3.md`](nota-3.md). |
 | 42 | Nota 3 · Gráfico de control con los datos simulados de consumo | Calidad (8) | 🟢 Libre | | | | Sugerido: Sebastián. Detalle en [`nota-3.md`](nota-3.md). |
