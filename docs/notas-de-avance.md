@@ -875,3 +875,13 @@ Abraham (con Claude). Rama `docs/readme-al-dia`.
 - **Tarea 21 ✅:** ya estaba hecha dentro de la tarea 28 (PR #42) y probada con datos reales el 04/11.
 - **Tarea 44 nueva (Abraham):** que el Edge descargue los umbrales de la nube al sincronizar.
 - **Pendiente:** `docs/ciberseguridad.md` todavía describe 3 roles (Operario / Jefe / Administrador); hay que pasarlo a los 4 grupos.
+
+---
+
+## 2026-11-14 — Ágil/Lean y gestión del equipo para la Nota 3 (tareas 37 y 39, Bárbara con Claude)
+
+- **Tarea 37 (criterio 5, 15 %):** `docs/nota-3/backlog.md` con el Product Backlog: 21 historias de usuario en 6 épicas, priorizadas con MoSCoW, cada una con criterio de aceptación y evidencia (tarea y PR). Estado al 14/11: 13 listas, 6 en curso o pendientes y 2 fuera de esta etapa. Incluye los 7 sprints de una semana (05/10 a 22/11) y `EN-CURSO.md` presentado como Kanban, con sus columnas, una foto del tablero y los principios Lean aplicados.
+- **Tarea 39 (criterio 7, 15 %):** `docs/nota-3/gestion-equipo.md` con la lluvia de ideas de la clase del 07/10 (documento *Decisiones Cloud*) y un diagrama de afinidad de 22 ideas en 6 temas, con la decisión que cambió cada tema y su evidencia (las 9 diferencias con el repo, alertas en dos niveles, VPN como diseño, roles por sede, dashboard por rol).
+- **Decidido con Bárbara:** después del Sprint 3 las semanas se presentan como sprints de una semana (4 a 7); no se agregan reuniones fijas como ceremonias. El diagrama de afinidad ordena ideas reales del equipo; si el profe pregunta: la lluvia de ideas fue en clase el 07/10 y las ideas se ordenaron por afinidad para decidir.
+- **Pendiente:** revisión del equipo del PR #62 y llevar ambos criterios al PowerPoint de la Nota 3 (tarea 17).
+
