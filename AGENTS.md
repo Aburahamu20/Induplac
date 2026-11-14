@@ -8,6 +8,7 @@ Este archivo es para cualquier IA que trabaje en este repositorio (Claude, Antig
    - [`docs/CONTEXTO.md`](docs/CONTEXTO.md): contexto maestro y decisiones vigentes.
    - [`docs/notas-de-avance.md`](docs/notas-de-avance.md): bitácora; el estado vigente está en la **entrada más reciente**.
    - [`docs/EN-CURSO.md`](docs/EN-CURSO.md): qué está haciendo cada integrante **ahora**.
+   - [`docs/nota-3.md`](docs/nota-3.md): **entrega vigente (Nota 3, 25/11/2026)**: pauta del profe, criterios con su peso, qué existe, qué falta, reparto y fechas. Léelo si la tarea es de la Nota 3 (tareas 33 a 43, 17 y 18).
 3. Lo marcado como "propuesta", "idea" o "pendiente" **no está decidido**. No lo implementes como si lo estuviera; pregunta al usuario.
 4. Si el `README.md` no coincide con `docs/CONTEXTO.md`, manda `docs/CONTEXTO.md`.
 
@@ -19,7 +20,8 @@ Este archivo es para cualquier IA que trabaje en este repositorio (Claude, Antig
 
 ## 3. Todo cambio va por Pull Request (obligatorio)
 - **Nunca hagas commit directo en `main`.** Crea una rama (`feature/<tema>`, `fix/<tema>` o `docs/<tema>`), haz tus commits ahí y abre un **Pull Request** hacia `main`.
-- **Única excepción:** reservar o cambiar el estado de una tarea en `docs/EN-CURSO.md` se puede hacer directo en `main`, porque la reserva tiene que verse de inmediato. Ese commit solo puede tocar ese archivo.
+- **`main` está protegida** (ruleset `proteger-main`, desde el 13/11/2026): solo acepta cambios con los 6 checks del CI en verde. Un commit directo a `main` será rechazado.
+- **Reservar una tarea:** crea la rama, cambia la tarea a 🟡 en `docs/EN-CURSO.md` como **primer commit**, haz push y abre el PR de inmediato (puede ser *draft*) para que el equipo vea la reserva. Si no puedes, pídele al admin del repo (Abraham) que la reserve en `main`.
 - El PR debe **dejar escrito qué cambiaste** usando la plantilla (`.github/pull_request_template.md`): qué cambió, por qué, cómo probarlo y el checklist.
 - No hagas merge de tu propio PR sin que el usuario lo apruebe.
 

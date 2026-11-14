@@ -40,7 +40,7 @@
 ## 🚧 Antes de empezar: reservar la tarea
 
 1. Revisa [`docs/EN-CURSO.md`](docs/EN-CURSO.md). Si la tarea está **🟡 En curso** por otra persona, no la tomes.
-2. Si está libre, resérvala (nombre, fecha, rama, estado 🟡) y haz push. **Es el único cambio que se puede subir directo a `main`**, y solo tocando ese archivo.
+2. Si está libre, resérvala (nombre, fecha, rama, estado 🟡): crea tu rama, cambia la tarea a 🟡 como **primer commit**, haz push y abre el PR de inmediato (puede ser *draft*) para que el equipo vea la reserva. Desde el 13/11 `main` está protegida y rechaza commits directos; si no puedes abrir el PR, pídele la reserva a Abraham (admin).
 3. Si trabajas con una IA, pídele que lea [`AGENTS.md`](AGENTS.md) antes de empezar.
 
 ---

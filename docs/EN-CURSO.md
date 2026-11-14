@@ -9,10 +9,10 @@
 
 1. `git pull` para tener la versión más reciente de este archivo.
 2. Busca la tarea en la tabla:
-   - Si está **🟢 Libre**, reservala: pon tu nombre, la fecha, la rama y cambia el estado a **🟡 En curso**. Haz commit y **push de inmediato**, antes de empezar a trabajar.
+   - Si está **🟢 Libre**, resérvala antes de empezar: pon tu nombre, la fecha y la rama, crea tu rama, cambia la tarea a 🟡 como **primer commit**, haz push y abre el PR de inmediato (puede ser *draft*) para que el equipo vea la reserva. Desde el 13/11 `main` está protegida y rechaza commits directos; si no puedes abrir el PR, pídele la reserva a Abraham (admin).
    - Si está **🟡 En curso** por otra persona, **no la tomes**. Coordina con quien la tiene.
    - Si no existe, agrégala como fila nueva.
-3. Trabaja en tu propia rama (`feature/...`, `fix/...` o `docs/...`) y entrega todo por **Pull Request** con la plantilla (qué cambiaste, por qué, cómo probarlo). **Nadie hace commit directo en `main`**, salvo para reservar o cambiar estados en este archivo.
+3. Trabaja en tu propia rama (`feature/...`, `fix/...` o `docs/...`) y entrega todo por **Pull Request** con la plantilla (qué cambiaste, por qué, cómo probarlo). **Nadie hace commit directo en `main`** (la regla `proteger-main` lo bloquea).
 4. Al abrir el PR: estado **🔵 En revisión** con el link. Al hacer merge: **✅ Listo**, y una entrada en [`docs/notas-de-avance.md`](notas-de-avance.md). Avisa en el grupo.
 5. Si una tarea lleva **más de 7 días** en curso sin cambios, pregunta en el grupo antes de tomarla.
 
@@ -77,6 +77,17 @@ Pauta del profesor: ver [`docs/pauta-entrega.md`](pauta-entrega.md). Lo marcado 
 | 17 | Presentación PowerPoint (consolida todo, en el orden que pide el profe) | 1 | 🔵 En revisión | Bárbara Saavedra (`barbaraantoniaa`) | 2026-10-21 | Claude Slides | 10 diapositivas con notas para quien presenta; se descarga en .pptx o PDF. Bárbara la comparte con el grupo. |
 | 18 | Guion y ensayo de la demo del prototipo | 11 | 🟢 Libre | | | | Depende de las tareas 1 a 4. |
 | 32 | DevSecOps (Nota 3, actividad 3.2.2): revisión de dependencias, SAST y DAST con ZAP en el CI + quality gate | 8 | ✅ Listo | Abraham (con Claude) | 2026-11-05 | [PR #59](https://github.com/Aburahamu20/Induplac/pull/59) | npm audit, pip-audit, Bandit + Semgrep y ZAP baseline contra el build del dashboard. |
+| 33 | Nota 3 · Ansible (actividad 3.3.1): inventario con el Edge, ping, playbook baseline e idempotencia, con capturas | Pipeline (2) | 🟢 Libre | | | | Sugerido: Abraham y Felipe. Detalle en [`nota-3.md`](nota-3.md). |
+| 34 | Nota 3 · API REST: diagrama cliente-servidor + demo de envío y consulta con curl/Postman | API REST (3) | 🟢 Libre | | | | Sugerido: Abraham y Felipe. Detalle en [`nota-3.md`](nota-3.md). |
+| 35 | Nota 3 · Backend: recibe → valida → procesa → almacena → entrega, y por qué Lambda | Backend (4) | 🟢 Libre | | | | Sugerido: Felipe. Detalle en [`nota-3.md`](nota-3.md). |
+| 36 | Nota 3 · 5 Porqués del problema de Induplac | Problema (1) | 🟢 Libre | | | | Sugerido: Lisandra. Detalle en [`nota-3.md`](nota-3.md). |
+| 37 | Nota 3 · Product Backlog con historias de usuario priorizadas + EN-CURSO como Kanban | Ágil/Lean (5) | 🟢 Libre | | | | Sugerido: Bárbara. Detalle en [`nota-3.md`](nota-3.md). |
+| 38 | Nota 3 · Roadmap de transferencia tecnológica (validación a mejora continua) | Transferencia (6) | 🟢 Libre | | | | Sugerido: Lisandra. Detalle en [`nota-3.md`](nota-3.md). |
+| 39 | Nota 3 · SIPOC o diagrama de afinidad + qué decisiones cambió | Gestión del equipo (7) | 🟢 Libre | | | | Sugerido: Bárbara. Detalle en [`nota-3.md`](nota-3.md). |
+| 40 | Nota 3 · Diagrama de Ishikawa (causa-efecto) | Calidad (8) | 🟢 Libre | | | | Sugerido: Lisandra. Detalle en [`nota-3.md`](nota-3.md). |
+| 41 | Nota 3 · Plan de pruebas e inspección (desde las pruebas del CI) | Calidad (8) | 🟢 Libre | | | | Sugerido: Abraham. Detalle en [`nota-3.md`](nota-3.md). |
+| 42 | Nota 3 · Gráfico de control con los datos simulados de consumo | Calidad (8) | 🟢 Libre | | | | Sugerido: Sebastián. Detalle en [`nota-3.md`](nota-3.md). |
+| 43 | Nota 3 · Carpeta de evidencias (CI, ZAP, Ansible, API, dashboard) + grabación | Entregables | 🟢 Libre | | | | Sugerido: Abraham + todos. Detalle en [`nota-3.md`](nota-3.md). |
 
 ---
 
