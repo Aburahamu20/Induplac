@@ -62,7 +62,7 @@ Si un trabajo falla, el PR muestra **❌** y vuelve al paso 1.
 
 - **Plantilla de PR** obligatoria (`.github/pull_request_template.md`): qué se cambió, por qué, cómo probarlo y checklist (tarea reservada, notas de avance, sin credenciales).
 - **Revisión de un compañero**, que aprueba o pide cambios.
-- **Regla de `main`** (*Settings → Branches → Branch protection*): no se puede mergear sin los checks de CI en verde ni sin una aprobación.
+- **Regla de `main`** (*Settings → Rules → Rulesets → `proteger-main`*, activa desde el 13/11): nada entra a `main` sin los 6 checks de CI en verde; no se puede borrar `main` ni hacer *force push*. Solo el admin del repositorio puede saltársela (para las reservas en EN-CURSO); el resto del equipo trabaja siempre por rama + PR.
 
 ## 4. Despliegue (CD)
 
@@ -90,7 +90,7 @@ Las credenciales del Learner Lab **vencen cada ~4 horas** y **no se pueden crear
 
 1. **Variables** (*Settings → Secrets and variables → Actions → Variables*): `S3_BUCKET`, `VITE_API_URL` (`https://<api-id>.execute-api.us-east-1.amazonaws.com/api`) y `VITE_COGNITO_CLIENT_ID`.
 2. **Secretos** (misma pantalla → *Secrets*): las 3 credenciales del Learner Lab. Se actualizan cada vez que se despliega.
-3. **Regla de `main`**: exigir los checks *Dashboard*, *Edge y Lambdas*, *Sin claves en el repositorio*, *Dependencias sin vulnerabilidades conocidas*, *Análisis estático de seguridad (SAST)* y *DAST con OWASP ZAP*, y 1 aprobación.
+3. **Regla de `main`** (✅ creada el 13/11 como ruleset `proteger-main`): exige los checks *Dashboard*, *Edge y Lambdas*, *Sin claves en el repositorio*, *Dependencias sin vulnerabilidades conocidas*, *Análisis estático de seguridad (SAST)* y *DAST con OWASP ZAP*; bloquea borrar `main` y el *force push*. Bypass: *Repository admin*. No exige aprobación (la revisión de un compañero se pide por acuerdo del equipo).
 
 > El login con Cognito (`login: cognito` en *Run workflow*) requiere el PR #20 mergeado. Con `login: simulada` se publica el login de demo.
 

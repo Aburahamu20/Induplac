@@ -839,3 +839,13 @@ Abraham (con Claude). Rama `feature/devsecops-ci`. Base para la actividad 3.2.2 
 - **Pendiente:**
   - Agregar los 3 checks nuevos a la regla de `main` (*Settings → Branches*).
   - Diseño: cabeceras de seguridad con CloudFront delante de S3 (S3 solo no las pone).
+
+---
+
+## 2026-11-13 — Regla de `main` activa (ruleset `proteger-main`)
+
+Abraham (con Claude). PR #59 mergeado y tarea 32 ✅.
+
+- **Hecho:** ruleset `proteger-main` activo sobre `main`: exige los 6 checks del CI (incluidos Dependencias, SAST y DAST con ZAP), bloquea borrar la rama y el *force push*.
+- **Decidido:** bypass solo para *Repository admin*. El resto del equipo ya no puede hacer commits directos a `main`: reservan la tarea en su rama/PR o le piden la reserva a Abraham.
+- **Pendiente:** Ansible (actividad 3.3.1) para la Nota 3.
