@@ -19,13 +19,19 @@
 | Scrum Master | **Bárbara Saavedra** | Cuida que el equipo avance, quita bloqueos y mantiene el tablero al día. En el proyecto llevó la planificación (Scrum, PMI, Gantt) y el seguimiento de las tareas. |
 | Equipo de desarrollo | Abraham, Sebastián, Lisandra, Felipe y Bárbara | Construyen y prueban cada parte del MVP. |
 
-### Sprints (05/10 – 23/10/2026)
+### Sprints (05/10 – 22/11/2026)
 
 | Sprint | Objetivo | Resultado esperado |
 |---|---|---|
 | Sprint 1 (05–09/10) | Diseño y documentación | Contexto, arquitectura y decisiones técnicas en el repositorio. |
 | Sprint 2 (12–16/10) | Captura y visualización | Broker MQTT funcionando, backend en AWS y dashboard con datos simulados. |
 | Sprint 3 (19–23/10) | Integración híbrida y demo | ESP32 en Wokwi, Edge con modo offline, RDS PostgreSQL, Cognito y **demo el miércoles 21/10**. |
+| Sprint 4 (26/10–01/11) | Planta autónoma y nueva interfaz | API local del Edge con login de planta, umbrales desde RDS y bocetos del dashboard aprobados. |
+| Sprint 5 (02–08/11) | Roles, auditoría y DevSecOps | 4 roles por sede, auditoría, dashboard de 7 pantallas y controles de seguridad en el CI. |
+| Sprint 6 (09–15/11) | Preparar la Nota 3 | Pauta y reparto de la Nota 3, README y contexto al día. |
+| Sprint 7 (16–22/11) | Entregables de la Nota 3 | Ansible, API REST, calidad, backlog y PowerPoint. |
+
+> Desde el Sprint 4 el detalle está en el Product Backlog de la Nota 3: [`nota-3/backlog.md`](nota-3/backlog.md).
 
 ### Herramientas de seguimiento
 
@@ -59,5 +65,5 @@ Scrum entrega el **prototipo funcionando** (hito: demo del 21/10). Ese prototipo
 ## 4. Falta que decida el equipo
 
 - [x] **Product Owner:** Abraham · **Scrum Master:** Bárbara (definido el 21/10/2026). Son personas distintas, como pide Scrum.
-- [ ] Si hubo reuniones fijas (en clases o por el grupo) para nombrarlas como revisión de sprint o reunión diaria.
+- [x] Reuniones fijas: no se nombran ceremonias aparte; la planificación se hizo al repartir tareas en el grupo y la revisión con la demo del 21/10 y los bocetos del 01/11 (decidido con Bárbara el 14/11).
 - [x] Agregar **RDS PostgreSQL** a la Gantt y a las tareas de Felipe y Abraham (hecho el 19/10/2026, PR #15).
