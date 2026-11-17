@@ -392,6 +392,12 @@ Si uno falla, el PR se marca ❌ y **no puede entrar a `main`** (eso se llama *q
 
 > **Una alerta automática no siempre es un problema real.** Bandit avisó de "posible inyección SQL" en el Edge; al revisarlo, las consultas eran seguras (*falso positivo*). Por eso lo grave bloquea y lo medio se revisa a mano.
 
+### Versiones: saber qué está instalado y poder volver atrás
+
+Cada hito del proyecto tiene un **nombre de versión** en Git (un *tag*): `v0.1` (diseño), `v0.2` (demo del 21/10), `v0.3` (planta autónoma), `v0.4` (roles, auditoría y umbrales), `v0.5` (dashboard de 7 pantallas), `v0.6` (DevSecOps) y `v0.7` (Ansible). Es como ponerle nombre a las fotos importantes del álbum: en vez de decir "el código de algún día de noviembre", se dice "está instalada la `v0.7`".
+
+**Para qué sirve:** si una versión nueva falla en las sedes, con Ansible se vuelve a la anterior en un solo comando (`-e repo_version=v0.6`), en todas las sedes a la vez. El día de la presentación se crea la `v1.0`.
+
 ### Ansible: el Edge igual en todas las sedes
 
 Configurar a mano una Raspberry en cada sede es lento y cada persona lo haría un poco distinto. Con **Ansible**, el estado correcto del Edge está escrito en una "receta" (`ansible/edge-baseline.yml`) y se aplica a todas las sedes a la vez, desde un solo computador:
@@ -449,7 +455,7 @@ Otras cosas que se pueden mostrar:
 - Dashboard con 7 pantallas, en la nube (S3) y en el Edge.
 - Cognito con 4 roles y sede, claves temporales y MFA por rol; la API exige iniciar sesión.
 - Umbrales editables (RDS → DynamoDB) con simulación, y auditoría que no se puede borrar.
-- Pipeline DevOps: ramas + PR, CI con 6 controles (incluida seguridad), `main` protegida, despliegue con `/health` y **Ansible** para el Edge.
+- Pipeline DevOps: ramas + PR, CI con 6 controles (incluida seguridad), `main` protegida, versiones `v0.1` a `v0.7`, despliegue con `/health` y **Ansible** para el Edge.
 - Backlog con historias de usuario, Kanban y gestión del equipo (criterios 5 y 7).
 
 **⏳ Falta para la Nota 3 (25/11):** Wokwi listo para la demo, 5 Porqués, transferencia tecnológica, Ishikawa, plan de pruebas, gráfico de control, diagrama de la API, explicación del backend, guion de la demo, PowerPoint y grabación (tareas 18, 23 y 34 a 43).
@@ -558,6 +564,9 @@ Otras cosas que se pueden mostrar:
 **¿Qué pasa si alguien sube algo con un error?**
 > El CI lo detecta antes: si falla una prueba o un control de seguridad, el PR queda en rojo y `main` no lo acepta. Si aun así llegara a producción, el monitoreo (`/health`, *Estado de las sedes*) lo muestra, y como todo está versionado en Git, se puede volver a la versión anterior.
 
+**¿Qué versión está instalada? ¿Pueden volver atrás si algo falla?**
+> Cada hito tiene una versión con nombre en Git (de `v0.1` a `v0.7`), y el playbook de Ansible muestra qué versión quedó en cada sede. Si una versión nueva falla, se reinstala la anterior en todas las sedes con un solo comando, y cuando esté corregida se vuelve a la nueva.
+
 **¿Para qué sirve Ansible si el Edge es un solo programa?**
 > Porque en la realidad hay un Edge en cada sede. Con Ansible, todos quedan instalados igual, con la misma versión y configuración, sin pasos a mano. Y es idempotente: se puede correr cuando se quiera para revisar que una sede siga bien.
 
@@ -617,6 +626,7 @@ Otras cosas que se pueden mostrar:
 | Tasa de éxito del CI | **97,3 %** (107 de 110 ejecuciones, al 05/11) |
 | Historias de usuario del backlog | **21** (en 6 épicas) |
 | Ansible: 1ª / 2ª pasada | **9** cambios / **0** cambios (idempotente) |
+| Versiones del proyecto | **v0.1** (08/10) a **v0.7** (17/11); **v1.0** el 25/11 |
 
 ---
 

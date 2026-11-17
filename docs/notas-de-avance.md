@@ -963,3 +963,25 @@ Abraham (con Claude). Tarea 46 ✅ (PR #65 mergeado).
 
 - **Decidido por Abraham:** todo cambio grande o que agregue algo nuevo actualiza, en el mismo PR, el `README.md` (secciones afectadas, roadmap y estado actual) y la `docs/GUIA-EQUIPO.md` (explicado simple y con para qué sirve).
 - Quedó en `AGENTS.md` §4 (así lo siguen todas las IA del equipo) y como casilla en la plantilla de PR.
+
+---
+
+## 2026-11-17 — Versiones, Ansible en el pipeline y notas para el PPT (tarea 47)
+
+Abraham (con Claude). Rama `docs/versiones-pipeline`. Lo que pide el PPT de preparación de la Nota 3 y no estaba.
+
+- **`docs/devops.md`:**
+  - Diagrama del pipeline con las 8 etapas del PPT y **Ansible** en la etapa *Configurar*.
+  - Tabla que responde las 5 preguntas del ejemplo del umbral.
+  - Sección de **versiones** con cómo volver a una versión anterior.
+- **Versiones con nombre** (*tags* de Git) en 7 hitos reales:
+  - `v0.1` (PR #3) · `v0.2` (PR #28, demo del 21/10) · `v0.3` (PR #30) · `v0.4` (PR #42) · `v0.5` (PR #58) · `v0.6` (PR #59) · `v0.7` (PR #64).
+  - `v1.0` se crea el 25/11.
+  - ⚠️ Los *tags* los crea Abraham desde su WSL, porque la sesión de la IA no puede publicarlos.
+- **`ansible/README.md`:** cómo volver a una versión (`-e repo_version=v0.6`) y la **reflexión técnica** que pide la actividad 3.3.1.
+- **`docs/nota-3.md`:**
+  - Estado de los criterios (2, 5 y 7 ✅).
+  - Detalles del correo: evolución del MVP en el criterio 1, envío **y** consulta funcionando en el criterio 3, y el diagrama de flujo como herramienta de calidad.
+  - Notas para el PPT (que se arma al final), con la diapositiva de cierre de la "idea central".
+- **Actividad 3.2.2 (DevSecOps): informe entregado** (lo confirmó Abraham el 17/11).
+- **README y guía del equipo** al día con las versiones (regla nueva de `AGENTS.md` §4).

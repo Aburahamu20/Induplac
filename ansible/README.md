@@ -120,6 +120,21 @@ Antes se probó contra un Ubuntu 24.04 limpio (1ª pasada `changed=5`, 2ª `chan
 
 > El aviso `remote_tmp ... mode of 0700` de la 1ª pasada es informativo: Ansible crea su carpeta temporal para el usuario `induplac` y no afecta el resultado.
 
+## Volver a una versión anterior
+
+Las versiones del proyecto son *tags* de Git (`v0.1` a `v0.7`, ver [`docs/devops.md`](../docs/devops.md)). Para instalar una versión concreta en todas las sedes:
+
+```bash
+ansible-playbook edge-baseline.yml -e repo_version=v0.6   # rollback a v0.6
+ansible-playbook edge-baseline.yml                        # de vuelta a main
+```
+
+El resumen de cada sede muestra el commit instalado, así se comprueba que todas quedaron en la misma versión.
+
+## Reflexión técnica
+
+Ansible no mide energía ni reemplaza al backend: **automatiza la infraestructura que soporta la solución**. Sin él, instalar el Edge en cada sede serían 10 pasos a mano por equipo, y bastaría con que alguien olvidara uno (la zona horaria, el usuario sin privilegios, los permisos del `.env`) para que dos sedes quedaran distintas sin que nadie lo note. Con el playbook, el estado correcto queda **escrito, versionado y revisado por PR** como el resto del código, y la idempotencia permite correrlo cuando se quiera para comprobar que cada sede sigue bien. Además, junto con las versiones de Git, responde dos preguntas que antes no tenían respuesta: qué versión quedó instalada en cada sede y cómo volver a una versión estable si algo falla. Lo que no automatizamos: los sensores, el broker y el backend serverless, porque Ansible aporta donde hay equipos que configurar.
+
 ## Para la presentación
 
 - **Qué es:** configuración como código. El estado de cada equipo de sede está escrito en el repo, versionado con Git y revisado por PR, igual que el resto del proyecto.
