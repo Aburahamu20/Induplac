@@ -35,7 +35,7 @@ Igual que en la demo del 21/10 (cada uno maneja la parte que conoce). **Confirma
 
 - [ ] Ensayar el guion completo **con cronómetro**, dos veces.
 - [ ] Grabar el segundo ensayo: sirve de **grabación de respaldo** (es un entregable) y de **plan C** si el día 25 falla todo.
-- [ ] Revisar que las cuentas de prueba entran: un **operario** y un **admin** (el admin pide MFA: tener el celular con Microsoft Authenticator a mano).
+- [ ] Revisar que entra la **cuenta de Abraham** (*admin general*, pide MFA: tener su celular con Microsoft Authenticator a mano). Si se va a mostrar el paso opcional de roles, revisar también la cuenta de **Lisandra** (*operaria* de Planta).
 - [ ] Dejar escritos en un `.txt` los comandos `curl` del paso 3, para copiar y pegar.
 
 ### 30 minutos antes (miércoles 25/11)
@@ -65,7 +65,7 @@ Los tiempos son **acumulados**. Lo que va entre comillas es una sugerencia de qu
 ### Paso 2 · El Edge recibe y valida (0:45 – 1:30) · Edge
 
 - **Se hace:** pasar a la consola del Edge.
-- **Se dice:** "El Edge es la Raspberry Pi de la planta. Recibe cada lectura, **revisa que esté en rango** (por ejemplo, energía entre 0 y 250 kW) y la guarda en **SQLite**. Cada 15 minutos arma un resumen y lo sube a AWS."
+- **Se dice:** "En la demo el Edge corre en este PC; en la planta real sería una Raspberry Pi. Recibe cada lectura, **revisa que esté en rango** (por ejemplo, energía entre 0 y 250 kW) y la guarda en **SQLite**. Cada 15 minutos arma un resumen y lo sube a AWS."
 - **Se tiene que ver:** líneas `local1: lectura seq=… · … kW · UV …`.
 
 ### Paso 3 · La API REST: envío y consulta (1:30 – 2:45) · AWS
@@ -106,7 +106,7 @@ Las dos operaciones que pide el criterio 3. Los comandos exactos los deja listos
 
 ### Si sobra tiempo (opcional, en este orden)
 
-1. **Roles:** entrar como **operario** (no ve Histórico ni Umbrales) y como **admin** (pide MFA).
+1. **Roles:** la demo se hace con la cuenta de **Abraham** (*admin general*, con MFA). Si hay tiempo, entrar con la de **Lisandra** (*operaria* de Planta) para mostrar que no ve Histórico ni Umbrales.
 2. **Estado de las sedes:** último dato, pendientes y si RDS está encendido. Es nuestro monitoreo (etapa 8 del pipeline).
 3. **Auditoría:** quién cambió qué y desde dónde.
 
@@ -122,7 +122,7 @@ La regla: **no arreglar en vivo más de 30 segundos.** Se dice "pasamos al plan 
 | La alerta UV no sale con la perilla | `py simular_esp32.py --uv 9.5`, o el botón **UV alto** del panel 🎬 Demo | Wokwi / Edge |
 | El panel 🎬 Demo responde 404 | Falta `DEMO=1` en `edge/.env`: ponerlo y reiniciar el Edge (≈ 20 s) | Edge |
 | AWS no responde (lab apagado o credenciales vencidas, duran ~4 h) | Hacer *Start Lab*. Mientras tanto, seguir con el dashboard de planta: el Edge queda OFFLINE y **eso mismo es la demo del paso 5** | AWS |
-| No entra el login (MFA, clave) | Usar la otra cuenta de prueba. Si ninguna entra, mostrar el dashboard de planta | AWS |
+| No entra el login (MFA, clave) | Revisar la hora del celular (el código MFA depende de ella) y reintentar. Si no entra, mostrar el dashboard de planta (login de planta, sin Cognito) | Edge |
 | Se cae todo | Poner la **grabación del ensayo** del 24/11 y narrarla en vivo | Narrador/a |
 
 ## 6. Ensayo del martes 24/11
