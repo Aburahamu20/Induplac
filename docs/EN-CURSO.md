@@ -91,7 +91,7 @@ Pauta del profesor: ver [`docs/pauta-entrega.md`](pauta-entrega.md). Lo marcado 
 | 43 | Nota 3 · Carpeta de evidencias (CI, ZAP, Ansible, API, dashboard) + grabación | Entregables | 🟢 Libre | | | | Sugerido: Abraham + todos. Detalle en [`nota-3.md`](nota-3.md). |
 | 45 | README al día (estado, dashboard de 7 pantallas, roles, tecnologías con DevSecOps, roadmap, contribución) + CONTEXTO §6-7 | Entregables | ✅ Listo | Abraham (con Claude) | 2026-11-14 | [PR #61](https://github.com/Aburahamu20/Induplac/pull/61) | Para la Nota 3: es lo primero que ve el profe en el repo. |
 | 46 | Guía del equipo al día (para quien sabe poco del proyecto): roles, dashboard, demo, estado, DevOps explicado simple, API y backend, y preguntas de la Nota 3 | Entregables | ✅ Listo | Abraham (con Claude) | 2026-11-17 | [PR #65](https://github.com/Aburahamu20/Induplac/pull/65) | Estaba al 14/10. Base para que todos puedan defender la Nota 3. |
-| 47 | Pipeline: Ansible en el diagrama, versiones con nombre (v0.1 a v0.7) y volver a una versión anterior, reflexión de Ansible y notas para el PPT de la Nota 3 | Pipeline (2) | 🔵 En revisión | Abraham (con Claude) | 2026-11-17 | [PR #67](https://github.com/Aburahamu20/Induplac/pull/67) | Lo que pide el PPT de preparación de la Nota 3 (diapositivas 11, 18 y 19). |
+| 47 | Pipeline: Ansible en el diagrama, versiones con nombre (v0.1 a v0.7) y volver a una versión anterior, reflexión de Ansible y notas para el PPT de la Nota 3 | Pipeline (2) | ✅ Listo | Abraham (con Claude) | 2026-11-17 | [PR #67](https://github.com/Aburahamu20/Induplac/pull/67) | Lo que pide el PPT de preparación de la Nota 3 (diapositivas 11, 18 y 19). |
 
 ---
 

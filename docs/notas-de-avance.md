@@ -977,7 +977,7 @@ Abraham (con Claude). Rama `docs/versiones-pipeline`. Lo que pide el PPT de prep
 - **Versiones con nombre** (*tags* de Git) en 7 hitos reales:
   - `v0.1` (PR #3) · `v0.2` (PR #28, demo del 21/10) · `v0.3` (PR #30) · `v0.4` (PR #42) · `v0.5` (PR #58) · `v0.6` (PR #59) · `v0.7` (PR #64).
   - `v1.0` se crea el 25/11.
-  - ⚠️ Los *tags* los crea Abraham desde su WSL, porque la sesión de la IA no puede publicarlos.
+  - Los *tags* los creó Abraham desde su WSL el 17/11 (la sesión de la IA no puede publicarlos). Ya están en GitHub.
 - **`ansible/README.md`:** cómo volver a una versión (`-e repo_version=v0.6`) y la **reflexión técnica** que pide la actividad 3.3.1.
 - **`docs/nota-3.md`:**
   - Estado de los criterios (2, 5 y 7 ✅).
