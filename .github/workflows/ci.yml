@@ -83,9 +83,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Dashboard (npm audit, bloquea con severidad alta o crítica)
+      - name: Dashboard (bloquea severidad alta o crítica, salvo excepciones documentadas en audit-ci.jsonc)
         working-directory: dashboard
-        run: npm audit --audit-level=high
+        run: npx --yes audit-ci@7.1.0 --config audit-ci.jsonc
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

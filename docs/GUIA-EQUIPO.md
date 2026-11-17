@@ -392,6 +392,8 @@ Si uno falla, el PR se marca ❌ y **no puede entrar a `main`** (eso se llama *q
 
 > **Una alerta automática no siempre es un problema real.** Bandit avisó de "posible inyección SQL" en el Edge; al revisarlo, las consultas eran seguras (*falso positivo*). Por eso lo grave bloquea y lo medio se revisa a mano.
 
+> **Caso real (17/11): ¿y si aparece una falla nueva que no nos afecta?** Se publicó una falla en `picomatch`, una librería que viene dentro de Vite (la herramienta que **arma** el dashboard). El control bloqueó todos los PR, como debía. **No fue un hackeo:** fue un aviso de que una pieza tiene una debilidad recién descubierta. Como esa pieza solo la usamos nosotros al armar el dashboard y todavía no hay versión corregida, se dejó una **excepción solo para esa falla**, escrita en [`devops.md`](devops.md) con el porqué y cuándo se quita. Todo lo demás sigue bloqueando. Es como saber que tu modelo de cerradura tiene una falla, pero que esa cerradura está en la bodega de la fábrica y no en la puerta de entrada.
+
 ### Versiones: saber qué está instalado y poder volver atrás
 
 Cada hito del proyecto tiene un **nombre de versión** en Git (un *tag*): `v0.1` (diseño), `v0.2` (demo del 21/10), `v0.3` (planta autónoma), `v0.4` (roles, auditoría y umbrales), `v0.5` (dashboard de 7 pantallas), `v0.6` (DevSecOps) y `v0.7` (Ansible). Es como ponerle nombre a las fotos importantes del álbum: en vez de decir "el código de algún día de noviembre", se dice "está instalada la `v0.7`".

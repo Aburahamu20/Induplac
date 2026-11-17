@@ -55,7 +55,7 @@ Al abrir un Pull Request, **GitHub Actions** corre solo `ci.yml`. Los trabajos b
 | **Dashboard** | `npm ci`, `oxlint` (calidad del código), `tsc` (tipos) y `vite build` | Si no compila, no se puede publicar en S3 |
 | **Edge y Lambdas** | Sintaxis de todo el Python y las pruebas unitarias e integración con dobles (Edge, auditoría, `induplac-config` con RDS falso) | Protege lo que se demuestra: validación de rangos, descarte de duplicados, reglas de alerta, cadena de hashes de la auditoría y umbrales |
 | **Secretos** | `gitleaks` busca claves, tokens y contraseñas en todo el historial | Ley 19.628 y capa de seguridad: ninguna credencial al repositorio |
-| **Dependencias** | `npm audit --audit-level=high` (dashboard) y `pip-audit` (Edge e `induplac-config`) | Una librería con CVE conocido es la forma más común de heredar una vulnerabilidad |
+| **Dependencias** | `audit-ci` sobre `npm audit` (dashboard, con excepciones en [`dashboard/audit-ci.jsonc`](../dashboard/audit-ci.jsonc)) y `pip-audit` (Edge e `induplac-config`) | Una librería con CVE conocido es la forma más común de heredar una vulnerabilidad |
 | **SAST** | `Bandit` (Python) y `Semgrep` con reglas de Python, TypeScript, React y secretos | Busca patrones inseguros en el código antes de ejecutarlo: inyección SQL, XSS, `eval`, claves en el código |
 | **DAST (ZAP)** | `zap-baseline.py` (spider + reglas pasivas) contra el build del dashboard levantado **en el mismo runner** con datos simulados | Revisa la aplicación funcionando: cabeceras, cookies, librerías JS vulnerables. Solo pasivo, y solo contra un sistema propio y aislado |
 
@@ -65,12 +65,22 @@ Al abrir un Pull Request, **GitHub Actions** corre solo `ci.yml`. Los trabajos b
 | :--- | :--- | :--- |
 | Build, lint y pruebas | Cualquier error o prueba fallida | — |
 | `gitleaks` | Cualquier secreto | — |
-| `npm audit` / `pip-audit` | Vulnerabilidad alta o crítica (npm) / cualquier CVE conocido (pip) | Severidad media o baja en npm |
+| `audit-ci` (npm) / `pip-audit` | Vulnerabilidad alta o crítica (npm) / cualquier CVE conocido (pip) | Severidad media o baja en npm, y las **excepciones documentadas** (abajo) |
 | `Bandit` | Severidad **y** confianza altas | Severidad media (se revisa a mano en el log) |
 | `Semgrep` | Cualquier hallazgo | — |
 | ZAP | Reglas en `FAIL` de [`.zap/rules.tsv`](../.zap/rules.tsv): librería JS vulnerable (10003), cookies sin `HttpOnly`/`Secure`, CORS mal configurado | Reglas en `WARN` (cabeceras faltantes, anti-CSRF): se revisan en el reporte, que queda como artefacto `reporte-zap` |
 
 > Una alerta automática es un **indicio**, no una vulnerabilidad confirmada. Ejemplo real (05/11): Bandit marca 9 avisos de severidad media; los de "posible inyección SQL" (`B608`) son consultas que solo arman los `?` de los parámetros o usan nombres de tabla fijos, así que se revisaron y no son explotables. Por eso no bloquean, pero se miran en cada PR.
+
+### Excepciones vigentes
+
+Una excepción solo se acepta si queda **escrita**: qué vulnerabilidad es, por qué no nos afecta, desde cuándo y cuándo se quita. Todo lo demás sigue bloqueando.
+
+| Vulnerabilidad | Librería | Por qué no nos afecta | Desde | Se quita cuando |
+|---|---|---|---|---|
+| [GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf) (ReDoS, alta) | `picomatch` ≤ 4.0.7, dentro de **Vite** | Vite solo **compila** el dashboard: `picomatch` procesa patrones escritos por el equipo, nunca entrada de usuarios, y no va en el dashboard publicado. No existe versión corregida | 17/11 (tarea 48) | Salga `picomatch` > 4.0.7: se actualiza y se borra de `audit-ci.jsonc` |
+
+> **Caso real para la Nota 3:** el 17/11 el control de dependencias bloqueó todos los PR por una vulnerabilidad recién publicada y sin arreglo. El equipo la analizó, vio que no era explotable en Induplac y tomó una **excepción acotada**: solo esa vulnerabilidad, documentada y con condición de salida. No se bajó la versión de Vite ni se apagó el control.
 
 **Pendiente (diseño):** S3 no agrega cabeceras de seguridad (`X-Content-Type-Options`, CSP, anti-clickjacking). En producción se pondría CloudFront delante del bucket con una *response headers policy*; el Learner Lab no lo incluye en la demo.
 
