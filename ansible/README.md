@@ -105,15 +105,20 @@ Detener las EC2 en la consola (*Instance state → Stop*) para no gastar crédit
 
 ---
 
-## Cómo se probó (17/11/2026)
+## Evidencias (17/11/2026, en las 2 EC2)
 
-El playbook se corrió dos veces contra un Ubuntu 24.04 limpio:
+Ejecutado por Abraham y Felipe desde el WSL de Abraham contra `edge-planta` y `edge-oficinas` (EC2 Ubuntu del Learner Lab).
 
-- **1ª pasada:** `ok=9 changed=5 failed=0`. Resumen: *"edge-planta (sede planta, local1): versión a06a10b, servicio instalado y detenido (faltan claves)"*.
-- **2ª pasada:** `ok=9 changed=0 failed=0` → **idempotente**.
-- `limpieza.yml` dejó el equipo sin el usuario `induplac` ni `/opt/induplac`.
+| # | Evidencia | Resultado |
+|---|---|---|
+| 1 | Inventario | Grupo `@edge` con las 2 sedes · [captura](../docs/nota-3/img/ansible-1-inventario.png) |
+| 2 | `ansible edge -m ping` | `"ping": "pong"` en las dos · [captura](../docs/nota-3/img/ansible-2-ping.png) |
+| 3 | 1ª pasada del playbook | `ok=12 changed=9 failed=0` en cada sede; versión `a06a10b`; servicio instalado y detenido (sin claves) · [captura](../docs/nota-3/img/ansible-3-primera-pasada.png) |
+| 4 | 2ª pasada (**idempotencia**) | `ok=12 changed=0 failed=0` en las dos · [captura](../docs/nota-3/img/ansible-4-idempotencia.png) |
 
-Las tareas del servicio (3, 8 y 9) no se pudieron probar ahí porque ese entorno no tiene systemd; se prueban en las EC2.
+Antes se probó contra un Ubuntu 24.04 limpio (1ª pasada `changed=5`, 2ª `changed=0`, y `limpieza.yml` funcionando).
+
+> El aviso `remote_tmp ... mode of 0700` de la 1ª pasada es informativo: Ansible crea su carpeta temporal para el usuario `induplac` y no afecta el resultado.
 
 ## Para la presentación
 

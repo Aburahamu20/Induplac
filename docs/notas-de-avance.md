@@ -919,6 +919,7 @@ Abraham y Felipe (con Claude). Rama `feature/ansible-edge`.
   - Probado contra un Ubuntu 24.04 limpio: 1ª pasada `changed=5`, 2ª pasada `changed=0` (idempotente); la limpieza funciona.
   - Las tareas de systemd se prueban en las EC2.
 - **Hecho:** tarea 31 ✅ (MFA probado) y `/config/*` revisado en API Gateway: GET y PUT con `cognito-jwt`, OPTIONS sin authorizer, y sin token responde `401`.
+- **Hecho en las EC2 (01:45):** inventario OK, `ansible edge -m ping` con `pong` en las dos, 1ª pasada `changed=9 failed=0` y 2ª pasada **`changed=0`** (idempotente). Capturas en `docs/nota-3/img/ansible-*.png` (la del ping recortada para no mostrar las IP públicas).
 - **Pendiente:**
-  - Correr el playbook en las EC2 y sacar las capturas.
   - Cerrar la tarea 20 cuando Felipe confirme que la pantalla Umbrales guarda bien.
+  - El 25/11: abrir el lab antes, iniciar las EC2 y actualizar las IP en `inventario.ini` (sin hacer commit).
