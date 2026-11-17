@@ -954,3 +954,12 @@ Abraham (con Claude). Rama `docs/guia-equipo-al-dia`. La guía estaba al 14/10.
   - §13 DevOps: el pipeline completo con para qué sirve cada etapa, los 6 controles del CI y Ansible.
   - §14 Cómo nos organizamos (Scrum, backlog, Kanban, Lean y gestión del equipo).
 - Los datos del backend se revisaron contra `backend/lambda_api/lambda_function.py` (clave `x-induplac-key`, códigos 400/401/403/503).
+
+---
+
+## 2026-11-17 — Regla: README y guía del equipo al día en cada cambio grande
+
+Abraham (con Claude). Tarea 46 ✅ (PR #65 mergeado).
+
+- **Decidido por Abraham:** todo cambio grande o que agregue algo nuevo actualiza, en el mismo PR, el `README.md` (secciones afectadas, roadmap y estado actual) y la `docs/GUIA-EQUIPO.md` (explicado simple y con para qué sirve).
+- Quedó en `AGENTS.md` §4 (así lo siguen todas las IA del equipo) y como casilla en la plantilla de PR.
