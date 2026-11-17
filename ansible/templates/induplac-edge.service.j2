@@ -1,0 +1,19 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Induplac IoT - Edge gateway (sede {{ sede }})
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ usuario_edge }}
+Group={{ usuario_edge }}
+WorkingDirectory={{ edge_dir }}
+ExecStart={{ venv_dir }}/bin/python {{ edge_dir }}/edge_gateway.py
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

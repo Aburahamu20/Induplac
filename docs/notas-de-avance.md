@@ -908,6 +908,23 @@ Abraham y Felipe. Se crearon cuentas de prueba en Cognito (grupo `jefe` y grupo 
 
 ---
 
+## 2026-11-17 — Ansible para el Edge (tarea 33)
+
+Abraham y Felipe (con Claude). Rama `feature/ansible-edge`.
+
+- **Decidido:** el nodo de control es el WSL (Ubuntu) del PC de Abraham. Los nodos son **2 EC2 Ubuntu del Learner Lab** (`edge-planta` y `edge-oficinas`), que simulan la Raspberry de cada sede.
+  - Se descartaron una VM de VirtualBox (no arrancó el ISO) y el PC de Felipe (están en casas distintas).
+  - El día 25 hay que abrir el lab antes y actualizar las IP del inventario.
+- **Hecho:** carpeta `ansible/` con inventario, `group_vars`, el playbook `edge-baseline.yml`, plantillas del `.env` y del servicio, `limpieza.yml` y un README con el paso a paso y las evidencias.
+  - Probado contra un Ubuntu 24.04 limpio: 1ª pasada `changed=5`, 2ª pasada `changed=0` (idempotente); la limpieza funciona.
+  - Las tareas de systemd se prueban en las EC2.
+- **Hecho:** tarea 31 ✅ (MFA probado) y `/config/*` revisado en API Gateway: GET y PUT con `cognito-jwt`, OPTIONS sin authorizer, y sin token responde `401`.
+- **Hecho en las EC2 (01:45):** inventario OK, `ansible edge -m ping` con `pong` en las dos, 1ª pasada `changed=9 failed=0` y 2ª pasada **`changed=0`** (idempotente). Capturas en `docs/nota-3/img/ansible-*.png` (la del ping recortada para no mostrar las IP públicas).
+- **Pendiente:**
+  - El 25/11: abrir el lab antes, iniciar las EC2 y actualizar las IP en `inventario.ini` (sin hacer commit).
+
+---
+
 ## 2026-11-17 — Token de Cognito en toda la API (tarea 20 ✅)
 
 Abraham y Felipe. En API Gateway, `GET` y `PUT /config/{proxy+}` tienen el authorizer `cognito-jwt` y `OPTIONS` va sin él (por CORS). Sin token, `/config/umbrales` responde `401 Unauthorized`. Felipe probó la pantalla Umbrales con su sesión y guarda bien. Se borraron las cuentas de prueba de la tarea 31.

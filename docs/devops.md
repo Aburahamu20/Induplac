@@ -86,6 +86,20 @@ Las credenciales del Learner Lab **vencen cada ~4 horas** y **no se pueden crear
 
 ---
 
+### Configuración de los Edge con Ansible
+
+El dashboard y las Lambdas los publica GitHub Actions. Los **Edge de cada sede** los deja listos **Ansible**, desde un nodo de control y por SSH, con el playbook [`ansible/edge-baseline.yml`](../ansible/edge-baseline.yml). Ese playbook se encarga de:
+
+- La zona horaria y la hora por NTP.
+- Los paquetes.
+- Un usuario sin privilegios.
+- El código de GitHub en la versión indicada.
+- El entorno de Python.
+- El `.env` de cada sede.
+- El servicio `induplac-edge`.
+
+Es **idempotente**: si se vuelve a correr y todo está bien, no cambia nada. Probado el 17/11 en 2 EC2 que simulan las Raspberry de Planta y Oficinas (detalle y capturas en [`ansible/README.md`](../ansible/README.md)).
+
 ## Configuración (una sola vez)
 
 1. **Variables** (*Settings → Secrets and variables → Actions → Variables*): `S3_BUCKET`, `VITE_API_URL` (`https://<api-id>.execute-api.us-east-1.amazonaws.com/api`) y `VITE_COGNITO_CLIENT_ID`.
