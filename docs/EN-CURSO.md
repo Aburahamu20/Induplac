@@ -90,6 +90,7 @@ Pauta del profesor: ver [`docs/pauta-entrega.md`](pauta-entrega.md). Lo marcado 
 | 42 | Nota 3 · Gráfico de control con los datos simulados de consumo | Calidad (8) | 🟢 Libre | | | | Sugerido: Sebastián. Detalle en [`nota-3.md`](nota-3.md). |
 | 43 | Nota 3 · Carpeta de evidencias (CI, ZAP, Ansible, API, dashboard) + grabación | Entregables | 🟢 Libre | | | | Sugerido: Abraham + todos. Detalle en [`nota-3.md`](nota-3.md). |
 | 45 | README al día (estado, dashboard de 7 pantallas, roles, tecnologías con DevSecOps, roadmap, contribución) + CONTEXTO §6-7 | Entregables | ✅ Listo | Abraham (con Claude) | 2026-11-14 | [PR #61](https://github.com/Aburahamu20/Induplac/pull/61) | Para la Nota 3: es lo primero que ve el profe en el repo. |
+| 46 | Guía del equipo al día (para quien sabe poco del proyecto): roles, dashboard, demo, estado, DevOps explicado simple, API y backend, y preguntas de la Nota 3 | Entregables | 🟡 En curso | Abraham (con Claude) | 2026-11-17 | `docs/guia-equipo-al-dia` | Estaba al 14/10. Base para que todos puedan defender la Nota 3. |
 
 ---
 
