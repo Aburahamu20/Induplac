@@ -905,3 +905,9 @@ Sus documentos no se actualizaban desde el 23/10. Se pusieron al día con lo con
 Abraham y Felipe. Se crearon cuentas de prueba en Cognito (grupo `jefe` y grupo `operario`, sede `planta`) y se probó el ingreso al dashboard: el MFA funciona según lo esperado (obligatorio para jefe, opcional para operario).
 
 - **Pendiente:** tarea 20 (`/config/*` con el authorizer) y Ansible (tarea 33).
+
+---
+
+## 2026-11-17 — Token de Cognito en toda la API (tarea 20 ✅)
+
+Abraham y Felipe. En API Gateway, `GET` y `PUT /config/{proxy+}` tienen el authorizer `cognito-jwt` y `OPTIONS` va sin él (por CORS). Sin token, `/config/umbrales` responde `401 Unauthorized`. Felipe probó la pantalla Umbrales con su sesión y guarda bien. Se borraron las cuentas de prueba de la tarea 31.
