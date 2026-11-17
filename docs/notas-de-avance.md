@@ -999,3 +999,16 @@ Abraham (con Claude). Rama `docs/versiones-pipeline`. Lo que pide el PPT de prep
 - El pipeline y Ansible quedan **fuera de la demo**, con capturas en las diapositivas del criterio 2. Así la demo no depende de las EC2.
 - Los comandos `curl` exactos del paso 3 los deja la **tarea 34** (API REST).
 - La tarea 18 queda 🔵 hasta el ensayo; después del 24/11 pasa a ✅.
+
+---
+
+## 2026-11-17 — Excepción acotada para picomatch en el CI (tarea 48)
+
+Abraham (con Claude). Rama `fix/audit-picomatch`.
+
+- **Qué pasó:** el control *Dependencias* empezó a fallar en todos los PR (lo vimos en el PR #69, que solo cambiaba texto) por **GHSA-fc5q-39xc-vjpf**, una vulnerabilidad alta de ReDoS en `picomatch` ≤ 4.0.7. No hay versión corregida, y `npm audit fix --force` proponía bajar Vite de la 8 a la 6.
+- **Análisis:** `picomatch` solo viene dentro de Vite (compilación), procesa patrones escritos por el equipo y no va en el dashboard publicado. No es explotable en Induplac. **No fue un ataque.**
+- **Decidido por Abraham:** excepción **solo para esa vulnerabilidad**.
+  - El paso de npm ahora usa `audit-ci` 7.1.0 con `dashboard/audit-ci.jsonc`, que sigue bloqueando cualquier otra alta o crítica.
+  - Queda documentada en `docs/devops.md` (*Excepciones vigentes*) y en la guía del equipo.
+- **Pendiente:** cuando salga `picomatch` > 4.0.7, actualizar y borrar la excepción. Rebasar el PR #69 después de mergear este.

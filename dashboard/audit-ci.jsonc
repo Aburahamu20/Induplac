@@ -1,0 +1,15 @@
+// Control de dependencias del dashboard (CI, trabajo "Dependencias").
+// Bloquea cualquier vulnerabilidad alta o crítica, salvo las excepciones de abajo.
+// Cada excepción debe tener: por qué no nos afecta, fecha y cuándo se quita (docs/devops.md, quality gate).
+{
+  "$schema": "https://github.com/IBM/audit-ci/raw/main/docs/schema.json",
+  "high": true,
+  "report-type": "important",
+  "allowlist": [
+    // GHSA-fc5q-39xc-vjpf · picomatch <= 4.0.7 · ReDoS con extglobs repetidos (alta).
+    // Por qué no nos afecta: picomatch solo viene dentro de Vite (herramienta de compilación),
+    // procesa patrones escritos por el equipo, nunca entrada de usuarios, y no va en el dashboard publicado.
+    // Desde: 17/11/2026 (tarea 48). Quitar cuando exista picomatch > 4.0.7 (npm audit lo dirá).
+    "GHSA-fc5q-39xc-vjpf"
+  ]
+}
