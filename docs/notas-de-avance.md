@@ -930,3 +930,27 @@ Abraham y Felipe (con Claude). Rama `feature/ansible-edge`.
 Abraham y Felipe. En API Gateway, `GET` y `PUT /config/{proxy+}` tienen el authorizer `cognito-jwt` y `OPTIONS` va sin él (por CORS). Sin token, `/config/umbrales` responde `401 Unauthorized`. Felipe probó la pantalla Umbrales con su sesión y guarda bien. Se borraron las cuentas de prueba de la tarea 31.
 
 - **Pendiente:** en la prueba, la advertencia de Energía de Planta quedó en **11 %** (era 10 %). Volverla a 10 % la próxima vez que se encienda RDS.
+
+---
+
+## 2026-11-17 — Guía del equipo al día (tarea 46)
+
+Abraham (con Claude). Rama `docs/guia-equipo-al-dia`. La guía estaba al 14/10.
+
+- **Actualizado:**
+  - §1 Roles Scrum; el Edge corre en un PC en la demo.
+  - §3 Diccionario con API REST, Git/GitHub, CI y Ansible.
+  - §5 Login de planta.
+  - §8 Umbrales editables con simulación.
+  - §9 Los 4 roles con sede, quién tiene cada rol en el equipo y cómo la API revisa el token.
+  - §11 Dashboard de 7 pantallas.
+  - §15 Demo con el recorrido que pide la pauta.
+  - §16 Hecho y falta al 17/11.
+  - §17 Respuestas corregidas (roles y "qué tienen listo") y un bloque de preguntas de la Nota 3.
+  - §18 Números nuevos.
+  - §19 Enlaces a la Nota 3, DevOps, Ansible, la API y el backlog.
+- **Nuevo:**
+  - §12 API REST y backend explicados simple (cliente-servidor, verbos, códigos, los 5 pasos del backend y por qué Lambda).
+  - §13 DevOps: el pipeline completo con para qué sirve cada etapa, los 6 controles del CI y Ansible.
+  - §14 Cómo nos organizamos (Scrum, backlog, Kanban, Lean y gestión del equipo).
+- Los datos del backend se revisaron contra `backend/lambda_api/lambda_function.py` (clave `x-induplac-key`, códigos 400/401/403/503).
