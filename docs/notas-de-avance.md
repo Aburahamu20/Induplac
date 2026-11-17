@@ -985,3 +985,17 @@ Abraham (con Claude). Rama `docs/versiones-pipeline`. Lo que pide el PPT de prep
   - Notas para el PPT (que se arma al final), con la diapositiva de cierre de la "idea central".
 - **Actividad 3.2.2 (DevSecOps): informe entregado** (lo confirmó Abraham el 17/11).
 - **README y guía del equipo** al día con las versiones (regla nueva de `AGENTS.md` §4).
+
+---
+
+## 2026-11-17 — Guion y ensayo de la demo (tarea 18)
+
+- **Nuevo:** [`nota-3/guion-demo.md`](nota-3/guion-demo.md), el guion de la demo en vivo de la Nota 3 (~6 min). Lo armó Bárbara con Claude.
+  - Quién maneja qué, igual que en la demo del 21/10: Wokwi (Sebastián), Edge (Abraham), AWS (Felipe). **Falta confirmarlo en el grupo**, y también quién narra.
+  - Lista de "30 minutos antes" y 7 pasos con tiempo, qué se hace, qué se dice y qué se tiene que ver. Recorre todo el flujo de la pauta: Wokwi → MQTT → Edge → API REST (envío y consulta) → Lambda → DynamoDB → alerta → corte de internet → reconexión sin duplicados.
+  - Plan B para cada falla, con la regla de no arreglar en vivo más de 30 s. El plan C es la grabación del ensayo.
+  - Plan del ensayo del **24/11**: dos pasadas con cronómetro, la segunda grabada, y un plan B ensayado a propósito.
+- **Ojo:** la alerta de **posible fuga** no se puede mostrar el 25/11, porque solo alerta entre las 22:00 y las 06:00 o el fin de semana, y la presentación es un miércoles en la tarde. La demo usa **UV** y **sobreconsumo**.
+- El pipeline y Ansible quedan **fuera de la demo**, con capturas en las diapositivas del criterio 2. Así la demo no depende de las EC2.
+- Los comandos `curl` exactos del paso 3 los deja la **tarea 34** (API REST).
+- La tarea 18 queda 🔵 hasta el ensayo; después del 24/11 pasa a ✅.

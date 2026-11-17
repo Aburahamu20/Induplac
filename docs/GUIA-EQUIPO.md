@@ -428,7 +428,7 @@ La evaluación no se gana con gráficos bonitos, sino mostrando que **el sistema
 Wokwi (ESP32) ─► broker MQTT ─► Edge ─► API REST ─► backend (Lambda) ─► DynamoDB ─► reglas/alertas ─► consulta ─► dashboard
 ```
 
-Guion base (el guion final es la tarea 18):
+Resumen del guion. El guion completo, con tiempos, quién hace qué, plan B y el ensayo del 24/11, está en [`nota-3/guion-demo.md`](nota-3/guion-demo.md) (tarea 18):
 
 1. Wokwi envía datos y el dashboard muestra todo 🟢 **ONLINE**.
 2. Se corta **solo la conexión del Edge con AWS** (no todo internet). El indicador pasa a 🔴 **OFFLINE**, pero el dashboard de planta **sigue mostrando datos**.

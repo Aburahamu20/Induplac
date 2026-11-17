@@ -81,6 +81,7 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 | Tema | Documento |
 |---|---|
 | **Nota 3: pauta, criterios, reparto y fechas** | [`docs/nota-3.md`](docs/nota-3.md) |
+| **Nota 3: guion de la demo en vivo** | [`docs/nota-3/guion-demo.md`](docs/nota-3/guion-demo.md) |
 | Decisiones vigentes (fuente de verdad) | [`docs/CONTEXTO.md`](docs/CONTEXTO.md) |
 | El proyecto explicado en simple | [`docs/GUIA-EQUIPO.md`](docs/GUIA-EQUIPO.md) |
 | Decisiones técnicas (ADR-01 a ADR-10) | [`docs/decisiones-tecnicas.md`](docs/decisiones-tecnicas.md) |
