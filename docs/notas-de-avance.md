@@ -897,3 +897,11 @@ Sus documentos no se actualizaban desde el 23/10. Se pusieron al día con lo con
 - [ ] El Excel `docs/nota-2/Induplac_Roles_Equipo.xlsx` no se tocó; si se presenta en la Nota 3, actualizarlo igual que el texto.
 - [ ] Fortaleza y rol de Lisandra (espera el aviso de Bárbara).
 
+
+---
+
+## 2026-11-17 — MFA por rol probado (tarea 31 ✅)
+
+Abraham y Felipe. Se crearon cuentas de prueba en Cognito (grupo `jefe` y grupo `operario`, sede `planta`) y se probó el ingreso al dashboard: el MFA funciona según lo esperado (obligatorio para jefe, opcional para operario).
+
+- **Pendiente:** tarea 20 (`/config/*` con el authorizer) y Ansible (tarea 33).
