@@ -695,6 +695,7 @@ Induplac/
 ├── CONTRIBUTING.md
 ├── .github/workflows/  ← CI (pruebas + seguridad) y despliegue
 ├── .zap/rules.tsv      ← qué alertas de OWASP ZAP bloquean un PR
+├── ansible/            ← configuración del Edge de cada sede (Ansible)
 │
 ├── docs/
 │   ├── CONTEXTO.md            ← fuente de verdad de las decisiones
@@ -741,10 +742,10 @@ Induplac/
 | **Conectividad cloud** | VPN Site-to-Site IPsec + API Gateway privada | Diseño, no se demuestra |
 | **Redes en planta** | VLANs segmentadas, *Zero Inbound Ports* | Diseño |
 | **Hora sin internet** | RTC DS3231 + la Pi como servidor NTP (ADR-10) | Diseño |
-| **Control de versiones** | Git + GitHub (ramas, Pull Requests y `main` protegida con el ruleset `proteger-main`) | En uso |
+| **Control de versiones** | Git + GitHub (ramas, Pull Requests, `main` protegida con el ruleset `proteger-main` y versiones `v0.1` a `v0.7`) | En uso |
 | **CI/CD** | GitHub Actions: build, lint, pruebas y despliegue a S3 y Lambda con verificación `/health` | ✅ En uso |
 | **DevSecOps** | `gitleaks`, `npm audit`, `pip-audit`, Bandit, Semgrep y OWASP ZAP (baseline) en cada PR | ✅ En uso (desde el 13/11) |
-| **Configuración de equipos** | Ansible: playbook baseline del Edge | En desarrollo (Nota 3, tarea 33) |
+| **Configuración de equipos** | Ansible: playbook baseline del Edge, idempotente, con vuelta a una versión anterior ([`ansible/`](ansible/README.md)) | ✅ Probado en 2 EC2 (17/11) |
 | **Documentación** | Markdown + Mermaid | En uso |
 
 ---
@@ -837,10 +838,11 @@ Las reglas de las pruebas 2, 3 y 4 también se prueban solas en cada Pull Reques
 [✓] Auditoría (nube y Edge offline)      (tarea 29)
 [✓] Dashboard con 7 pantallas            (tarea 30, 04/11)
 [✓] DevSecOps en el CI + main protegida  (tarea 32, 13/11)
-[ ] MFA por rol                          (tarea 31)
-[ ] Token de Cognito también en /config (tarea 20; /api ya lo valida)
+[✓] MFA por rol                          (tarea 31, 17/11)
+[✓] Token de Cognito en toda la API      (tarea 20, 17/11)
+[✓] Ansible para configurar el Edge      (tarea 33, 17/11)
+[✓] Versiones con nombre v0.1 a v0.7     (tarea 47)
 [ ] Edge descarga los umbrales de la nube (tarea 44)
-[ ] Ansible para configurar el Edge      (tarea 33)
 [ ] Nota 3                               (25/11)
 [ ] App para celular (PWA sobre AWS)
 ```
@@ -887,19 +889,20 @@ Detalle en [`CONTRIBUTING.md`](CONTRIBUTING.md). Las IA siguen [`AGENTS.md`](AGE
 
 # ⚠️ 25. Estado actual
 
-> ✅ **MVP funcionando · preparando la Nota 3 (25/11)** · Última actualización: 2026-11-14
+> ✅ **MVP funcionando · preparando la Nota 3 (25/11)** · Última actualización: 2026-11-17
 
 **Funcionando:**
 - Cadena completa: `Wokwi (ESP32) → EMQX → Edge (SQLite, 15 min, alertas offline) → API Gateway → Lambda → DynamoDB → dashboard en S3`.
 - **Dashboard con 7 pantallas** por rol y sede: resumen, alertas con reconocimiento, histórico, umbrales con simulación, usuarios, auditoría y estado de las sedes.
-- **Cognito** con 4 grupos y sede, login con clave temporal y MFA.
+- **Cognito** con 4 grupos y sede, login con clave temporal y MFA por rol; la API exige iniciar sesión en todas sus rutas.
 - **Umbrales:** se editan en RDS y se copian a DynamoDB, que es lo que usa la API para las alertas.
 - **Auditoría** en la nube y en el Edge (también sin internet, se sube al reconectar).
 - **CI/CD con DevSecOps:** pruebas, secretos, dependencias, SAST y OWASP ZAP en cada PR; `main` protegida.
+- **Ansible:** el Edge de cada sede se configura con un playbook idempotente, en la versión que se elija (`v0.1` a `v0.7`).
 
 **Dashboard en la nube:** [induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html](https://induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html) (login con Cognito y MFA).
 
-**En curso:** MFA por rol (tarea 31), validar el token en `/config` (tarea 20), Wokwi para la demo (tarea 23), umbrales en el Edge (tarea 44) y la **Nota 3**: Ansible y los criterios de gestión y calidad (tareas 33 a 43, [`docs/nota-3.md`](docs/nota-3.md)).
+**En curso:** Wokwi para la demo (tarea 23), umbrales en el Edge (tarea 44) y la **Nota 3**: API REST, backend y los criterios de problema, transferencia y calidad (tareas 34 a 43, [`docs/nota-3.md`](docs/nota-3.md)).
 
 El estado de cada tarea está en [`docs/EN-CURSO.md`](docs/EN-CURSO.md) y el detalle de cada sesión en [`docs/notas-de-avance.md`](docs/notas-de-avance.md). Los datos son ficticios.
 

@@ -3,14 +3,32 @@
 > Entregable 8 de la pauta (tarea 12 de `EN-CURSO.md`): cómo pasa un cambio desde que alguien lo escribe hasta que está funcionando.
 > Archivos: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) (prueba y validación) y [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) (despliegue).
 
+El pipeline de Induplac sigue las 8 etapas del PPT de preparación de la Nota 3, cada una con su herramienta:
+
 ```mermaid
 flowchart LR
-    A["1 · Desarrollo<br/>rama feature/*<br/>pruebas locales"] -->|"git push + Pull Request"| B["2 · Prueba y seguridad<br/>GitHub Actions (CI)<br/>build · pruebas · secretos<br/>dependencias · SAST · DAST ZAP"]
-    B -->|"checks ✅"| C["3 · Validación<br/>plantilla de PR<br/>+ revisión de un compañero"]
-    C -->|"merge a main"| D["4 · Despliegue<br/>Deploy: dashboard → S3<br/>Lambdas → AWS<br/>+ /health"]
+    R["0 · Requerimiento<br/>tarea en EN-CURSO<br/>(Kanban) + reserva"] --> A["1 · Cambio<br/>rama feature/*<br/>pruebas locales"]
+    A -->|"git push + Pull Request"| G["2 · Git<br/>versionado y<br/>trazabilidad (PR)"]
+    G --> B["3 · Test<br/>GitHub Actions (CI)<br/>build · pruebas · secretos<br/>dependencias · SAST · DAST ZAP"]
+    B -->|"checks ✅"| C["4 · Validar<br/>revisión de un compañero<br/>main protegida"]
+    C -->|"merge a main<br/>+ versión vX.Y"| D["5 · Desplegar<br/>Deploy: dashboard → S3<br/>Lambdas → AWS · /health"]
+    D --> K["6 · Configurar<br/>Ansible: Edge de<br/>cada sede (idempotente)"]
+    K --> O["7 · Operar<br/>Edge + nube<br/>con y sin internet"]
+    O --> M["8 · Monitorear<br/>/health · Estado de las sedes<br/>alerta sin datos · logs"]
+    M -->|"retroalimentación"| R
     B -->|"❌ falla un control"| A
     C -->|"cambios pedidos"| A
 ```
+
+| Etapa | Herramienta en Induplac | Pregunta que responde (PPT, diapositiva 4) |
+|---|---|---|
+| 0 · Requerimiento | `EN-CURSO.md` (Kanban), backlog | ¿Qué se va a cambiar y quién lo hace? |
+| 1-2 · Cambio y Git | Rama + Pull Request en GitHub | **¿Quién cambió la regla?** |
+| 3 · Test | GitHub Actions: 6 controles | **¿Se probó?** |
+| 4 · Validar | Revisión + ruleset `proteger-main` | ¿Alguien más lo revisó? |
+| 5 · Desplegar | `deploy.yml` (S3 y Lambda) + versiones `vX.Y` | **¿Qué versión quedó instalada?** |
+| 6 · Configurar | Ansible (`ansible/edge-baseline.yml`) | **¿Se desplegó igual en todos los nodos?** |
+| 7-8 · Operar y monitorear | `/health`, *Estado de las sedes*, alerta "sin datos", logs de CloudWatch | **¿Cómo sabemos si falló?** |
 
 ---
 
@@ -99,6 +117,30 @@ El dashboard y las Lambdas los publica GitHub Actions. Los **Edge de cada sede**
 - El servicio `induplac-edge`.
 
 Es **idempotente**: si se vuelve a correr y todo está bien, no cambia nada. Probado el 17/11 en 2 EC2 que simulan las Raspberry de Planta y Oficinas (detalle y capturas en [`ansible/README.md`](../ansible/README.md)).
+
+### Versiones: qué está instalado y cómo volver atrás
+
+Cada hito del proyecto tiene una **versión con nombre** (un *tag* de Git), así siempre se sabe qué código está instalado:
+
+| Versión | Fecha | Qué trae |
+|---|---|---|
+| `v0.1` | 08/10 | Diseño: arquitectura y decisiones cloud |
+| `v0.2` | 21/10 | MVP de la demo: Wokwi → Edge → AWS → dashboard, Cognito con MFA y CI |
+| `v0.3` | 29/10 | Planta autónoma: API local del Edge con login de planta |
+| `v0.4` | 03/11 | Roles por sede, auditoría y umbrales editables |
+| `v0.5` | 04/11 | Dashboard de 7 pantallas |
+| `v0.6` | 13/11 | DevSecOps en el CI y `main` protegida |
+| `v0.7` | 17/11 | Ansible para el Edge y token en toda la API |
+| `v1.0` | 25/11 | Versión de la Nota 3 (se crea el día de la presentación) |
+
+**Volver a una versión estable** (por ejemplo, si `v0.7` fallara en las sedes):
+
+```bash
+ansible-playbook edge-baseline.yml -e repo_version=v0.6   # instala v0.6 en todos los Edge
+ansible-playbook edge-baseline.yml                        # vuelve a main cuando esté corregido
+```
+
+El resumen del playbook muestra el commit instalado en cada sede. Para el dashboard y las Lambdas, el despliegue se corre desde el commit de esa versión.
 
 ## Configuración (una sola vez)
 
