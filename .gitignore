@@ -43,3 +43,6 @@ Thumbs.db
 # Logs
 logs/
 *.log
+
+# Ansible (tarea 33): claves nunca al repo
+ansible/secretos.yml

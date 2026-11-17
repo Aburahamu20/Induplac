@@ -1,0 +1,109 @@
+# Playbook baseline del Edge de Induplac (tarea 33, Nota 3).
+# Deja cada equipo de sede igual: hora, paquetes, usuario, código versionado, entorno de Python,
+# configuración y servicio. Se puede correr las veces que sea: si ya está todo, no cambia nada.
+#
+#   ansible-playbook edge-baseline.yml                       # todo
+#   ansible-playbook edge-baseline.yml -e @secretos.yml      # con claves: el servicio queda corriendo
+- name: Baseline del Edge de Induplac
+  hosts: edge
+  become: true
+  vars:
+    servicio_activo: "{{ (mqtt_clave | default('') | length > 0) and (clave_ingesta | default('') | length > 0) }}"
+
+  tasks:
+    - name: 1. Zona horaria de Chile
+      ansible.builtin.file:
+        src: "/usr/share/zoneinfo/{{ zona_horaria }}"
+        dest: /etc/localtime
+        state: link
+        force: true
+
+    - name: 1b. Zona horaria de Chile (archivo /etc/timezone)
+      ansible.builtin.copy:
+        content: "{{ zona_horaria }}\n"
+        dest: /etc/timezone
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: 2. Paquetes base
+      ansible.builtin.apt:
+        name: "{{ paquetes_base }}"
+        state: present
+        update_cache: true
+        cache_valid_time: 86400
+
+    - name: 3. Hora sincronizada por NTP (chrony)
+      ansible.builtin.service:
+        name: chrony
+        state: started
+        enabled: true
+      tags: servicio
+
+    - name: 4. Usuario de sistema para el Edge
+      ansible.builtin.user:
+        name: "{{ usuario_edge }}"
+        system: true
+        home: "{{ base_dir }}"
+        create_home: true
+        shell: /usr/sbin/nologin
+
+    - name: 5. Código del Edge desde GitHub (versión {{ repo_version }})
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "{{ repo_dir }}"
+        version: "{{ repo_version }}"
+        depth: 1
+      become_user: "{{ usuario_edge }}"
+      register: codigo
+      notify: Reiniciar Edge
+
+    - name: 6. Entorno de Python con las dependencias del Edge
+      ansible.builtin.pip:
+        requirements: "{{ edge_dir }}/requirements.txt"
+        virtualenv: "{{ venv_dir }}"
+        virtualenv_command: python3 -m venv
+      become_user: "{{ usuario_edge }}"
+      notify: Reiniciar Edge
+
+    - name: 7. Configuración del Edge (edge/.env, sede {{ sede }})
+      ansible.builtin.template:
+        src: templates/edge.env.j2
+        dest: "{{ edge_dir }}/.env"
+        owner: "{{ usuario_edge }}"
+        group: "{{ usuario_edge }}"
+        mode: "0600"
+      notify: Reiniciar Edge
+
+    - name: 8. Servicio de Linux induplac-edge
+      ansible.builtin.template:
+        src: templates/induplac-edge.service.j2
+        dest: /etc/systemd/system/induplac-edge.service
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reiniciar Edge
+      tags: servicio
+
+    - name: 9. Servicio habilitado al arrancar (y corriendo solo si hay claves)
+      ansible.builtin.systemd_service:
+        name: induplac-edge
+        daemon_reload: true
+        enabled: true
+        state: "{{ 'started' if servicio_activo | bool else 'stopped' }}"
+      tags: servicio
+
+    - name: 10. Resumen de la sede
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }} (sede {{ sede }}, {{ local_id }}):
+          versión {{ codigo.after[:7] }},
+          servicio {{ 'corriendo' if servicio_activo | bool else 'instalado y detenido (faltan claves)' }}.
+
+  handlers:
+    - name: Reiniciar Edge
+      ansible.builtin.systemd_service:
+        name: induplac-edge
+        daemon_reload: true
+        state: restarted
+      when: servicio_activo | bool

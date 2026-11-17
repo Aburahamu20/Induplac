@@ -1,0 +1,28 @@
+# Deshace lo que instala edge-baseline.yml (después de la presentación, o para empezar de cero).
+#   ansible-playbook limpieza.yml
+- name: Quitar el Edge de Induplac
+  hosts: edge
+  become: true
+  tasks:
+    - name: Detener y deshabilitar el servicio
+      ansible.builtin.systemd_service:
+        name: induplac-edge
+        state: stopped
+        enabled: false
+      failed_when: false
+
+    - name: Borrar el servicio
+      ansible.builtin.file:
+        path: /etc/systemd/system/induplac-edge.service
+        state: absent
+
+    - name: Borrar el usuario y su carpeta
+      ansible.builtin.user:
+        name: "{{ usuario_edge }}"
+        state: absent
+        remove: true
+
+    - name: Borrar lo que quede en /opt/induplac
+      ansible.builtin.file:
+        path: "{{ base_dir }}"
+        state: absent

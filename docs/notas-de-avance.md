@@ -905,3 +905,20 @@ Sus documentos no se actualizaban desde el 23/10. Se pusieron al día con lo con
 Abraham y Felipe. Se crearon cuentas de prueba en Cognito (grupo `jefe` y grupo `operario`, sede `planta`) y se probó el ingreso al dashboard: el MFA funciona según lo esperado (obligatorio para jefe, opcional para operario).
 
 - **Pendiente:** tarea 20 (`/config/*` con el authorizer) y Ansible (tarea 33).
+
+---
+
+## 2026-11-17 — Ansible para el Edge (tarea 33, en curso)
+
+Abraham y Felipe (con Claude). Rama `feature/ansible-edge`.
+
+- **Decidido:** el nodo de control es el WSL (Ubuntu) del PC de Abraham. Los nodos son **2 EC2 Ubuntu del Learner Lab** (`edge-planta` y `edge-oficinas`), que simulan la Raspberry de cada sede.
+  - Se descartaron una VM de VirtualBox (no arrancó el ISO) y el PC de Felipe (están en casas distintas).
+  - El día 25 hay que abrir el lab antes y actualizar las IP del inventario.
+- **Hecho:** carpeta `ansible/` con inventario, `group_vars`, el playbook `edge-baseline.yml`, plantillas del `.env` y del servicio, `limpieza.yml` y un README con el paso a paso y las evidencias.
+  - Probado contra un Ubuntu 24.04 limpio: 1ª pasada `changed=5`, 2ª pasada `changed=0` (idempotente); la limpieza funciona.
+  - Las tareas de systemd se prueban en las EC2.
+- **Hecho:** tarea 31 ✅ (MFA probado) y `/config/*` revisado en API Gateway: GET y PUT con `cognito-jwt`, OPTIONS sin authorizer, y sin token responde `401`.
+- **Pendiente:**
+  - Correr el playbook en las EC2 y sacar las capturas.
+  - Cerrar la tarea 20 cuando Felipe confirme que la pantalla Umbrales guarda bien.
