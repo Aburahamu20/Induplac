@@ -1,9 +1,11 @@
 # 🧭 Guía del Equipo — Induplac IoT explicado simple
 
-> **Para quién es:** para cualquier integrante que no estuvo en alguna reunión, que se perdió cambios o que no maneja bien algún tema (redes, nube, IoT).
-> **Objetivo:** que después de leer esto puedas **explicar el proyecto completo** y **responder las preguntas del profe** con seguridad.
+> **Para quién es:** para cualquier integrante que no estuvo en alguna reunión, que se perdió cambios o que no maneja bien algún tema (redes, nube, IoT, DevOps).
+> **Objetivo:** que después de leer esto puedas **explicar el proyecto completo**, **entender para qué sirve cada cosa que hicimos** y **responder las preguntas del profe** con seguridad.
 >
-> Última actualización: 2026-10-14. Si algo de esta guía no coincide con otro documento, manda lo que diga [`docs/CONTEXTO.md`](CONTEXTO.md) y avisa al equipo.
+> **Cómo leerla:** las secciones 1 a 8 explican **qué hace** el sistema; la 9 a la 14, **cómo está construido y cómo trabajamos**; la 15 y la 17 te preparan para la **presentación**.
+>
+> Última actualización: **2026-11-17** (preparación de la Nota 3). Si algo de esta guía no coincide con otro documento, manda lo que diga [`docs/CONTEXTO.md`](CONTEXTO.md) y avisa al equipo.
 
 ---
 
@@ -20,11 +22,14 @@
 9. [Seguridad explicada simple](#9-seguridad-explicada-simple)
 10. [La red](#10-la-red)
 11. [El dashboard](#11-el-dashboard)
-12. [La demo para el profe](#12-la-demo-para-el-profe)
-13. [Qué está hecho y qué falta](#13-qué-está-hecho-y-qué-falta)
-14. [Preguntas que nos pueden hacer (y cómo responder)](#14-preguntas-que-nos-pueden-hacer-y-cómo-responder)
-15. [Números para tener a mano](#15-números-para-tener-a-mano)
-16. [Dónde está el detalle](#16-dónde-está-el-detalle)
+12. [API REST y backend, explicados simple](#12-api-rest-y-backend-explicados-simple)
+13. [¿Cómo cambiamos el sistema sin romperlo? (DevOps)](#13-cómo-cambiamos-el-sistema-sin-romperlo-devops)
+14. [Cómo nos organizamos (Ágil, Lean y gestión del equipo)](#14-cómo-nos-organizamos-ágil-lean-y-gestión-del-equipo)
+15. [La demo para el profe](#15-la-demo-para-el-profe)
+16. [Qué está hecho y qué falta](#16-qué-está-hecho-y-qué-falta)
+17. [Preguntas que nos pueden hacer (y cómo responder)](#17-preguntas-que-nos-pueden-hacer-y-cómo-responder)
+18. [Números para tener a mano](#18-números-para-tener-a-mano)
+19. [Dónde está el detalle](#19-dónde-está-el-detalle)
 
 ---
 
@@ -33,7 +38,7 @@
 Si alguien te pregunta "¿de qué se trata su proyecto?", esta es la respuesta corta:
 
 > **Induplac IoT es una plataforma que mide en tiempo real el consumo de electricidad y agua, la radiación UV, la producción y las horas sin accidentes de dos sedes de la empresa Induplac.**
-> **Los sensores mandan los datos a un computador pequeño en cada sede (una Raspberry Pi), que los guarda, calcula alertas y muestra un dashboard. Cada 15 minutos manda un resumen a la nube de AWS, donde se juntan las dos sedes para comparar y ver el histórico.**
+> **Los sensores mandan los datos a un computador pequeño en cada sede (una Raspberry Pi; en la demo, un PC), que los guarda, calcula alertas y muestra un dashboard. Cada 15 minutos manda un resumen a la nube de AWS, donde se juntan las dos sedes para comparar y ver el histórico.**
 > **Lo más importante: si se corta internet, la planta sigue funcionando igual. Los datos se guardan localmente y se suben solos cuando vuelve la conexión, sin perder ni duplicar nada.**
 
 Datos del proyecto:
@@ -45,6 +50,7 @@ Datos del proyecto:
 | Empresa de referencia | Induplac (real), pero usamos **datos ficticios** |
 | Sedes | **Local 1:** planta/taller · **Local 2:** oficinas/administración |
 | Equipo | Abraham Castro, Sebastián Fuentes, Lisandra González, Felipe Murúa, Bárbara Saavedra |
+| Roles Scrum | **Product Owner:** Abraham · **Scrum Master:** Bárbara |
 
 ---
 
@@ -68,15 +74,19 @@ Hoy, en muchas empresas, el consumo se ve **tarde**: llega la boleta a fin de me
 | **Wokwi** | Un simulador web de ESP32. | Simulamos los sensores sin comprar hardware. |
 | **MQTT** | Un protocolo de mensajes muy liviano, pensado para dispositivos pequeños. | Es el "idioma" con que el ESP32 envía datos. |
 | **Broker MQTT** | El "cartero" de MQTT: recibe mensajes y los entrega a quien los pidió. | Recibe los datos de los ESP32 y se los pasa al Edge. En la simulación usamos **EMQX Serverless** (en la nube, gratis). |
-| **Edge / Edge Gateway** | Un computador que está **en la sede**, cerca de los sensores ("en el borde" de la red). | En nuestro caso es una **Raspberry Pi**: guarda, resume, alerta y muestra el dashboard de planta. |
+| **Edge / Edge Gateway** | Un computador que está **en la sede**, cerca de los sensores ("en el borde" de la red). | En el diseño es una **Raspberry Pi** por sede; en la demo corre en un PC. Guarda, resume, alerta y muestra el dashboard de planta. |
 | **SQLite** | Una base de datos liviana que vive en un solo archivo. | Base de datos local de la Raspberry Pi. |
 | **AWS** | La nube de Amazon. Usamos el **Learner Lab** (cuenta educativa con USD 100). | Junta las dos sedes, guarda el histórico, administra usuarios. |
 | **API Gateway** | La "puerta de entrada" a la nube: recibe pedidos por HTTPS. | Recibe los resúmenes del Edge y las consultas del dashboard. |
 | **Lambda** | Código que corre en la nube solo cuando se necesita (sin servidor encendido). | Procesa lo que llega, revisa alertas y guarda en las bases. |
 | **DynamoDB** | Base de datos de AWS sin tablas relacionadas (NoSQL), muy barata. | Guarda la serie de tiempo (los resúmenes cada 15 min) y las alertas. |
 | **RDS PostgreSQL** | Base de datos relacional clásica (con tablas y relaciones). | Configuración: permisos de cada usuario, umbrales, sedes y dispositivos. |
-| **Cognito** | Servicio de AWS para inicio de sesión. | Cuentas, claves temporales y **MFA**. |
-| **MFA** | Segundo factor: además de la contraseña, un código que cambia cada 30 s en el celular. | Obligatorio para quienes pueden cambiar cosas (Admin y Jefe). Se usa con Microsoft Authenticator. |
+| **Cognito** | Servicio de AWS para inicio de sesión. | Cuentas, claves temporales, **MFA** y el **rol y la sede** de cada persona. |
+| **MFA** | Segundo factor: además de la contraseña, un código que cambia cada 30 s en el celular. | Obligatorio para jefes y admins, opcional para operarios. Se usa con Microsoft Authenticator. |
+| **API REST** | Una forma estándar de pedir y mandar datos por internet con direcciones (URL) y verbos (`GET` = pedir, `POST` = mandar, `PUT` = cambiar). | Es como el Edge sube los datos y como el dashboard los consulta (sección 12). |
+| **Git y GitHub** | Git guarda la historia de cada cambio del código; GitHub es donde vive el repositorio del equipo. | Todo el proyecto está ahí, y cada cambio entra por un *Pull Request* (sección 13). |
+| **CI (GitHub Actions)** | Un "robot" que prueba solo cada cambio que alguien sube. | Corre las pruebas y los controles de seguridad antes de aceptar un cambio. |
+| **Ansible** | Herramienta que configura muchos computadores a la vez, por SSH, siguiendo una "receta" (*playbook*). | Deja el Edge de cada sede instalado igual, sin hacerlo a mano (sección 13). |
 | **VPN Site-to-Site** | Un "túnel" cifrado entre la red de la sede y la red en AWS. | Por ahí viajan los datos del Edge a la nube, sin pasar expuestos por internet. |
 | **VLAN** | Dividir una red física en varias redes separadas. | Separa los sensores de los computadores de la oficina. |
 | **Dashboard** | La página web con indicadores y gráficos. | Lo que ven los operarios, jefes y gerencia. |
@@ -137,7 +147,7 @@ El sistema tiene tres estados:
 
 **¿Y si lo que se cae es la Raspberry Pi?** El ESP32 guarda en su memoria unas **1.500 lecturas (~2 horas)** y las reenvía cuando la Pi vuelve.
 
-**¿Cómo se ve el dashboard sin internet?** Los operarios abren el dashboard **directamente desde la Raspberry Pi** dentro de la red de la planta (por ejemplo, `https://edge.induplac.local`). No necesita salir a internet.
+**¿Cómo se ve el dashboard sin internet?** Los operarios abren el dashboard **directamente desde el Edge** dentro de la red de la planta (por ejemplo, `http://<ip-del-edge>:8080`), con un **login de planta** que funciona sin internet. No necesita salir a internet.
 
 ---
 
@@ -184,6 +194,8 @@ El sistema tiene tres estados:
 | 💧 **Agua** | **Local 1 (planta):** alerta sobre 14 m³/día (amarillo sobre 12). **Local 2 (oficinas):** alerta sobre 2,5 m³/día (amarillo sobre 2). Además, **posible fuga** si hay consumo de noche (22:00–06:00) o el fin de semana: más de 0,3 m³/h en la planta o 0,05 m³/h en oficinas durante 1 hora. |
 | ☀️ **UV** | Índice **8 o más** (riesgo para quienes trabajan afuera). Entre 6 y 7,9 se muestra amarillo como recomendación de protector y sombra. |
 
+**Los umbrales se pueden cambiar** desde la pantalla *Umbrales* del dashboard, sin tocar código: se guardan en RDS, se copian a DynamoDB (lo que usan las alertas de la nube) y el cambio queda en la auditoría. Antes de guardar, la pantalla **simula** cuántas alertas habría dado el valor nuevo con los datos reales. El Edge todavía usa sus propios umbrales fijos (tarea 44).
+
 **¿Por qué comparar contra el promedio y no un número fijo en electricidad?** Porque un lunes a las 10:00 es normal consumir mucho, pero un domingo a las 3:00 no. Comparar contra "lo normal para esa hora" detecta lo raro.
 
 ### Alertas en dos niveles
@@ -213,15 +225,24 @@ Usamos **"defensa en profundidad"**: varias capas, para que si una falla, las ot
 
 ### Roles: quién ve qué
 
-| Rol | Puede | MFA |
-|---|---|---|
-| **Operario** | Ver los indicadores de **su sede** (solo mirar) | No |
-| **Jefe de Mantenimiento/Operaciones** | Ver **ambas sedes** y **gestionar alertas** | **Sí** |
-| **Administrador** | **Todo**: usuarios, configuración y umbrales | **Sí** |
+Cada cuenta tiene un **rol** (qué puede hacer) y una **sede** (dónde): `planta`, `oficinas` o `todas`. Nadie puede cambiarse de sede solo.
 
-**¿Por qué MFA solo para algunos?** Porque el MFA protege las acciones que **cambian cosas**. El operario solo mira; pedirle MFA agrega fricción sin mucho beneficio.
+| Rol | Sedes | Ver datos actuales | Histórico | Reconocer alertas | Umbrales, usuarios y auditoría | MFA |
+|---|---|:---:|:---:|:---:|:---:|:---:|
+| **Admin general** | Todas | ✅ | ✅ | ✅ | ✅ de todas | Obligatorio |
+| **Admin de sede** | La suya | ✅ | ✅ | ✅ | ✅ solo de su sede | Obligatorio |
+| **Jefe** | La suya | ✅ | ✅ | ✅ | ❌ | Obligatorio |
+| **Operario** | La suya | ✅ | ❌ | ❌ | ❌ | Opcional |
 
-**¿Cómo se inicia sesión sin internet?** La Raspberry Pi tiene un login local para ver el dashboard. Lo que cambia la configuración (umbrales, usuarios) requiere internet y MFA. Sin internet también se pueden **reconocer alertas** (queda registrado y se sube después). *(Aprobado por el equipo.)*
+**En el equipo:** Abraham y Felipe son *admin general*; Bárbara, *admin de sede* de Planta; Seba, *admin de sede* de Oficinas; Lisandra, *operaria* de Planta.
+
+**¿Por qué el MFA es opcional para el operario?** Porque el MFA protege las acciones que **cambian cosas**. El operario solo mira su sede; obligarlo agrega fricción sin mucho beneficio. Igual puede activarlo si quiere.
+
+**¿Cómo funciona por dentro?** Cognito pone el rol y la sede dentro del **token** de la sesión. La API (API Gateway) **rechaza cualquier consulta sin token válido** (`401`), y el backend mira el rol y la sede del token antes de responder o permitir un cambio. Lo que se ve en pantalla es solo la cara visible: la seguridad real está en el servidor.
+
+**¿Cómo se inicia sesión sin internet?** El Edge tiene un **login de planta** para ver el dashboard. Lo que cambia la configuración (umbrales, usuarios) requiere internet y MFA.
+
+**Nada se borra:** los registros de **auditoría** (quién hizo qué) y de **alertas** no se pueden borrar, ni siquiera un admin.
 
 ---
 
@@ -246,72 +267,198 @@ Si preguntan por la parte de redes, estos son los puntos:
 
 ## 11. El dashboard
 
-Es **el mismo dashboard en dos lugares**:
+Es **el mismo dashboard en dos lugares**: **en la nube** (para todos, con login de Cognito) y **en el Edge de la planta** (sigue funcionando sin internet). No es una sola pantalla: es un **panel tipo app** con menú lateral, y cada persona ve solo las pantallas y sedes de su rol.
 
-- **En la planta**, servido por la Raspberry Pi: funciona con o sin internet.
-- **En la nube**, para gerencia: ve las dos sedes juntas.
+```text
+┌──────────────────────┬──────────────────────────────────────────────┐
+│ INDUPLAC IoT         │ Resumen · Sede: Todas · 🕑 · 🔔 2              │
+│ MONITOREO            │                                              │
+│  • Resumen           │  ⚡ Energía   💧 Agua   ☀ UV   🏭 Producción  │
+│  • Planta / Oficinas │  [al día]    [al día]  [dato antiguo]  ...   │
+│  • Alertas           │                                              │
+│  • Histórico         │  Gráfico de consumo · alertas activas        │
+│ GESTIÓN              │                                              │
+│  • Umbrales          │                                              │
+│  • Usuarios          │                                              │
+│  • Auditoría         │                                              │
+│ SISTEMA              │                                              │
+│  • Estado de sedes   │                                              │
+└──────────────────────┴──────────────────────────────────────────────┘
+```
 
-Qué muestra:
+| Pantalla | Para qué sirve |
+|---|---|
+| **Resumen, Planta y Oficinas** | Ver cómo está cada sede **ahora**. Cada tarjeta dice si el dato está *al día*, es *antiguo* o *no hay datos*, para saber si confiar en lo que se ve |
+| **Alertas** | Ver las alertas y **reconocerlas** con un comentario (jefes y admins), para que el equipo sepa que alguien las atendió |
+| **Histórico** | Comparar día con día y hora con hora, entre sedes y con el período anterior |
+| **Umbrales** | Cambiar cuándo salta una alerta, **simulando antes** cuántas alertas habría dado el valor nuevo |
+| **Usuarios** | Crear cuentas (con clave temporal), desactivarlas y reenviar la invitación |
+| **Auditoría** | Ver quién cambió qué, cuándo y desde dónde (nube o Edge, con o sin internet) |
+| **Estado de las sedes** | Saber si todo está llegando bien: último dato, sensores, pendientes por subir, hora del equipo y si RDS está encendido |
 
-- Monitor por sede: electricidad y agua actuales **comparados con el promedio histórico**.
-- Producción: tableros del mes y acumulado del año.
-- Horas-hombre sin incidentes.
-- Índice UV del día.
-- Alertas activas en rojo.
-- Histórico: comparación entre sedes y entre períodos (día, semana, mes).
-- Indicador de estado: 🟢 ONLINE / 🔴 OFFLINE / 🟡 SINCRONIZANDO.
-- **Panel de demostración:** botones para simular un corte de red e inyectar alertas en vivo.
-
----
-
-## 12. La demo para el profe
-
-La evaluación no se gana con gráficos bonitos, sino mostrando que **el sistema aguanta sin internet**. El guion:
-
-1. Todo funciona en 🟢 **ONLINE**.
-2. Se presiona **"Simular corte de red"** → se corta el enlace entre la Raspberry Pi y AWS. El indicador pasa a 🔴 **OFFLINE**, pero el dashboard **sigue mostrando datos en tiempo real**.
-3. Se inyecta un **UV alto** → **la alerta aparece igual**, generada por la Raspberry Pi.
-4. Mientras tanto, los resúmenes se acumulan en la Pi como pendientes.
-5. Se **reconecta** → 🟡 **SINCRONIZANDO (XX pendientes)**.
-6. Todo sube a AWS, la alerta aparece en la vista de gerencia **una sola vez**, y vuelve a 🟢 **ONLINE**. **No se perdió ni se duplicó ningún dato.**
-
-Pruebas de seguridad que también se pueden mostrar:
-- Inyectar **9.999 kW** → el sistema lo rechaza.
-- Reenviar un lote ya enviado → no se duplica.
-- Entrar como **Operario** → no puede ver la vista consolidada ni cambiar umbrales.
-- Entrar como **Admin sin código MFA** → no puede entrar.
+**Próximo paso decidido:** una **app para celular (PWA)** sobre AWS, para recibir las alertas en el teléfono.
 
 ---
 
-## 13. Qué está hecho y qué falta
+## 12. API REST y backend, explicados simple
 
-**✅ Hecho (diseño y documentación):**
-- Arquitectura completa (Edge + nube) y comportamiento online/offline.
-- Decisiones de nube del equipo (resúmenes cada 15 min, alertas, roles, MFA).
-- Seguridad en 5 capas.
-- Red: VLANs, VPN, VPC, permisos entre servicios.
-- Bases de datos y cálculo de capacidad.
+> Criterios 3 (cliente-servidor y API REST) y 4 (backend) de la Nota 3.
 
-**⏳ Falta (código), en este orden:**
-1. Dashboard (React).
-2. Código del ESP32 en Wokwi.
-3. Programa de la Raspberry Pi (Python): recibir, guardar, resumir, alertar y sincronizar.
-4. Backend en AWS: Lambdas, bases de datos y Cognito con MFA.
-5. ~~VPN y API privada~~ → queda solo como diseño (no se demuestra).
+### Cliente-servidor: quién pide y quién responde
 
-**✅ Decidido el 2026-10-14:**
-- La demo es **100 % en Wokwi**.
-- Sin internet se puede **ver todo y reconocer alertas**; umbrales y usuarios solo con internet y MFA.
-- Umbrales de agua definidos (ver sección 8).
-- **Broker MQTT: EMQX Serverless** (gratis, con TLS). HiveMQ Cloud se descartó porque ya no tiene plan gratis permanente.
-- La **VPN queda como diseño** y no se demuestra; Cognito con MFA **sí se implementa**.
+En una arquitectura **cliente-servidor**, el **cliente** pide algo y el **servidor** responde. Como en un restaurante: el cliente pide al mesero (la **API**), el mesero lleva el pedido a la cocina (el **backend**) y vuelve con el plato (los **datos**).
 
-**❓ Pendiente:**
-- Probar que el Learner Lab permita **Cognito con MFA**.
+En Induplac hay **dos clientes** y **un servidor**:
+
+```text
+CLIENTES                                SERVIDOR (AWS)
+Edge de la sede  ──POST /intervalos──►  API Gateway ──► Lambda ──► DynamoDB
+  (sube datos)                            (la puerta)    (la cocina)  (la despensa)
+Dashboard        ──GET /api/...──────►        │
+  (consulta)     ◄──── JSON ───────────────────┘
+```
+
+### La API REST: direcciones y verbos
+
+Una API **REST** usa direcciones (URL) y verbos para decir qué se quiere hacer. Las respuestas vienen en **JSON** (texto ordenado que entiende cualquier programa).
+
+| Verbo | Significa | Ejemplo en Induplac |
+|---|---|---|
+| `POST` | **Mandar** algo nuevo | `POST /intervalos`: el Edge sube los resúmenes de 15 minutos |
+| `GET` | **Pedir** datos | `GET /api/locales/local1/actual`: el dashboard pide cómo está la planta ahora |
+| `GET` | | `GET /api/alertas`, `GET /api/historico`, `GET /api/auditoria` |
+| `POST` | | `POST /api/alertas/{id}/reconocer`: un jefe reconoce una alerta |
+| `PUT` | **Cambiar** algo que existe | `PUT /config/umbrales/local1/uv`: un admin cambia el umbral de UV |
+
+Cada respuesta trae un **código** que dice cómo le fue: `200` (todo bien), `400` (el pedido viene mal), `401` (no iniciaste sesión o la clave no sirve), `403` (no tienes permiso para esa sede o acción), `404` (no existe), `503` (la fuente de datos no responde, por ejemplo RDS apagado). El contrato completo está en [`api-dashboard.md`](api-dashboard.md).
+
+### El backend: qué pasa con un dato cuando llega
+
+El backend son **dos funciones Lambda** (código que corre solo cuando llega un pedido): `induplac-api` (datos y alertas) e `induplac-config` (configuración en RDS). Con un dato que llega del Edge:
+
+| Paso | Qué hace | Ejemplo |
+|---|---|---|
+| 1. **Recibe** | API Gateway recibe el `POST /intervalos` y la Lambda revisa la clave del Edge (cabecera `x-induplac-key`) | Sin la clave correcta responde `401` |
+| 2. **Valida** | Revisa que el JSON esté bien formado y que la sede exista. Los valores absurdos ya los filtró el Edge antes de enviar (por ejemplo, 9.999 kW) | Un lote de una sede que no existe responde `400` |
+| 3. **Procesa** | Revisa las **reglas de alerta** con los umbrales vigentes | ¿UV ≥ 8? → alerta |
+| 4. **Almacena** | Guarda el intervalo y las alertas en **DynamoDB**, con una llave única (sede + hora) | Si llega dos veces, se reemplaza: **no se duplica** |
+| 5. **Entrega** | Cuando el dashboard pregunta, responde solo con **lo que ese rol y esa sede pueden ver** | Un operario de Planta no recibe datos de Oficinas |
+
+**¿Por qué Lambda y no un servidor con Flask o FastAPI?** La pauta permite cualquier tecnología justificada. Elegimos **Lambda (serverless)** porque:
+- **Costo:** solo se paga cuando llega un pedido; un servidor Flask estaría encendido (y cobrando) las 24 horas, y el Learner Lab tiene USD 100.
+- **Nada que mantener:** no hay sistema operativo que actualizar ni servidor que se caiga; AWS lo escala solo.
+- **Encaja con AWS:** se integra directo con API Gateway, Cognito y DynamoDB.
+- **Es Python igual:** el código se escribe como en Flask; solo cambia quién lo ejecuta.
 
 ---
 
-## 14. Preguntas que nos pueden hacer (y cómo responder)
+## 13. ¿Cómo cambiamos el sistema sin romperlo? (DevOps)
+
+> Criterio 2 de la Nota 3 (Pipeline DevOps). Detalle en [`devops.md`](devops.md) y [`ansible/README.md`](../ansible/README.md).
+
+**La idea:** cuando un sistema ya funciona, el riesgo más grande es **cambiarlo**. DevOps es la forma de trabajar para que cada cambio, por chico que sea, pase siempre por el mismo camino: **se guarda, se prueba, se revisa, se instala y se vigila**.
+
+Ejemplo real: **cambiar el umbral de una alerta o arreglar un error en el Edge**. ¿Quién lo hizo? ¿Se probó? ¿Qué versión quedó instalada? ¿Cómo sabemos si falló? El pipeline responde todo eso:
+
+```text
+requerimiento ─► desarrollo ─► Git + Pull Request ─► CI: pruebas + seguridad ─► revisión ─► despliegue ─► operación ─► monitoreo
+     ▲                                                                                                                │
+     └───────────────────────────────────────── retroalimentación ◄───────────────────────────────────────────────────┘
+```
+
+| Etapa | Qué hacemos | Para qué sirve |
+|---|---|---|
+| **1. Requerimiento** | La tarea se anota en [`EN-CURSO.md`](EN-CURSO.md) (nuestro Kanban) y alguien la reserva | Que dos personas no hagan lo mismo y se sepa quién tiene cada cosa |
+| **2. Desarrollo** | Se trabaja en una **rama** (una copia aparte del código) | Si algo sale mal, `main` (la versión buena) no se toca |
+| **3. Git + Pull Request** | El cambio se propone con un **PR**: qué cambió, por qué y cómo se prueba | Queda registrado **quién cambió qué, cuándo y por qué** |
+| **4. CI (pruebas + seguridad)** | GitHub Actions corre solo **6 controles** en cada PR (abajo) | Encontrar errores **antes** de que lleguen a la planta |
+| **5. Validación** | Otro integrante revisa el PR; `main` está **protegida** y no acepta cambios sin los 6 controles en verde | Nadie sube cambios sin probar, ni por apuro |
+| **6. Despliegue** | GitHub Actions publica el dashboard (S3) y las Lambdas, y **Ansible** deja listo el Edge de cada sede | Instalar siempre igual, sin pasos a mano que se olviden |
+| **7. Operación y monitoreo** | La API responde `/health`, la pantalla *Estado de las sedes* y las alertas de "sin datos" | Saber al tiro si algo dejó de funcionar |
+| **8. Retroalimentación** | Lo que se encuentra vuelve como tarea nueva al tablero | El sistema mejora con cada vuelta |
+
+### Los 6 controles automáticos del CI
+
+| Control | Qué revisa, en simple |
+|---|---|
+| **Dashboard** | Que el dashboard compile y no tenga errores de código |
+| **Edge y Lambdas** | Que pasen las pruebas: reglas de alerta, que no se dupliquen datos, la auditoría, los umbrales |
+| **Secretos** (`gitleaks`) | Que nadie haya subido una contraseña o clave por error |
+| **Dependencias** (`npm audit`, `pip-audit`) | Que ninguna librería que usamos tenga fallas de seguridad conocidas |
+| **SAST** (Bandit, Semgrep) | Que el código no tenga malas prácticas peligrosas, como armar una consulta SQL a mano |
+| **DAST** (OWASP ZAP) | Prueba el dashboard **funcionando**, desde afuera, como lo haría un atacante |
+
+Si uno falla, el PR se marca ❌ y **no puede entrar a `main`** (eso se llama *quality gate*). A esto de meter la seguridad dentro del pipeline se le llama **DevSecOps**: es más barato encontrar un problema en el PR que cuando ya está en la planta.
+
+> **Una alerta automática no siempre es un problema real.** Bandit avisó de "posible inyección SQL" en el Edge; al revisarlo, las consultas eran seguras (*falso positivo*). Por eso lo grave bloquea y lo medio se revisa a mano.
+
+### Ansible: el Edge igual en todas las sedes
+
+Configurar a mano una Raspberry en cada sede es lento y cada persona lo haría un poco distinto. Con **Ansible**, el estado correcto del Edge está escrito en una "receta" (`ansible/edge-baseline.yml`) y se aplica a todas las sedes a la vez, desde un solo computador:
+
+- Hora de Chile sincronizada, paquetes, un usuario sin privilegios, el código de GitHub en una **versión conocida**, la configuración de su sede y el servicio que arranca solo.
+- Es **idempotente**: si se corre de nuevo y todo está bien, **no cambia nada** (`changed=0`). Si alguien cambió algo a mano, lo devuelve al estado correcto.
+- Lo probamos el 17/11 en 2 máquinas de AWS que simulan las Raspberry de Planta y Oficinas: 1ª pasada con 9 cambios, 2ª pasada con **0**.
+
+---
+
+## 14. Cómo nos organizamos (Ágil, Lean y gestión del equipo)
+
+> Criterios 5 y 7 de la Nota 3. Detalle en [`nota-3/backlog.md`](nota-3/backlog.md) y [`nota-3/gestion-equipo.md`](nota-3/gestion-equipo.md).
+
+- **Scrum con sprints de una semana** desde el 05/10. Abraham es *Product Owner* (prioriza qué se hace) y Bárbara, *Scrum Master* (mantiene el orden y el tablero).
+- **Product Backlog:** 21 **historias de usuario** escritas desde quien usa el sistema (*"Como jefe de planta, quiero… para…"*), priorizadas con **MoSCoW** (Debe, Debería, Podría, No ahora).
+- **Kanban:** [`EN-CURSO.md`](EN-CURSO.md) es el tablero: 🟢 Libre → 🟡 En curso → 🔵 En revisión → ✅ Listo. Una tarea sin avance por más de 7 días se conversa en el grupo.
+- **Lean:** reservar antes de empezar (no repetir trabajo), cada uno toma tarjetas libres (sistema *pull*), cambios chicos por PR (lotes pequeños) y el CI prueba todo (calidad desde el origen).
+- **Gestión del equipo:** la **lluvia de ideas** del 07/10 (documento *Decisiones Cloud*) y su orden en un **diagrama de afinidad** mostraron decisiones clave, como poner las alertas también en el Edge para no quedar a ciegas sin internet.
+
+---
+
+## 15. La demo para el profe
+
+La evaluación no se gana con gráficos bonitos, sino mostrando que **el sistema funciona de punta a punta y aguanta sin internet**. El recorrido que pide la pauta:
+
+```text
+Wokwi (ESP32) ─► broker MQTT ─► Edge ─► API REST ─► backend (Lambda) ─► DynamoDB ─► reglas/alertas ─► consulta ─► dashboard
+```
+
+Guion base (el guion final es la tarea 18):
+
+1. Wokwi envía datos y el dashboard muestra todo 🟢 **ONLINE**.
+2. Se corta **solo la conexión del Edge con AWS** (no todo internet). El indicador pasa a 🔴 **OFFLINE**, pero el dashboard de planta **sigue mostrando datos**.
+3. Se sube el **UV** en Wokwi → **la alerta aparece igual**, generada por el Edge.
+4. Se **reconecta** → 🟡 **SINCRONIZANDO** → todo sube a AWS **sin perder ni duplicar** datos → 🟢 **ONLINE**.
+
+Otras cosas que se pueden mostrar:
+- **Roles:** entrar como operario (no ve Histórico ni Umbrales) y como admin (pide MFA).
+- **Umbrales:** simular un valor nuevo y guardarlo; aparece en la **Auditoría**.
+- **Pipeline:** un PR con los 6 controles en verde y el reporte de ZAP.
+- **Ansible:** `ansible edge -m ping` y el playbook con `changed=0`.
+
+> ⚠️ **Antes de presentar:** abrir el Learner Lab, encender RDS y las 2 EC2, actualizar las IP en `ansible/inventario.ini` y revisar que Wokwi esté enviando (la pantalla *Estado de las sedes* lo muestra).
+
+---
+
+## 16. Qué está hecho y qué falta
+
+> Estado al **17/11/2026**. El detalle de cada tarea está en [`EN-CURSO.md`](EN-CURSO.md) y el de la Nota 3 en [`nota-3.md`](nota-3.md).
+
+**✅ Funcionando:**
+- Cadena completa: Wokwi → EMQX → Edge (SQLite, resúmenes de 15 min, alertas sin internet) → API Gateway → Lambda → DynamoDB → dashboard.
+- Modo offline y sincronización sin perder ni duplicar datos.
+- Dashboard con 7 pantallas, en la nube (S3) y en el Edge.
+- Cognito con 4 roles y sede, claves temporales y MFA por rol; la API exige iniciar sesión.
+- Umbrales editables (RDS → DynamoDB) con simulación, y auditoría que no se puede borrar.
+- Pipeline DevOps: ramas + PR, CI con 6 controles (incluida seguridad), `main` protegida, despliegue con `/health` y **Ansible** para el Edge.
+- Backlog con historias de usuario, Kanban y gestión del equipo (criterios 5 y 7).
+
+**⏳ Falta para la Nota 3 (25/11):** Wokwi listo para la demo, 5 Porqués, transferencia tecnológica, Ishikawa, plan de pruebas, gráfico de control, diagrama de la API, explicación del backend, guion de la demo, PowerPoint y grabación (tareas 18, 23 y 34 a 43).
+
+**📐 Queda como diseño (no se demuestra):** VPN entre las sedes y AWS, sensores reales y Raspberry Pi física.
+
+---
+
+## 17. Preguntas que nos pueden hacer (y cómo responder)
 
 ### Sobre la idea general
 
@@ -390,7 +537,7 @@ Pruebas de seguridad que también se pueden mostrar:
 > Porque abrir puertos hacia la red de una fábrica es una puerta de entrada para ataques. Todas las conexiones las inicia la planta hacia afuera.
 
 **¿Quién puede ver y cambiar qué?**
-> El operario solo ve su sede. El jefe ve ambas sedes y gestiona alertas. El administrador puede todo. Los que pueden cambiar cosas (jefe y admin) entran con MFA.
+> Hay 4 roles y cada uno tiene una sede. El operario solo mira su sede; el jefe además ve el histórico y reconoce alertas; el admin de sede administra umbrales y usuarios de su sede, y el admin general, de todas. Jefes y admins entran con MFA. La API revisa el rol y la sede en cada consulta, no solo la pantalla.
 
 **¿Cumplen con la ley de protección de datos?**
 > Sí, con la Ley 19.628. No guardamos nombres, RUT ni ubicación de trabajadores. Las horas-hombre son solo contadores agregados por turno, y a la nube solo suben resúmenes.
@@ -401,7 +548,36 @@ Pruebas de seguridad que también se pueden mostrar:
 > La mayoría de los servicios cuesta casi nada a esta escala (DynamoDB, Lambda, API Gateway). RDS es una instancia pequeña que apagamos cuando no se usa, y no usamos NAT Gateway. Lo único caro sería la VPN (unos USD 0,05 por hora por conexión); por eso en el MVP queda como diseño y no se levanta.
 
 **¿Qué tienen listo y qué falta?**
-> El diseño completo y la documentación están listos. Falta el código: primero el dashboard, después el ESP32 en Wokwi, el programa de la Raspberry Pi y el backend en AWS.
+> El sistema funciona de punta a punta: Wokwi, Edge con modo offline, backend en AWS, dashboard con roles y MFA, y el pipeline con pruebas, seguridad y Ansible. Lo que queda como diseño es la VPN y el hardware real.
+
+### Sobre la Nota 3 (cómo administramos los cambios y cómo nos organizamos)
+
+**¿Cómo administran un cambio, por ejemplo un umbral nuevo?**
+> Si es un valor, lo cambia un admin en la pantalla *Umbrales*: primero simula cuántas alertas habría dado, lo guarda en RDS, se copia a DynamoDB y queda en la auditoría con el valor de antes y el nuevo. Si es un cambio de código, entra por rama y Pull Request, pasa los 6 controles del CI, lo revisa otro integrante y recién ahí llega a `main` y se despliega.
+
+**¿Qué pasa si alguien sube algo con un error?**
+> El CI lo detecta antes: si falla una prueba o un control de seguridad, el PR queda en rojo y `main` no lo acepta. Si aun así llegara a producción, el monitoreo (`/health`, *Estado de las sedes*) lo muestra, y como todo está versionado en Git, se puede volver a la versión anterior.
+
+**¿Para qué sirve Ansible si el Edge es un solo programa?**
+> Porque en la realidad hay un Edge en cada sede. Con Ansible, todos quedan instalados igual, con la misma versión y configuración, sin pasos a mano. Y es idempotente: se puede correr cuando se quiera para revisar que una sede siga bien.
+
+**¿Qué es DevSecOps?**
+> Meter la seguridad dentro del pipeline: en cada cambio se revisan claves filtradas, librerías vulnerables, el código (SAST) y la app funcionando (DAST con ZAP). Encontrar un problema en el PR es mucho más barato que en la planta.
+
+**¿Cómo se envían y consultan los datos? (cliente-servidor)**
+> El Edge es un cliente que **manda** (`POST /intervalos`) y el dashboard es un cliente que **pide** (`GET /api/...`). Los dos hablan con la misma API REST en API Gateway, que llama a la Lambda, y la Lambda guarda y lee en DynamoDB. Las respuestas van en JSON.
+
+**¿Qué hace el backend con un dato?**
+> Lo recibe (revisa la clave del Edge), lo valida (formato y rangos), lo procesa (reglas de alerta), lo almacena (DynamoDB, sin duplicar) y lo entrega al dashboard según el rol y la sede de quien pregunta.
+
+**¿Por qué Lambda y no Flask?**
+> Porque solo cobra cuando se usa, no hay servidor que mantener ni que se caiga, y se integra directo con API Gateway, Cognito y DynamoDB. El código igual es Python.
+
+**¿Cómo se organizaron como equipo?**
+> Con Scrum en sprints de una semana, un backlog de historias de usuario priorizadas con MoSCoW y un tablero Kanban en el repositorio. Cada tarea se reserva antes de empezar y entra por Pull Request, así siempre se sabe quién hace qué.
+
+**¿Cómo podría pasar esto a una empresa real?** *(transferencia tecnológica)*
+> Por etapas: validar con la empresa, hacer un **piloto** en una sede, probar, documentar, capacitar a los usuarios, ponerlo en marcha, darle soporte y mejorarlo con lo que se aprenda. El roadmap detallado es la tarea 38.
 
 ### Si no sabes la respuesta
 
@@ -409,7 +585,7 @@ Pruebas de seguridad que también se pueden mostrar:
 
 ---
 
-## 15. Números para tener a mano
+## 18. Números para tener a mano
 
 | Dato | Valor |
 |---|---|
@@ -434,14 +610,29 @@ Pruebas de seguridad que también se pueden mostrar:
 | VLAN operarios Local 1 / Local 2 | `192.168.11.0/24` / `192.168.21.0/24` |
 | Raspberry Pi Local 1 / Local 2 | `192.168.10.10` / `192.168.20.10` |
 | Crédito del Learner Lab | **USD 100** |
+| Roles en Cognito | **4** (admin general, admin de sede, jefe, operario) |
+| Pantallas del dashboard | **7** |
+| Controles del CI en cada PR | **6** (3 de ellos de seguridad: dependencias, SAST y DAST) |
+| Tiempo del CI | Mediana **21 s**; **87 s** con todos los controles de seguridad |
+| Tasa de éxito del CI | **97,3 %** (107 de 110 ejecuciones, al 05/11) |
+| Historias de usuario del backlog | **21** (en 6 épicas) |
+| Ansible: 1ª / 2ª pasada | **9** cambios / **0** cambios (idempotente) |
 
 ---
 
-## 16. Dónde está el detalle
+## 19. Dónde está el detalle
 
 | Si quieres saber más de... | Lee |
 |---|---|
+| **La Nota 3: pauta, criterios, qué falta y quién hace qué** | [`docs/nota-3.md`](nota-3.md) |
 | Todo el proyecto, decisiones y roadmap | [`docs/CONTEXTO.md`](CONTEXTO.md) |
+| Pipeline DevOps y DevSecOps | [`docs/devops.md`](devops.md) |
+| Ansible (configuración del Edge) | [`ansible/README.md`](../ansible/README.md) |
+| La API: todos los endpoints | [`docs/api-dashboard.md`](api-dashboard.md) |
+| El backend en AWS | [`backend/README.md`](../backend/README.md) |
+| Backlog, sprints y Kanban | [`docs/nota-3/backlog.md`](nota-3/backlog.md) |
+| Lluvia de ideas y diagrama de afinidad | [`docs/nota-3/gestion-equipo.md`](nota-3/gestion-equipo.md) |
+| Qué está haciendo cada uno ahora | [`docs/EN-CURSO.md`](EN-CURSO.md) |
 | Por qué elegimos cada tecnología (ADR-01 a ADR-08) | [`docs/decisiones-tecnicas.md`](decisiones-tecnicas.md) |
 | Modo offline, cálculos y sincronización | [`docs/modo-offline.md`](modo-offline.md) |
 | Seguridad, roles y MFA | [`docs/ciberseguridad.md`](ciberseguridad.md) |
