@@ -1012,3 +1012,13 @@ Abraham (con Claude). Rama `fix/audit-picomatch`.
   - El paso de npm ahora usa `audit-ci` 7.1.0 con `dashboard/audit-ci.jsonc`, que sigue bloqueando cualquier otra alta o crítica.
   - Queda documentada en `docs/devops.md` (*Excepciones vigentes*) y en la guía del equipo.
 - **Pendiente:** cuando salga `picomatch` > 4.0.7, actualizar y borrar la excepción. Rebasar el PR #69 después de mergear este.
+
+---
+
+## 2026-11-17 — Guion de la demo: cuentas definidas (tarea 18)
+
+Abraham (con Claude). Revisión del PR #68 de Bárbara (mergeado): los datos técnicos del guion se revisaron contra el código y están correctos.
+
+- **Decidido por Abraham:** la demo se hace con **su cuenta** (*admin general*, con MFA en su celular). Las cuentas de prueba de la tarea 31 se borraron. Para el paso opcional de roles se puede usar la cuenta de Lisandra (*operaria* de Planta).
+- **Ajuste:** en el paso 2 se dice que en la demo el Edge corre en un PC y en la planta real sería una Raspberry Pi.
+- **Pendiente:** acordar en el grupo la fecha del ensayo (el guion dice martes 24; en el grupo se habló del lunes 23 para el ensayo y del martes 24 para la grabación). La tarea 18 se cierra después del ensayo.
