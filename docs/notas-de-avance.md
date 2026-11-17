@@ -1022,3 +1022,20 @@ Abraham (con Claude). Revisión del PR #68 de Bárbara (mergeado): los datos té
 - **Decidido por Abraham:** la demo se hace con **su cuenta** (*admin general*, con MFA en su celular). Las cuentas de prueba de la tarea 31 se borraron. Para el paso opcional de roles se puede usar la cuenta de Lisandra (*operaria* de Planta).
 - **Ajuste:** en el paso 2 se dice que en la demo el Edge corre en un PC y en la planta real sería una Raspberry Pi.
 - **Pendiente:** acordar en el grupo la fecha del ensayo (el guion dice martes 24; en el grupo se habló del lunes 23 para el ensayo y del martes 24 para la grabación). La tarea 18 se cierra después del ensayo.
+
+---
+
+## 2026-11-17 — Plan de pruebas e inspección (tarea 41)
+
+Abraham (con Claude). Rama `docs/plan-de-pruebas`. Criterio 8 de la Nota 3 (herramientas de calidad).
+
+- **Hecho:** `docs/nota-3/plan-de-pruebas.md` con:
+  - Los niveles de prueba.
+  - El criterio de aceptación (el quality gate).
+  - Una **matriz de 17 requisitos → 112 pruebas** con su resultado.
+  - Las **listas de inspección** manual (al revisar un PR, después de desplegar y antes de la demo).
+  - **Cómo se usó en el proyecto:** los falsos positivos de Bandit, la regla de `main`, Ansible con `changed=0`, el bloqueo de `picomatch` y la revisión del guion.
+  - Lo que no se automatiza y cómo se cubre.
+- **Corrida del 17/11:** 112/112 OK (61 del Edge, 46 de `induplac-api` y 5 de `induplac-config`).
+- **README §20, guía del equipo (§16 y §18) y `nota-3.md`** (criterio 8) actualizados.
+- **Pendiente del criterio 8:** Ishikawa (tarea 40, Lisandra) y gráfico de control (tarea 42, Seba).

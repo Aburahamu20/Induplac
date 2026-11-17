@@ -784,6 +784,8 @@ Se hacen en vivo con las perillas y botones del ESP32 en Wokwi (`simulation/wokw
 
 Las reglas de las pruebas 2, 3 y 4 también se prueban solas en cada Pull Request (`edge/tests/`).
 
+**Pruebas automáticas:** **112** pruebas unitarias y de integración (61 del Edge, 46 de la API y 5 de la configuración) corren en cada PR, atadas a 17 requisitos. Al 17/11: **112/112 OK**. El detalle, con las listas de inspección manual, está en el [**plan de pruebas e inspección**](docs/nota-3/plan-de-pruebas.md).
+
 ---
 
 # 📌 21. Alcance del MVP

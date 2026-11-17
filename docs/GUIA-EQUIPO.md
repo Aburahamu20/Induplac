@@ -460,7 +460,7 @@ Otras cosas que se pueden mostrar:
 - Pipeline DevOps: ramas + PR, CI con 6 controles (incluida seguridad), `main` protegida, versiones `v0.1` a `v0.7`, despliegue con `/health` y **Ansible** para el Edge.
 - Backlog con historias de usuario, Kanban y gestión del equipo (criterios 5 y 7).
 
-**⏳ Falta para la Nota 3 (25/11):** Wokwi listo para la demo, 5 Porqués, transferencia tecnológica, Ishikawa, plan de pruebas, gráfico de control, diagrama de la API, explicación del backend, guion de la demo, PowerPoint y grabación (tareas 18, 23 y 34 a 43).
+**⏳ Falta para la Nota 3 (25/11):** Wokwi listo para la demo, 5 Porqués, transferencia tecnológica, Ishikawa, gráfico de control, diagrama de la API, explicación del backend, ensayo de la demo, PowerPoint y grabación (tareas 18, 23, 34 a 40, 42 y 43). Ya están el guion de la demo (tarea 18) y el [plan de pruebas](nota-3/plan-de-pruebas.md) (tarea 41).
 
 **📐 Queda como diseño (no se demuestra):** VPN entre las sedes y AWS, sensores reales y Raspberry Pi física.
 
@@ -624,6 +624,7 @@ Otras cosas que se pueden mostrar:
 | Roles en Cognito | **4** (admin general, admin de sede, jefe, operario) |
 | Pantallas del dashboard | **7** |
 | Controles del CI en cada PR | **6** (3 de ellos de seguridad: dependencias, SAST y DAST) |
+| Pruebas automáticas | **112** (61 Edge, 46 API, 5 configuración), atadas a **17 requisitos**; 112/112 OK al 17/11 |
 | Tiempo del CI | Mediana **21 s**; **87 s** con todos los controles de seguridad |
 | Tasa de éxito del CI | **97,3 %** (107 de 110 ejecuciones, al 05/11) |
 | Historias de usuario del backlog | **21** (en 6 épicas) |
