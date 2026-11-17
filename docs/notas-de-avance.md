@@ -911,3 +911,5 @@ Abraham y Felipe. Se crearon cuentas de prueba en Cognito (grupo `jefe` y grupo 
 ## 2026-11-17 — Token de Cognito en toda la API (tarea 20 ✅)
 
 Abraham y Felipe. En API Gateway, `GET` y `PUT /config/{proxy+}` tienen el authorizer `cognito-jwt` y `OPTIONS` va sin él (por CORS). Sin token, `/config/umbrales` responde `401 Unauthorized`. Felipe probó la pantalla Umbrales con su sesión y guarda bien. Se borraron las cuentas de prueba de la tarea 31.
+
+- **Pendiente:** en la prueba, la advertencia de Energía de Planta quedó en **11 %** (era 10 %). Volverla a 10 % la próxima vez que se encienda RDS.
