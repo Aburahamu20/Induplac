@@ -908,7 +908,7 @@ Abraham y Felipe. Se crearon cuentas de prueba en Cognito (grupo `jefe` y grupo 
 
 ---
 
-## 2026-11-17 — Ansible para el Edge (tarea 33, en curso)
+## 2026-11-17 — Ansible para el Edge (tarea 33)
 
 Abraham y Felipe (con Claude). Rama `feature/ansible-edge`.
 
@@ -921,5 +921,12 @@ Abraham y Felipe (con Claude). Rama `feature/ansible-edge`.
 - **Hecho:** tarea 31 ✅ (MFA probado) y `/config/*` revisado en API Gateway: GET y PUT con `cognito-jwt`, OPTIONS sin authorizer, y sin token responde `401`.
 - **Hecho en las EC2 (01:45):** inventario OK, `ansible edge -m ping` con `pong` en las dos, 1ª pasada `changed=9 failed=0` y 2ª pasada **`changed=0`** (idempotente). Capturas en `docs/nota-3/img/ansible-*.png` (la del ping recortada para no mostrar las IP públicas).
 - **Pendiente:**
-  - Cerrar la tarea 20 cuando Felipe confirme que la pantalla Umbrales guarda bien.
   - El 25/11: abrir el lab antes, iniciar las EC2 y actualizar las IP en `inventario.ini` (sin hacer commit).
+
+---
+
+## 2026-11-17 — Token de Cognito en toda la API (tarea 20 ✅)
+
+Abraham y Felipe. En API Gateway, `GET` y `PUT /config/{proxy+}` tienen el authorizer `cognito-jwt` y `OPTIONS` va sin él (por CORS). Sin token, `/config/umbrales` responde `401 Unauthorized`. Felipe probó la pantalla Umbrales con su sesión y guarda bien. Se borraron las cuentas de prueba de la tarea 31.
+
+- **Pendiente:** en la prueba, la advertencia de Energía de Planta quedó en **11 %** (era 10 %). Volverla a 10 % la próxima vez que se encienda RDS.
