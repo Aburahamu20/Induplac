@@ -14,5 +14,6 @@ Tarea EN-CURSO #
 - [ ] Reservé la tarea en `docs/EN-CURSO.md` antes de empezar.
 - [ ] Agregué una entrada con fecha en `docs/notas-de-avance.md` con lo que hice.
 - [ ] Actualicé `docs/CONTEXTO.md` si cambió alguna decisión.
+- [ ] Si el cambio es grande o agrega algo nuevo: actualicé el `README.md` y la `docs/GUIA-EQUIPO.md`.
 - [ ] No subí credenciales, `.env`, llaves ni bases de datos locales.
 - [ ] Avisé en el grupo del equipo que abrí este PR.

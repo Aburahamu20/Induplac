@@ -29,7 +29,11 @@ Este archivo es para cualquier IA que trabaje en este repositorio (Claude, Antig
 1. En `docs/EN-CURSO.md`: estado 🔵 (PR abierto) con el link al PR; ✅ cuando se haga merge, y muévela al historial.
 2. Agrega una entrada con fecha al final de `docs/notas-de-avance.md`: qué se hizo, qué se decidió y qué quedó pendiente (dentro del mismo PR).
 3. Si cambió una decisión, actualiza también `docs/CONTEXTO.md` y, si aplica, `docs/GUIA-EQUIPO.md`.
-4. Recuérdale al usuario **avisar en el grupo del equipo** qué cambió y el link al PR.
+4. **Si el cambio es grande o agrega algo nuevo** (una función, una pantalla, un componente, una herramienta, un cambio de arquitectura o un entregable), actualiza **en el mismo PR**:
+   - el **`README.md`**: las secciones afectadas, el roadmap y el **Estado actual**, con la fecha;
+   - la **`docs/GUIA-EQUIPO.md`**: explicado simple, con **para qué sirve**, las secciones afectadas, "Qué está hecho y qué falta" y, si aplica, una pregunta del profe con su respuesta;
+   - solo lo que cambió, sin regenerar los documentos.
+5. Recuérdale al usuario **avisar en el grupo del equipo** qué cambió y el link al PR.
 
 ## 5. Reglas generales
 - Idioma: español.
