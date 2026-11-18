@@ -70,7 +70,7 @@ Los tiempos son **acumulados**. Lo que va entre comillas es una sugerencia de qu
 
 ### Paso 3 · La API REST: envío y consulta (1:30 – 2:45) · AWS
 
-Las dos operaciones que pide el criterio 3. Los comandos exactos los deja listos la **tarea 34** (API REST).
+Las dos operaciones que pide el criterio 3. Los comandos exactos están en [`api-rest.md`](api-rest.md) §4 (tarea 34).
 
 - **Envío:** "El Edge le habla a la nube por una **API REST**. Para enviar, usa `POST /intervalos` con una clave en la cabecera." Se corre el `curl` de envío **con la clave en una variable** (`$env:CLAVE_INGESTA`), **nunca escrita en pantalla**.
 - **Se ve que quedó guardado:** abrir DynamoDB → `induplac-intervalos` → el registro con ese `inicio_intervalo`. "La **Lambda** lo validó, evaluó las reglas de alerta y lo guardó. Si lo mandamos dos veces, **no se duplica**: la llave es sede + hora del intervalo."
