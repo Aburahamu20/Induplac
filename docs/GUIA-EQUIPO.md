@@ -462,6 +462,8 @@ Otras cosas que se pueden mostrar:
 
 **⏳ Falta para la Nota 3 (25/11):** Wokwi listo para la demo, gráfico de control, explicación del backend, ensayo de la demo, PowerPoint y grabación (tareas 18, 23, 35, 42 y 43). Ya están el guion de la demo (tarea 18), la API REST (tarea 34), el [plan de pruebas](nota-3/plan-de-pruebas.md) (tarea 41) y, de Lisandra (18/11): los [5 Porqués](nota-3/5-porques.md) (36), la [transferencia tecnológica](nota-3/transferencia-tecnologica.md) (38) y el [Ishikawa](nota-3/ishikawa.md) (40). Sirven para explicar **por qué** existe el problema, **qué podría fallar** en nuestra solución y **cómo se llevaría** a Induplac de verdad.
 
+**📁 Evidencias:** todas las pruebas de que el prototipo funciona están ordenadas por criterio en [`nota-3/evidencias.md`](nota-3/evidencias.md): capturas, reporte de ZAP y links al CI. Ahí se ve qué falta y quién lo saca. La grabación del ensayo del 24/11 se deja como link en ese mismo archivo.
+
 **📐 Queda como diseño (no se demuestra):** VPN entre las sedes y AWS, sensores reales y Raspberry Pi física.
 
 ---

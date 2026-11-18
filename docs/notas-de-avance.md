@@ -1090,3 +1090,16 @@ Abraham (con Claude), para que Felipe lo revise y lo presente. Rama `tarea-35-ba
   - Está escrito a partir del código de `backend/lambda_api/` y `backend/lambda_config/`. No se configuró nada nuevo.
 - **Pendiente:** Felipe lo revisa (corrige lo que no le cuadre) y lo ensaya para el 25/11. Plazo: jueves 19.
 
+## 2026-11-18 — Carpeta de evidencias (tarea 43)
+
+Abraham (con Claude). Rama `tarea-43-evidencias`. Entregables de la Nota 3.
+
+- **Hecho:** [`nota-3/evidencias.md`](nota-3/evidencias.md) es el índice de evidencias por criterio. Muestra lo que ya hay (Ansible, API, 5 Porqués, Ishikawa, backlog, transferencia, plan de pruebas) y marca lo que falta con el nombre de quién lo saca.
+- **Hecho:** se guardó en el repo el reporte de ZAP del CI de `main` del 18/11 (`nota-3/evidencias/reporte-zap.html` y `.json`), porque el artefacto de GitHub vence a los 90 días.
+  - Resultado: 0 altos, 2 medios, 5 bajos y 2 informativos. Todos son cabeceras de seguridad que el servidor de prueba no envía, algo ya anotado en `devops.md` (en producción se resuelve con CloudFront). Las reglas que bloquean salieron limpias.
+- **Decidido:** la grabación del ensayo del 24/11 sirve como entregable y como respaldo si la demo falla en vivo. El video no se sube al repo, solo su link.
+- **Pendiente:**
+  - Abraham: captura de los 6 checks del CI y las 6 capturas del dashboard (`demo-1` a `demo-6`) más la del modo offline (`demo-8`).
+  - Seba: Wokwi (`demo-7`) y el gráfico de control (42).
+  - Todos: grabación (24/11).
+
