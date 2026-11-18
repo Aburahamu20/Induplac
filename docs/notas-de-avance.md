@@ -1062,7 +1062,7 @@ Abraham (con Claude), con el lab de Felipe encendido. Rama `tarea-34-capturas-ap
 
 - **Hecho:** se corrieron los comandos de [`nota-3/api-rest.md`](nota-3/api-rest.md) §4 desde WSL. Las 4 respuestas salieron como se esperaba: `/health` OK, `POST` con `recibidos: 1`, `401` sin token y `200` con token (las 8 variables de `local1`). Las capturas están en `docs/nota-3/img/api-*.png` y no muestran ni la clave ni el token.
 - **Hallazgo:** el intervalo de prueba tiene fecha futura (24/11), así que `GET /actual` lo toma como el último dato y el dashboard muestra 12.4 kW. Se agregó a la guía el paso de borrarlo de DynamoDB al terminar (§4.5).
-- **Pendiente:**
-  - Felipe: captura de DynamoDB (`api-3-dynamodb.png`) y después borrar ese registro.
-  - Con eso se cierra la tarea 34.
+- **Hecho (Felipe):** capturas de DynamoDB. `Items returned: 1` aunque se envió dos veces, y `recibido_en` con la hora del segundo envío, o sea que el reenvío reemplazó al primero. La segunda captura se recortó para no mostrar el Account ID.
+- **Tarea 34 ✅. Criterio 3 ✅.**
+- **Pendiente:** borrar de DynamoDB el registro de prueba `local1` + `2026-11-24T06:00:00Z`.
 

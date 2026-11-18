@@ -155,7 +155,8 @@ Y en **DynamoDB → `induplac-intervalos`**: seleccionar el registro `local1` + 
 | --- | --- | --- |
 | 1 | `GET /health` → `{"ok": true}` | ![health](img/api-1-health.png) |
 | 2 | `POST /intervalos` → `{"recibidos": 1, "alertas": 0}` | ![envío](img/api-2-envio.png) |
-| 3 | DynamoDB: un solo registro aunque se envió dos veces | ⏳ pendiente (consola de AWS de Felipe) |
+| 3 | DynamoDB: `Items returned: 1` aunque se envió dos veces (no se duplica) | ![dynamodb](img/api-3-dynamodb.png) |
+| 3b | El registro guardado: los mismos valores que se enviaron, y `recibido_en` con la hora del **segundo** envío (00:12 de Chile): el reenvío **reemplazó** al primero en vez de duplicarlo | ![registro](img/api-3b-dynamodb-registro.png) |
 | 4 | Consulta sin token → `HTTP/2 401` | ![sin token](img/api-4-sin-token.png) |
 | 5 | Consulta con token → JSON con las 8 variables de `local1` y su nivel | ![consulta](img/api-5-consulta.png) |
 
