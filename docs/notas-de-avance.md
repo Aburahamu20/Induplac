@@ -1039,3 +1039,17 @@ Abraham (con Claude). Rama `docs/plan-de-pruebas`. Criterio 8 de la Nota 3 (herr
 - **Corrida del 17/11:** 112/112 OK (61 del Edge, 46 de `induplac-api` y 5 de `induplac-config`).
 - **README §20, guía del equipo (§16 y §18) y `nota-3.md`** (criterio 8) actualizados.
 - **Pendiente del criterio 8:** Ishikawa (tarea 40, Lisandra) y gráfico de control (tarea 42, Seba).
+
+---
+
+## 2026-11-17 — API REST: diagrama cliente-servidor y comandos de la demo (tarea 34)
+
+Abraham (con Claude). Rama `docs/api-rest-demo`. Criterio 3 de la Nota 3.
+
+- **Hecho:** `docs/nota-3/api-rest.md` con:
+  - El diagrama cliente-servidor (Mermaid): 2 servidores REST (AWS y la API local del Edge) y 3 clientes (Edge, dashboard de gerencia y dashboard de planta).
+  - Las operaciones principales con su autenticación y respuesta, y un ejemplo real de `POST /intervalos`.
+  - Los **comandos de la demo** (WSL) para `/health`, envío, reenvío sin duplicar, `401` sin token y consulta con token, con las 5 capturas a sacar.
+- Revisado contra el código: la clave va en la cabecera `x-induplac-key`; el token es el `IdToken` de Cognito en `Authorization: Bearer`; los campos del registro salen de `edge/reglas.py`.
+- **Seguridad:** la clave y el token se piden con `read -s`, nunca quedan en pantalla ni en el repo.
+- **Pendiente:** correr la §4 con el lab de Felipe encendido y subir las capturas (`docs/nota-3/img/api-*.png`). Ahí se cierra la tarea 34.
