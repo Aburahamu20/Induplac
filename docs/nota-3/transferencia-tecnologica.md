@@ -35,7 +35,7 @@
 
 | # | Etapa | Qué se hace | Quién (responsable · apoyo) | Duración aprox. | Para pasar a la siguiente |
 |---|---|---|---|---|---|
-| 1 | **Validación** | Presentar el MVP; confirmar con Induplac el problema, las reglas de alerta y los umbrales; definir indicadores de éxito; revisar la Ley 19.628 modificada por la Ley 21.719 (vigente desde el 1 de diciembre de 2026; un proyecto para postergarla al 15 de octubre de 2027 ya pasó el Senado y está en la Cámara) (sin datos personales); levantar los puntos de medición, la red y el espacio para la Pi en el Local 1 | Equipo · gerencia, jefe de planta, TI | **2 semanas** | Acta firmada con alcance del piloto, indicadores y presupuesto aprobado |
+| 1 | **Validación** | Presentar el MVP; confirmar con Induplac el problema, las reglas de alerta y los umbrales; definir indicadores de éxito; revisar la Ley 19.628 modificada por la Ley 21.719 (sin datos personales; hoy rige desde el 01/12/2026, y el Congreso ya aprobó postergarla al 15/10/2027, falta su publicación); levantar los puntos de medición, la red y el espacio para la Pi en el Local 1 | Equipo · gerencia, jefe de planta, TI | **2 semanas** | Acta firmada con alcance del piloto, indicadores y presupuesto aprobado |
 | 2 | **Piloto en una sede** | Comprar e instalar sensores, ESP32 y Raspberry Pi con RTC en el **Local 1**; crear la cuenta AWS de Induplac y desplegar con el pipeline; instalar el Edge con **Ansible**; medir **4 semanas** para tener la línea base de la regla de energía (+20 %) | Equipo · electricista, TI | **6 semanas** (2 de instalación + 4 de medición) | Datos llegando sin cortes y alertas funcionando en la planta |
 | 3 | **Pruebas** | Correr el [plan de pruebas](plan-de-pruebas.md) en el piloto: comparar los sensores con el medidor de la distribuidora, **cortar internet y la luz de verdad**, medir falsas alarmas, prueba de seguridad (ZAP y revisión de la VPN) | Equipo · jefe de planta, TI | **3 semanas** (las 2 últimas del piloto + 1) | Cumplir las metas de la sección 5 |
 | 4 | **Documentación** | Manual por rol (operario, jefe, admin), manual de operación de TI (despliegue, volver a una versión, Ansible), plan de contingencia y registro de equipos instalados | Equipo · TI revisa | **2 semanas** (en paralelo con las pruebas) | TI aprueba que puede operar con los manuales |
@@ -86,7 +86,7 @@ gantt
 
 | Riesgo | Cómo lo cubrimos |
 |---|---|
-| Los operarios lo sienten como vigilancia | No se guardan nombres ni RUT; las HH son contadores (Ley 19.628 modificada por la Ley 21.719 (vigente desde el 1 de diciembre de 2026; un proyecto para postergarla al 15 de octubre de 2027 ya pasó el Senado y está en la Cámara)). Se explica en la capacitación |
+| Los operarios lo sienten como vigilancia | No se guardan nombres ni RUT; las HH son contadores, como pide la Ley 19.628 modificada por la Ley 21.719 (hoy rige desde el 01/12/2026; el Congreso ya aprobó postergarla al 15/10/2027, falta su publicación). Se explica en la capacitación |
 | Muchas falsas alarmas y la gente deja de mirar | Umbral fijo de respaldo, simulación de umbrales y ajuste mensual en la mejora continua |
 | La instalación eléctrica de los sensores | La hace un electricista autorizado; el SCT-013 se abraza al cable, sin cortar el circuito |
 | Depender del equipo del proyecto | Manuales, referente por sede, Ansible y todo en el repositorio: TI puede reinstalar sin nosotros |
