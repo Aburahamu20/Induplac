@@ -1095,3 +1095,19 @@ Abraham (con Claude). Rama `tarea-43-evidencias`. Entregables de la Nota 3.
   - Seba: Wokwi (`demo-7`) y el gráfico de control (42).
   - Todos: grabación (24/11).
 
+---
+
+## 2026-11-18 — Wokwi de Oficinas (tarea 23)
+
+Abraham (con Claude). Rama `tarea-23-wokwi-oficinas`. Abraham pasó los 3 archivos del Wokwi de la Planta para hacer el de Oficinas.
+
+- **Hecho:** `simulation/wokwi-local2/` con `sketch.ino`, `diagram.json`, `libraries.txt` y su README. Se tomó el prototipo de la Planta de Sebastián y se ajustó a la sede:
+  - Usuario `esp32-local2`, Client ID `esp32-local-02-xxxx` y topic `induplac/local2/telemetria`.
+  - Energía con 2 perillas: climatización (0–60 kW) e iluminación (0–20 kW). El total es la suma, que es el mismo JSON que `simular_esp32.py` manda para `local2`.
+  - Agua de 0 a 1 m³/h, con 2 decimales, porque la fuga de Oficinas es 0,05 m³/h.
+  - Sin UV ni producción. Botón de personal 20 ↔ 0.
+  - Alertas locales: energía sobre el 120 % del promedio y posible fuga fuera de horario.
+- **Probado:** el JSON pasa `reglas.validar` del Edge, incluso con todas las perillas al máximo. **Falta** correrlo en Wokwi, porque necesita la clave de `esp32-local2`.
+- **Seguridad:** el `sketch.ino` de la Planta que se pasó por chat tenía la contraseña real de `esp32-local1`. En el repo sigue con `"CLAVE"`, y el de Oficinas también. Se recomienda cambiar esa contraseña en EMQX porque es débil y ya circuló.
+- **Pendiente:** probarlo en Wokwi con la clave, correr las dos sedes a la vez y sacar las capturas (`demo-7` y `demo-7b`).
+

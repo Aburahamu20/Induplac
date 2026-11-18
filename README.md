@@ -68,7 +68,7 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 
 | Parte | Cómo | Guía |
 |---|---|---|
-| **ESP32** | Abrir el proyecto en Wokwi con los archivos de `simulation/wokwi-local1/` y darle *Play* | [README](simulation/wokwi-local1/README.md) |
+| **ESP32** | Abrir un proyecto en Wokwi por sede con los archivos de `simulation/wokwi-local1/` (Planta) y `simulation/wokwi-local2/` (Oficinas) y darle *Play* | [Planta](simulation/wokwi-local1/README.md) · [Oficinas](simulation/wokwi-local2/README.md) |
 | **Edge** | `cd edge` → copiar `.env.example` a `.env` → `py edge_gateway.py` (sin Wokwi: `py simular_esp32.py`) | [README](edge/README.md) |
 | **Backend AWS** | API Gateway + Lambdas + DynamoDB + RDS en el Learner Lab. Prueba: `curl <API>/health` y `curl <API>/config/umbrales` | [README](backend/README.md) |
 | **Dashboard** | `cd dashboard` → `npm install` → `npm run dev` (o el build publicado en S3) | `dashboard/.env.example` |
@@ -544,6 +544,7 @@ La **demo es 100 % en Wokwi** (sin hardware físico). Cada ESP32 simulado emula 
 - **Electricidad (kW):** potenciómetro analógico que simula un transformador de corriente (sensor CT SCT-013).
 - **Consumo de agua (m³):** generador de pulsos que simula un caudalímetro de turbina tipo YF-S201.
 - **Radiación solar (UV):** sensor analógico que simula un fotodiodo UV con escala UVI 0–12.
+- **Oficinas (Local 2):** sin UV ni producción. La energía se mide con dos potenciómetros, **climatización** e **iluminación**, y el total es la suma. Prototipo en [`simulation/wokwi-local2/`](simulation/wokwi-local2/README.md).
 
 ### Formato de Telemetría (Payload JSON MQTT)
 
