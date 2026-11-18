@@ -1090,6 +1090,8 @@ Abraham (con Claude), para que Felipe lo revise y lo presente. Rama `tarea-35-ba
   - Está escrito a partir del código de `backend/lambda_api/` y `backend/lambda_config/`. No se configuró nada nuevo.
 - **Pendiente:** Felipe lo revisa (corrige lo que no le cuadre) y lo ensaya para el 25/11. Plazo: jueves 19.
 
+---
+
 ## 2026-11-18 — Carpeta de evidencias (tarea 43)
 
 Abraham (con Claude). Rama `tarea-43-evidencias`. Entregables de la Nota 3.
