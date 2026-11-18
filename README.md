@@ -87,6 +87,9 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 | Decisiones técnicas (ADR-01 a ADR-10) | [`docs/decisiones-tecnicas.md`](docs/decisiones-tecnicas.md) |
 | Contrato dashboard ↔ API | [`docs/api-dashboard.md`](docs/api-dashboard.md) |
 | Arquitectura cliente-servidor y demo de la API REST (Nota 3) | [`docs/nota-3/api-rest.md`](docs/nota-3/api-rest.md) |
+| 5 Porqués y evolución del MVP (Nota 3, criterio 1) | [`docs/nota-3/5-porques.md`](docs/nota-3/5-porques.md) |
+| Diagrama de Ishikawa (Nota 3, criterio 8) | [`docs/nota-3/ishikawa.md`](docs/nota-3/ishikawa.md) |
+| Transferencia tecnológica: del MVP a Induplac (Nota 3, criterio 6) | [`docs/nota-3/transferencia-tecnologica.md`](docs/nota-3/transferencia-tecnologica.md) |
 | Backend: los 5 pasos de un dato y por qué Lambda (Nota 3) | [`docs/nota-3/backend.md`](docs/nota-3/backend.md) |
 | Broker MQTT | [`docs/broker-mqtt.md`](docs/broker-mqtt.md) |
 | Modo offline y sincronización | [`docs/modo-offline.md`](docs/modo-offline.md) |
@@ -907,7 +910,7 @@ Detalle en [`CONTRIBUTING.md`](CONTRIBUTING.md). Las IA siguen [`AGENTS.md`](AGE
 
 **Dashboard en la nube:** [induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html](https://induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html) (login con Cognito y MFA).
 
-**En curso:** Wokwi para la demo (tarea 23), umbrales en el Edge (tarea 44) y la **Nota 3**: API REST, backend y los criterios de problema, transferencia y calidad (tareas 34 a 43, [`docs/nota-3.md`](docs/nota-3.md)).
+**En curso:** Wokwi para la demo (tarea 23), umbrales en el Edge (tarea 44) y la **Nota 3**: backend, gráfico de control, ensayo y evidencias (tareas 35, 42 y 43, [`docs/nota-3.md`](docs/nota-3.md)). **18/11:** listos los [5 Porqués](docs/nota-3/5-porques.md), el [Ishikawa](docs/nota-3/ishikawa.md) y la [transferencia tecnológica](docs/nota-3/transferencia-tecnologica.md) (tareas 36, 38 y 40, Lisandra).
 
 El estado de cada tarea está en [`docs/EN-CURSO.md`](docs/EN-CURSO.md) y el detalle de cada sesión en [`docs/notas-de-avance.md`](docs/notas-de-avance.md). Los datos son ficticios.
 

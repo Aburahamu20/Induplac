@@ -460,7 +460,7 @@ Otras cosas que se pueden mostrar:
 - Pipeline DevOps: ramas + PR, CI con 6 controles (incluida seguridad), `main` protegida, versiones `v0.1` a `v0.7`, despliegue con `/health` y **Ansible** para el Edge.
 - Backlog con historias de usuario, Kanban y gestión del equipo (criterios 5 y 7).
 
-**⏳ Falta para la Nota 3 (25/11):** Wokwi listo para la demo, 5 Porqués, transferencia tecnológica, Ishikawa, gráfico de control, diagrama de la API, explicación del backend, ensayo de la demo, PowerPoint y grabación (tareas 18, 23, 34 a 40, 42 y 43). Ya están el guion de la demo (tarea 18) y el [plan de pruebas](nota-3/plan-de-pruebas.md) (tarea 41).
+**⏳ Falta para la Nota 3 (25/11):** Wokwi listo para la demo, gráfico de control, explicación del backend, ensayo de la demo, PowerPoint y grabación (tareas 18, 23, 35, 42 y 43). Ya están el guion de la demo (tarea 18), la API REST (tarea 34), el [plan de pruebas](nota-3/plan-de-pruebas.md) (tarea 41) y, de Lisandra (18/11): los [5 Porqués](nota-3/5-porques.md) (36), la [transferencia tecnológica](nota-3/transferencia-tecnologica.md) (38) y el [Ishikawa](nota-3/ishikawa.md) (40). Sirven para explicar **por qué** existe el problema, **qué podría fallar** en nuestra solución y **cómo se llevaría** a Induplac de verdad.
 
 **📐 Queda como diseño (no se demuestra):** VPN entre las sedes y AWS, sensores reales y Raspberry Pi física.
 
@@ -645,6 +645,9 @@ Otras cosas que se pueden mostrar:
 | El backend en AWS | [`backend/README.md`](../backend/README.md) |
 | Backlog, sprints y Kanban | [`docs/nota-3/backlog.md`](nota-3/backlog.md) |
 | Lluvia de ideas y diagrama de afinidad | [`docs/nota-3/gestion-equipo.md`](nota-3/gestion-equipo.md) |
+| Por qué existe el problema (5 Porqués) y cómo creció el MVP | [`docs/nota-3/5-porques.md`](nota-3/5-porques.md) |
+| Qué puede hacer que una alerta no llegue (Ishikawa) | [`docs/nota-3/ishikawa.md`](nota-3/ishikawa.md) |
+| Cómo pasaría el MVP a Induplac de verdad (transferencia) | [`docs/nota-3/transferencia-tecnologica.md`](nota-3/transferencia-tecnologica.md) |
 | Qué está haciendo cada uno ahora | [`docs/EN-CURSO.md`](EN-CURSO.md) |
 | Por qué elegimos cada tecnología (ADR-01 a ADR-08) | [`docs/decisiones-tecnicas.md`](decisiones-tecnicas.md) |
 | Modo offline, cálculos y sincronización | [`docs/modo-offline.md`](modo-offline.md) |
