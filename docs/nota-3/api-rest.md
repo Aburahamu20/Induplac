@@ -116,7 +116,8 @@ curl -s -X POST $API/intervalos \
 
 **Se manda de nuevo el mismo comando** → vuelve a responder `recibidos: 1`, y en **DynamoDB → tabla `induplac-intervalos`** sigue habiendo **un solo** registro para `local1` + `2026-11-24T06:00:00Z` (no se duplica) · 📸 `api-3-dynamodb.png`
 
-> El intervalo de ejemplo es a las **03:00 de Chile** del 24/11 y con valores normales, para no tapar datos reales ni generar alertas falsas.
+> El intervalo de ejemplo es a las **03:00 de Chile** del 24/11 y con valores normales, para no generar alertas falsas.
+> ⚠️ Como su fecha es **futura**, `GET /actual` lo toma como el último dato de la planta y el dashboard muestra 12.4 kW hasta esa fecha. Por eso **se borra al terminar** (§4.5).
 
 ### 4.3 Consulta sin sesión → `401`
 
@@ -145,6 +146,18 @@ curl -s "$API/api/alertas?local_id=local1" -H "Authorization: Bearer $TOKEN" | p
 ```bash
 unset CLAVE TOKEN
 ```
+
+Y en **DynamoDB → `induplac-intervalos`**: seleccionar el registro `local1` + `2026-11-24T06:00:00Z` → **Acciones → Eliminar elementos**. Así el dashboard vuelve a mostrar el dato real.
+
+### 4.6 Evidencias (18/11/2026)
+
+| # | Qué muestra | Captura |
+| --- | --- | --- |
+| 1 | `GET /health` → `{"ok": true}` | ![health](img/api-1-health.png) |
+| 2 | `POST /intervalos` → `{"recibidos": 1, "alertas": 0}` | ![envío](img/api-2-envio.png) |
+| 3 | DynamoDB: un solo registro aunque se envió dos veces | ⏳ pendiente (consola de AWS de Felipe) |
+| 4 | Consulta sin token → `HTTP/2 401` | ![sin token](img/api-4-sin-token.png) |
+| 5 | Consulta con token → JSON con las 8 variables de `local1` y su nivel | ![consulta](img/api-5-consulta.png) |
 
 ---
 
