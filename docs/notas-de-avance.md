@@ -1079,3 +1079,19 @@ Abraham (con Claude), con el lab de Felipe encendido. Rama `tarea-34-capturas-ap
 - **Corregido tras la revisión del equipo (18/11):** cadena de los 5 Porqués (el #4 pregunta por qué nunca se instaló un sistema); el #5 se ataca con alertas con responsable + dashboard de operación; "7 versiones (v0.1 a v0.7) y la v1.0"; transferencia en ~13 semanas (solo lo secuencial); "Local 2 (Oficinas)"; Ley 19.628 modificada por la Ley 21.719 (hoy rige desde el 01/12/2026; el Congreso ya aprobó postergarla al 15/10/2027 y falta su publicación; actualizado por Abraham con Claude al subir el PR).
 
 - **Merge (18/11):** Abraham aprobó el [PR #75](https://github.com/Aburahamu20/Induplac/pull/75) con los 6 checks del CI en verde. Las tareas 36, 38 y 40 quedan ✅. **Pendiente:** que el grupo revise las duraciones, los cargos y las metas de la transferencia, que son una propuesta.
+
+---
+
+## 2026-11-18 — Carpeta de evidencias (tarea 43)
+
+Abraham (con Claude). Rama `tarea-43-evidencias`. Entregables de la Nota 3.
+
+- **Hecho:** [`nota-3/evidencias.md`](nota-3/evidencias.md) es el índice de evidencias por criterio. Muestra lo que ya hay (Ansible, API, 5 Porqués, Ishikawa, backlog, transferencia, plan de pruebas) y marca lo que falta con el nombre de quién lo saca.
+- **Hecho:** se guardó en el repo el reporte de ZAP del CI de `main` del 18/11 (`nota-3/evidencias/reporte-zap.html` y `.json`), porque el artefacto de GitHub vence a los 90 días.
+  - Resultado: 0 altos, 2 medios, 5 bajos y 2 informativos. Todos son cabeceras de seguridad que el servidor de prueba no envía, algo ya anotado en `devops.md` (en producción se resuelve con CloudFront). Las reglas que bloquean salieron limpias.
+- **Decidido:** la grabación del ensayo del 24/11 sirve como entregable y como respaldo si la demo falla en vivo. El video no se sube al repo, solo su link.
+- **Pendiente:**
+  - Abraham: captura de los 6 checks del CI y las 6 capturas del dashboard (`demo-1` a `demo-6`) más la del modo offline (`demo-8`).
+  - Seba: Wokwi (`demo-7`) y el gráfico de control (42).
+  - Todos: grabación (24/11).
+

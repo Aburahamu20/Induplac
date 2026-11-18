@@ -90,6 +90,7 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 | 5 Porqués y evolución del MVP (Nota 3, criterio 1) | [`docs/nota-3/5-porques.md`](docs/nota-3/5-porques.md) |
 | Diagrama de Ishikawa (Nota 3, criterio 8) | [`docs/nota-3/ishikawa.md`](docs/nota-3/ishikawa.md) |
 | Transferencia tecnológica: del MVP a Induplac (Nota 3, criterio 6) | [`docs/nota-3/transferencia-tecnologica.md`](docs/nota-3/transferencia-tecnologica.md) |
+| Carpeta de evidencias de la Nota 3 (índice por criterio) | [`docs/nota-3/evidencias.md`](docs/nota-3/evidencias.md) |
 | Broker MQTT | [`docs/broker-mqtt.md`](docs/broker-mqtt.md) |
 | Modo offline y sincronización | [`docs/modo-offline.md`](docs/modo-offline.md) |
 | Ciberseguridad (5 capas) | [`docs/ciberseguridad.md`](docs/ciberseguridad.md) |
