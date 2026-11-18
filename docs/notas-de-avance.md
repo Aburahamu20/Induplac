@@ -469,7 +469,6 @@ Abraham, con la cuenta del Learner Lab de Felipe.
   - Nuevo incidente: cambiar la fecha en `.env` y reiniciar el Edge → días y HH a cero.
 - 6 pruebas nuevas en `edge/tests/` (21 en total).
 
-
 ---
 
 ## 2026-10-29 — API local del Edge y login de planta (tarea 22)
@@ -897,7 +896,6 @@ Sus documentos no se actualizaban desde el 23/10. Se pusieron al día con lo con
 - [ ] El Excel `docs/nota-2/Induplac_Roles_Equipo.xlsx` no se tocó; si se presenta en la Nota 3, actualizarlo igual que el texto.
 - [ ] Fortaleza y rol de Lisandra (espera el aviso de Bárbara).
 
-
 ---
 
 ## 2026-11-17 — MFA por rol probado (tarea 31 ✅)
@@ -1067,7 +1065,6 @@ Abraham (con Claude), con el lab de Felipe encendido. Rama `tarea-34-capturas-ap
 - **Hecho:** la advertencia de Energía de Planta volvió a **10 %** (pendiente del 17/11), desde la pantalla Umbrales con RDS encendido.
 - **Hecho (Felipe):** se borró de DynamoDB el registro de prueba `local1` + `2026-11-24T06:00:00Z`.
 
-
 ---
 
 ## 2026-11-18 — 5 Porqués, Ishikawa y transferencia tecnológica (tareas 36, 38 y 40, Lisandra con Claude)
@@ -1079,6 +1076,19 @@ Abraham (con Claude), con el lab de Felipe encendido. Rama `tarea-34-capturas-ap
 - **Corregido tras la revisión del equipo (18/11):** cadena de los 5 Porqués (el #4 pregunta por qué nunca se instaló un sistema); el #5 se ataca con alertas con responsable + dashboard de operación; "7 versiones (v0.1 a v0.7) y la v1.0"; transferencia en ~13 semanas (solo lo secuencial); "Local 2 (Oficinas)"; Ley 19.628 modificada por la Ley 21.719 (hoy rige desde el 01/12/2026; el Congreso ya aprobó postergarla al 15/10/2027 y falta su publicación; actualizado por Abraham con Claude al subir el PR).
 
 - **Merge (18/11):** Abraham aprobó el [PR #75](https://github.com/Aburahamu20/Induplac/pull/75) con los 6 checks del CI en verde. Las tareas 36, 38 y 40 quedan ✅. **Pendiente:** que el grupo revise las duraciones, los cargos y las metas de la transferencia, que son una propuesta.
+
+---
+
+## 2026-11-18 — Backend: borrador de la explicación (tarea 35)
+
+Abraham (con Claude), para que Felipe lo revise y lo presente. Rama `tarea-35-backend`. Criterio 4 de la Nota 3.
+
+- **Hecho:** [`nota-3/backend.md`](nota-3/backend.md) explica el recorrido de un dato en 5 pasos (recibe → valida → procesa → almacena → entrega), cada uno con su captura de la demo de la API. Incluye:
+  - Una tabla de por qué Lambda y no Flask/FastAPI en una EC2, con sus costos y cómo se resolvieron.
+  - El backend local del Edge.
+  - Las pruebas y las posibles preguntas del profe.
+  - Está escrito a partir del código de `backend/lambda_api/` y `backend/lambda_config/`. No se configuró nada nuevo.
+- **Pendiente:** Felipe lo revisa (corrige lo que no le cuadre) y lo ensaya para el 25/11. Plazo: jueves 19.
 
 ---
 
