@@ -87,6 +87,7 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 | Decisiones técnicas (ADR-01 a ADR-10) | [`docs/decisiones-tecnicas.md`](docs/decisiones-tecnicas.md) |
 | Contrato dashboard ↔ API | [`docs/api-dashboard.md`](docs/api-dashboard.md) |
 | Arquitectura cliente-servidor y demo de la API REST (Nota 3) | [`docs/nota-3/api-rest.md`](docs/nota-3/api-rest.md) |
+| Backend: los 5 pasos de un dato y por qué Lambda (Nota 3) | [`docs/nota-3/backend.md`](docs/nota-3/backend.md) |
 | Broker MQTT | [`docs/broker-mqtt.md`](docs/broker-mqtt.md) |
 | Modo offline y sincronización | [`docs/modo-offline.md`](docs/modo-offline.md) |
 | Ciberseguridad (5 capas) | [`docs/ciberseguridad.md`](docs/ciberseguridad.md) |

@@ -330,7 +330,7 @@ Una API **REST** usa direcciones (URL) y verbos para decir qué se quiere hacer.
 | `POST` | | `POST /api/alertas/{id}/reconocer`: un jefe reconoce una alerta |
 | `PUT` | **Cambiar** algo que existe | `PUT /config/umbrales/local1/uv`: un admin cambia el umbral de UV |
 
-Cada respuesta trae un **código** que dice cómo le fue: `200` (todo bien), `400` (el pedido viene mal), `401` (no iniciaste sesión o la clave no sirve), `403` (no tienes permiso para esa sede o acción), `404` (no existe), `503` (la fuente de datos no responde, por ejemplo RDS apagado). El contrato completo está en [`api-dashboard.md`](api-dashboard.md), y el diagrama cliente-servidor con los comandos para probar el envío y la consulta, en [`nota-3/api-rest.md`](nota-3/api-rest.md).
+Cada respuesta trae un **código** que dice cómo le fue: `200` (todo bien), `400` (el pedido viene mal), `401` (no iniciaste sesión o la clave no sirve), `403` (no tienes permiso para esa sede o acción), `404` (no existe), `503` (la fuente de datos no responde, por ejemplo RDS apagado). El contrato completo está en [`api-dashboard.md`](api-dashboard.md), y el diagrama cliente-servidor con los comandos para probar el envío y la consulta, en [`nota-3/api-rest.md`](nota-3/api-rest.md). Qué hace el backend con cada dato (recibe → valida → procesa → almacena → entrega) y por qué usamos Lambda está en [`nota-3/backend.md`](nota-3/backend.md).
 
 ### El backend: qué pasa con un dato cuando llega
 

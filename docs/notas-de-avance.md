@@ -1067,3 +1067,16 @@ Abraham (con Claude), con el lab de Felipe encendido. Rama `tarea-34-capturas-ap
 - **Hecho:** la advertencia de Energía de Planta volvió a **10 %** (pendiente del 17/11), desde la pantalla Umbrales con RDS encendido.
 - **Hecho (Felipe):** se borró de DynamoDB el registro de prueba `local1` + `2026-11-24T06:00:00Z`.
 
+---
+
+## 2026-11-18 — Backend: borrador de la explicación (tarea 35)
+
+Abraham (con Claude), para que Felipe lo revise y lo presente. Rama `tarea-35-backend`. Criterio 4 de la Nota 3.
+
+- **Hecho:** [`nota-3/backend.md`](nota-3/backend.md) explica el recorrido de un dato en 5 pasos (recibe → valida → procesa → almacena → entrega), cada uno con su captura de la demo de la API. Incluye:
+  - Una tabla de por qué Lambda y no Flask/FastAPI en una EC2, con sus costos y cómo se resolvieron.
+  - El backend local del Edge.
+  - Las pruebas y las posibles preguntas del profe.
+  - Está escrito a partir del código de `backend/lambda_api/` y `backend/lambda_config/`. No se configuró nada nuevo.
+- **Pendiente:** Felipe lo revisa (corrige lo que no le cuadre) y lo ensaya para el 25/11. Plazo: jueves 19.
+
