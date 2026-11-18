@@ -1065,5 +1065,5 @@ Abraham (con Claude), con el lab de Felipe encendido. Rama `tarea-34-capturas-ap
 - **Hecho (Felipe):** capturas de DynamoDB. `Items returned: 1` aunque se envió dos veces, y `recibido_en` con la hora del segundo envío, o sea que el reenvío reemplazó al primero. La segunda captura se recortó para no mostrar el Account ID.
 - **Tarea 34 ✅. Criterio 3 ✅.**
 - **Hecho:** la advertencia de Energía de Planta volvió a **10 %** (pendiente del 17/11), desde la pantalla Umbrales con RDS encendido.
-- **En curso:** Felipe borra de DynamoDB el registro de prueba `local1` + `2026-11-24T06:00:00Z`.
+- **Hecho (Felipe):** se borró de DynamoDB el registro de prueba `local1` + `2026-11-24T06:00:00Z`.
 
