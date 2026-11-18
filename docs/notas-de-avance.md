@@ -1053,3 +1053,17 @@ Abraham (con Claude). Rama `docs/api-rest-demo`. Criterio 3 de la Nota 3.
 - Revisado contra el código: la clave va en la cabecera `x-induplac-key`; el token es el `IdToken` de Cognito en `Authorization: Bearer`; los campos del registro salen de `edge/reglas.py`.
 - **Seguridad:** la clave y el token se piden con `read -s`, nunca quedan en pantalla ni en el repo.
 - **Pendiente:** correr la §4 con el lab de Felipe encendido y subir las capturas (`docs/nota-3/img/api-*.png`). Ahí se cierra la tarea 34.
+
+---
+
+## 2026-11-18 — API REST: capturas de la demo (tarea 34)
+
+Abraham (con Claude), con el lab de Felipe encendido. Rama `tarea-34-capturas-api`.
+
+- **Hecho:** se corrieron los comandos de [`nota-3/api-rest.md`](nota-3/api-rest.md) §4 desde WSL. Las 4 respuestas salieron como se esperaba: `/health` OK, `POST` con `recibidos: 1`, `401` sin token y `200` con token (las 8 variables de `local1`). Las capturas están en `docs/nota-3/img/api-*.png` y no muestran ni la clave ni el token.
+- **Hallazgo:** el intervalo de prueba tiene fecha futura (24/11), así que `GET /actual` lo toma como el último dato y el dashboard muestra 12.4 kW. Se agregó a la guía el paso de borrarlo de DynamoDB al terminar (§4.5).
+- **Hecho (Felipe):** capturas de DynamoDB. `Items returned: 1` aunque se envió dos veces, y `recibido_en` con la hora del segundo envío, o sea que el reenvío reemplazó al primero. La segunda captura se recortó para no mostrar el Account ID.
+- **Tarea 34 ✅. Criterio 3 ✅.**
+- **Hecho:** la advertencia de Energía de Planta volvió a **10 %** (pendiente del 17/11), desde la pantalla Umbrales con RDS encendido.
+- **Hecho (Felipe):** se borró de DynamoDB el registro de prueba `local1` + `2026-11-24T06:00:00Z`.
+
