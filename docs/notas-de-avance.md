@@ -1067,3 +1067,13 @@ Abraham (con Claude), con el lab de Felipe encendido. Rama `tarea-34-capturas-ap
 - **Hecho:** la advertencia de Energía de Planta volvió a **10 %** (pendiente del 17/11), desde la pantalla Umbrales con RDS encendido.
 - **Hecho (Felipe):** se borró de DynamoDB el registro de prueba `local1` + `2026-11-24T06:00:00Z`.
 
+
+---
+
+## 2026-11-18 — 5 Porqués, Ishikawa y transferencia tecnológica (tareas 36, 38 y 40, Lisandra con Claude)
+
+- **Hecho:** [`nota-3/5-porques.md`](nota-3/5-porques.md) (criterio 1): 5 Porqués sobre "el consumo anormal se descubre con la boleta". **Causa raíz:** no hay medición continua con reglas automáticas que avisen en el momento a quien debe actuar (la medición existe para pagar, no para operar). Tabla de cómo la solución ataca cada porqué y **línea de tiempo del MVP** (`v0.1` a `v1.0`).
+- **Hecho:** [`nota-3/ishikawa.md`](nota-3/ishikawa.md) + `img/ishikawa.png` (criterio 8): efecto "las alertas no llegan a tiempo a quien debe actuar"; **18 causas** en las 6M, sacadas de problemas reales de la bitácora. **14 con control**, 1 en curso (tarea 44) y 3 abiertas (notificaciones al celular, RTC, credenciales del Learner Lab) que pasan al roadmap.
+- **Hecho:** [`nota-3/transferencia-tecnologica.md`](nota-3/transferencia-tecnologica.md) (criterio 6): 8 etapas (validación → mejora continua) con qué, quién y duración; **~13 semanas hasta la puesta en marcha**, piloto en el Local 1 con 4 semanas de línea base, Gantt con fechas de ejemplo, metas del piloto y riesgos.
+- **Propuesta (no decidido):** duraciones, cargos de Induplac y metas del piloto son estimaciones del equipo; revisar en el grupo.
+- **Corregido tras la revisión del equipo (18/11):** cadena de los 5 Porqués (el #4 pregunta por qué nunca se instaló un sistema); el #5 se ataca con alertas con responsable + dashboard de operación; "7 versiones (v0.1 a v0.7) y la v1.0"; transferencia en ~13 semanas (solo lo secuencial); "Local 2 (Oficinas)"; Ley 19.628 modificada por la Ley 21.719 (vigente desde el 01/12/2026; el proyecto que la posterga al 15/10/2027 ya pasó el Senado y está en la Cámara).
