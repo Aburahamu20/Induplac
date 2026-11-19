@@ -38,7 +38,7 @@
 Si alguien te pregunta "¿de qué se trata su proyecto?", esta es la respuesta corta:
 
 > **Induplac IoT es una plataforma que mide en tiempo real el consumo de electricidad y agua, la radiación UV, la producción y las horas sin accidentes de dos sedes de la empresa Induplac.**
-> **Los sensores mandan los datos a un computador pequeño en cada sede (una Raspberry Pi; en la demo, un PC), que los guarda, calcula alertas y muestra un dashboard. Cada 15 minutos manda un resumen a la nube de AWS, donde se juntan las dos sedes para comparar y ver el histórico.**
+> **Los sensores mandan los datos a un computador pequeño en cada sede (una Raspberry Pi; en el prototipo, una máquina virtual de AWS por sede), que los guarda, calcula alertas y muestra un dashboard. Cada 15 minutos manda un resumen a la nube de AWS, donde se juntan las dos sedes para comparar y ver el histórico.**
 > **Lo más importante: si se corta internet, la planta sigue funcionando igual. Los datos se guardan localmente y se suben solos cuando vuelve la conexión, sin perder ni duplicar nada.**
 
 Datos del proyecto:
@@ -74,7 +74,7 @@ Hoy, en muchas empresas, el consumo se ve **tarde**: llega la boleta a fin de me
 | **Wokwi** | Un simulador web de ESP32. | Simulamos los sensores sin comprar hardware. Hay un prototipo por sede: Planta (`simulation/wokwi-local1/`) y Oficinas (`simulation/wokwi-local2/`, con energía separada en climatización e iluminación). |
 | **MQTT** | Un protocolo de mensajes muy liviano, pensado para dispositivos pequeños. | Es el "idioma" con que el ESP32 envía datos. |
 | **Broker MQTT** | El "cartero" de MQTT: recibe mensajes y los entrega a quien los pidió. | Recibe los datos de los ESP32 y se los pasa al Edge. En la simulación usamos **EMQX Serverless** (en la nube, gratis). |
-| **Edge / Edge Gateway** | Un computador que está **en la sede**, cerca de los sensores ("en el borde" de la red). | En el diseño es una **Raspberry Pi** por sede; en la demo corre en un PC. Guarda, resume, alerta y muestra el dashboard de planta. |
+| **Edge / Edge Gateway** | Un computador que está **en la sede**, cerca de los sensores ("en el borde" de la red). | En el diseño es una **Raspberry Pi** por sede. En el prototipo, cada sede tiene su Edge en una **EC2** del Learner Lab, que simula la Raspberry. Guarda, resume, alerta y muestra el dashboard de planta. |
 | **SQLite** | Una base de datos liviana que vive en un solo archivo. | Base de datos local de la Raspberry Pi. |
 | **AWS** | La nube de Amazon. Usamos el **Learner Lab** (cuenta educativa con USD 100). | Junta las dos sedes, guarda el histórico, administra usuarios. |
 | **API Gateway** | La "puerta de entrada" a la nube: recibe pedidos por HTTPS. | Recibe los resúmenes del Edge y las consultas del dashboard. |
@@ -407,6 +407,18 @@ Configurar a mano una Raspberry en cada sede es lento y cada persona lo haría u
 - Hora de Chile sincronizada, paquetes, un usuario sin privilegios, el código de GitHub en una **versión conocida**, la configuración de su sede y el servicio que arranca solo.
 - Es **idempotente**: si se corre de nuevo y todo está bien, **no cambia nada** (`changed=0`). Si alguien cambió algo a mano, lo devuelve al estado correcto.
 - Lo probamos el 17/11 en 2 máquinas de AWS que simulan las Raspberry de Planta y Oficinas: 1ª pasada con 9 cambios, 2ª pasada con **0**.
+- **Desde el 18/11, el Edge corre de verdad en esas 2 EC2**, una por sede, como servicio de Linux:
+  - `edge-planta` atiende solo `local1` con el usuario `edge-local1`, y `edge-oficinas` atiende solo `local2` con `edge-local2`.
+  - Arranca solo cuando se prende la EC2 y se reinicia si falla. **Ya no depende del PC de nadie.**
+  - Las claves van en `ansible/secretos.yml`, que nunca se sube (ver [`ansible/README.md`](../ansible/README.md) §4b).
+
+```
+Wokwi Planta   ─► EMQX ─► EC2 edge-planta   (local1) ─┐
+                                                      ├─► AWS ─► Dashboard
+Wokwi Oficinas ─► EMQX ─► EC2 edge-oficinas (local2) ─┘
+```
+
+> ⚠️ Para que lleguen datos se necesitan dos cosas: el **lab encendido** (si termina la sesión, las EC2 se apagan, y al prenderlas el Edge arranca solo) y **los dos Wokwi en Play** en el navegador.
 
 ---
 
@@ -443,7 +455,7 @@ Otras cosas que se pueden mostrar:
 - **Pipeline:** un PR con los 6 controles en verde y el reporte de ZAP.
 - **Ansible:** `ansible edge -m ping` y el playbook con `changed=0`.
 
-> ⚠️ **Antes de presentar:** abrir el Learner Lab, encender RDS y las 2 EC2, actualizar las IP en `ansible/inventario.ini` y revisar que Wokwi esté enviando (la pantalla *Estado de las sedes* lo muestra).
+> ⚠️ **Antes de presentar:** abrir el Learner Lab, encender RDS y las 2 EC2 (el Edge de cada sede arranca solo), poner los **2 Wokwi en Play** y revisar que lleguen datos (la pantalla *Estado de las sedes* lo muestra). Las IP en `ansible/inventario.ini` solo hay que actualizarlas si se va a mostrar Ansible.
 
 ---
 
@@ -497,6 +509,9 @@ Otras cosas que se pueden mostrar:
 
 **¿Y si se cae la Raspberry Pi?**
 > El ESP32 guarda unas 1.500 lecturas en memoria (cerca de 2 horas) y las reenvía cuando la Pi vuelve.
+
+**¿Esto depende de un computador de ustedes?**
+> No. Cada sede tiene su propio Edge en una máquina virtual de AWS (EC2) que simula la Raspberry Pi. Se instala con Ansible igual en las dos y corre como servicio: arranca solo y se reinicia si falla. Si una sede se cae, la otra sigue funcionando. Lo único que corre en el navegador es Wokwi, que simula los sensores.
 
 **¿Por qué no ponen una tarjeta SD en cada ESP32 en vez de la Raspberry?**
 > Porque mantener tarjetas en cada sensor es poco práctico, las tarjetas en microcontroladores se dañan con cortes de luz, y el ESP32 no tiene capacidad para levantar una VPN ni servir un dashboard.

@@ -69,7 +69,7 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 | Parte | Cómo | Guía |
 |---|---|---|
 | **ESP32** | Abrir un proyecto en Wokwi por sede con los archivos de `simulation/wokwi-local1/` (Planta) y `simulation/wokwi-local2/` (Oficinas) y darle *Play* | [Planta](simulation/wokwi-local1/README.md) · [Oficinas](simulation/wokwi-local2/README.md) |
-| **Edge** | `cd edge` → copiar `.env.example` a `.env` → `py edge_gateway.py` (sin Wokwi: `py simular_esp32.py`) | [README](edge/README.md) |
+| **Edge** | En el lab: ya corre solo en las 2 EC2 (una por sede), instalado con `ansible-playbook edge-baseline.yml -e @secretos.yml`. Para desarrollo en un PC: `cd edge` → copiar `.env.example` a `.env` → `py edge_gateway.py` (sin Wokwi: `py simular_esp32.py`) | [Ansible §4b](ansible/README.md) · [README](edge/README.md) |
 | **Backend AWS** | API Gateway + Lambdas + DynamoDB + RDS en el Learner Lab. Prueba: `curl <API>/health` y `curl <API>/config/umbrales` | [README](backend/README.md) |
 | **Dashboard** | `cd dashboard` → `npm install` → `npm run dev` (o el build publicado en S3) | `dashboard/.env.example` |
 | **Pruebas automáticas** | `cd edge` → `py -m unittest discover -s tests -v` (también corren solas en cada PR, junto con los controles de seguridad) | [DevOps](docs/devops.md) |
@@ -738,7 +738,7 @@ Induplac/
 | **Microcontrolador** | ESP32 (sensores analógicos y digitales) | ✅ Funcionando (Wokwi) |
 | **Simulación** | Wokwi (Wi-Fi virtual `Wokwi-GUEST`) | ✅ Funcionando |
 | **Broker MQTT** | EMQX Serverless (MQTTS 8883) · diseño real: Mosquitto en la Raspberry Pi | ✅ Funcionando |
-| **Edge Gateway** | Raspberry Pi + Python + SQLite (`is_synced`) | ✅ Funcionando (en PC para la demo) |
+| **Edge Gateway** | Raspberry Pi + Python + SQLite (`is_synced`) | ✅ Funcionando: un Edge por sede en 2 EC2 del lab (servicio `induplac-edge`, desde el 18/11) |
 | **API** | Amazon API Gateway (HTTP API) | ✅ Funcionando |
 | **Cómputo cloud** | AWS Lambda (Python 3.12): `induplac-api` y `induplac-config` | ✅ Funcionando |
 | **Base de datos cloud** | Amazon DynamoDB on-demand (intervalos y alertas) | ✅ Funcionando |
@@ -752,7 +752,7 @@ Induplac/
 | **Control de versiones** | Git + GitHub (ramas, Pull Requests, `main` protegida con el ruleset `proteger-main` y versiones `v0.1` a `v0.7`) | En uso |
 | **CI/CD** | GitHub Actions: build, lint, pruebas y despliegue a S3 y Lambda con verificación `/health` | ✅ En uso |
 | **DevSecOps** | `gitleaks`, `npm audit`, `pip-audit`, Bandit, Semgrep y OWASP ZAP (baseline) en cada PR | ✅ En uso (desde el 13/11) |
-| **Configuración de equipos** | Ansible: playbook baseline del Edge, idempotente, con vuelta a una versión anterior ([`ansible/`](ansible/README.md)) | ✅ Probado en 2 EC2 (17/11) |
+| **Configuración de equipos** | Ansible: playbook baseline del Edge, idempotente, con vuelta a una versión anterior ([`ansible/`](ansible/README.md)) | ✅ Probado en 2 EC2 (17/11) y dejando el Edge corriendo en cada una (18/11) |
 | **Documentación** | Markdown + Mermaid | En uso |
 
 ---
