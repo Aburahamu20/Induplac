@@ -1,0 +1,4 @@
+PubSubClient
+ArduinoJson
+Adafruit SH110X
+Adafruit GFX Library
