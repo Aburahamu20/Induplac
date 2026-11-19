@@ -20,10 +20,10 @@ paquetes_base:
 # Configuración del Edge (edge/.env). Lo que no es secreto va aquí.
 mqtt_host: gb12d98f.ala.us-east-1.emqxsl.com
 mqtt_port: 8883
-mqtt_usuario: edge-local1
+mqtt_usuario: "edge-{{ local_id }}"   # cada sede con su usuario del broker: edge-local1 / edge-local2
 aws_api_url: https://3j82c54obf.execute-api.us-east-1.amazonaws.com
 api_port: 8080
 
 # Secretos: NUNCA en el repo. Van en ansible/secretos.yml (ignorado por git) o con -e.
-#   mqtt_clave, clave_ingesta
+#   clave_ingesta y mqtt_claves (una por sede: local1 → edge-local1, local2 → edge-local2)
 # Sin secretos, el Edge queda instalado pero el servicio detenido.

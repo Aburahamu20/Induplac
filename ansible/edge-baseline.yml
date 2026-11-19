@@ -8,7 +8,9 @@
   hosts: edge
   become: true
   vars:
-    servicio_activo: "{{ (mqtt_clave | default('') | length > 0) and (clave_ingesta | default('') | length > 0) }}"
+    # Clave del broker de ESTA sede (mqtt_claves.local1 / .local2). Se acepta mqtt_clave suelta por compatibilidad.
+    mqtt_clave_sede: "{{ (mqtt_claves | default({})).get(local_id, mqtt_clave | default('')) }}"
+    servicio_activo: "{{ (mqtt_clave_sede | length > 0) and (clave_ingesta | default('') | length > 0) }}"
 
   tasks:
     - name: 1. Zona horaria de Chile

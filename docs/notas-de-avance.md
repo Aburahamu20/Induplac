@@ -1095,3 +1095,16 @@ Abraham (con Claude). Rama `tarea-43-evidencias`. Entregables de la Nota 3.
   - Seba: Wokwi (`demo-7`) y el gráfico de control (42).
   - Todos: grabación (24/11).
 
+---
+
+## 2026-11-18 — Edge corriendo en las EC2 del lab (opción B)
+
+Abraham (con Claude). Rama `tarea-33b-edge-en-ec2`. Decisión de Abraham: **todo debe funcionar en el lab**, sin depender de su PC.
+
+- **Decidido:** cada EC2 es el Edge de su sede, corriendo como servicio `induplac-edge`, como sería una Raspberry Pi en cada sede. El Edge del PC queda solo como respaldo y nunca corre a la vez que el de la EC2.
+- **Hecho (Ansible):** el playbook ya instalaba el servicio, pero usaba `edge-local1` en las dos sedes. Ahora cada EC2 usa su propio usuario del broker:
+  - `mqtt_usuario: edge-{{ local_id }}`.
+  - `secretos.yml` tiene una clave por sede (`mqtt_claves.local1` / `local2`).
+  - Se probó el render del `.env` de las dos sedes, con y sin claves, y el `--syntax-check`.
+- **Pendiente:** con el lab encendido, poner las IP en el inventario, completar `secretos.yml` y correr el playbook. Después, actualizar el guion de la demo y la guía, porque el Edge ya no está en el PC.
+

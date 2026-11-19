@@ -93,7 +93,24 @@ cd ~/Induplac/ansible
 | 4 | **Idempotencia** | `ansible-playbook edge-baseline.yml` (otra vez) | `changed=0` en las dos sedes |
 | 5 | Verificación | `ansible edge -a "systemctl is-enabled induplac-edge"` | `enabled` en las dos |
 
-> **Opcional (Edge corriendo de verdad):** copia `secretos.example.yml` como `secretos.yml`, completa las claves de `edge/.env` y corre `ansible-playbook edge-baseline.yml -e @secretos.yml`. Después: `ansible edge -a "systemctl is-active induplac-edge"` → `active`.
+### 4b. El Edge corriendo en el lab (sin depender de un PC)
+
+Con las claves, cada EC2 queda como el Edge de **su** sede, corriendo como servicio de Linux. Se levanta solo cada vez que la EC2 arranca y se reinicia si falla, igual que en una Raspberry Pi. Desde el 18/11 es **así como funciona la demo**: el Edge ya no corre en el PC.
+
+| EC2 | Sede | Usuario del broker | Lee |
+| --- | --- | --- | --- |
+| `edge-planta` | Planta | `edge-local1` | `local1` |
+| `edge-oficinas` | Oficinas | `edge-local2` | `local2` |
+
+1. `cp secretos.example.yml secretos.yml` y completar con `nano secretos.yml`:
+   - `clave_ingesta`: la `CLAVE_INGESTA` de `edge/.env`.
+   - `mqtt_claves.local1` y `mqtt_claves.local2`: las contraseñas de `edge-local1` y `edge-local2` en EMQX.
+2. `ansible-playbook edge-baseline.yml -e @secretos.yml`: el resumen debe decir `servicio corriendo` en las dos sedes.
+3. `ansible edge -a "systemctl is-active induplac-edge"` → `active` en las dos.
+4. Ver lo que recibe cada uno: `ansible edge -b -a "journalctl -u induplac-edge -n 5 --no-pager"` → líneas `local1: lectura …` y `local2: lectura …`.
+5. **Apagar el Edge del PC** si estaba corriendo: dos Edge de la misma sede leerían y subirían lo mismo dos veces.
+
+> ⚠️ **Learner Lab:** las EC2 se detienen cuando termina la sesión del lab, y con ellas el Edge. Al volver a iniciar el lab y las EC2, el servicio arranca solo. No hace falta correr Ansible de nuevo; solo se actualizan las IP en `inventario.ini` si vas a usar Ansible.
 
 ### 5. Al terminar
 
