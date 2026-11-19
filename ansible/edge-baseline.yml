@@ -95,12 +95,33 @@
         state: "{{ 'started' if servicio_activo | bool else 'stopped' }}"
       tags: servicio
 
+    - name: 9b. Dashboard de planta compilado en el equipo de control (solo con -e edge_dashboard=true)
+      ansible.builtin.shell: npm ci --no-audit --no-fund && npm run build:planta
+      args:
+        chdir: "{{ playbook_dir }}/../dashboard"
+      delegate_to: localhost
+      run_once: true
+      become: false
+      changed_when: false
+      when: edge_dashboard | bool
+      tags: dashboard
+
+    - name: 9c. Dashboard de planta copiado al Edge
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../dashboard/dist-planta/"
+        dest: "{{ repo_dir }}/dashboard/dist-planta/"
+        owner: "{{ usuario_edge }}"
+        group: "{{ usuario_edge }}"
+        mode: u=rwX,g=rX,o=rX
+      when: edge_dashboard | bool
+      tags: dashboard
+
     - name: 10. Resumen de la sede
       ansible.builtin.debug:
         msg: >-
           {{ inventory_hostname }} (sede {{ sede }}, {{ local_id }}):
           versión {{ codigo.after[:7] }},
-          servicio {{ 'corriendo' if servicio_activo | bool else 'instalado y detenido (faltan claves)' }}.
+          servicio {{ 'corriendo' if servicio_activo | bool else 'instalado y detenido (faltan claves)' }}{{ ', panel Demo ON' if edge_demo | bool else '' }}.
 
   handlers:
     - name: Reiniciar Edge
