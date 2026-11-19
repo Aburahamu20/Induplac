@@ -1135,7 +1135,8 @@ Abraham (con Claude). Rama `edge-topic-por-sede`.
 - **Hecho (Abraham, 22:55):** `ansible-playbook edge-baseline.yml -e @secretos.yml` dejó el servicio corriendo en las dos sedes (`failed=0`). A las 23:27, `journalctl` mostró `local1: lectura …` en `edge-planta` y `local2: lectura …` en `edge-oficinas`, recibiendo de los dos Wokwi. El Edge ya no depende del PC.
 - **Problema encontrado:** cada Edge se suscribía a `induplac/+/telemetria`, recibía también la otra sede y la descartaba con `WARNING Topic ignorado`.
 - **Arreglado:** ahora cada Edge se suscribe solo a los topics de sus `LOCALES` (`config.TOPICS_SUSCRIPCION`). En el PC, con las dos sedes, se suscribe a las dos, igual que antes. Las 61 pruebas del Edge siguen OK.
+- **Hecho (23:34):** se volvió a correr el playbook (versión `e0c1455`). Cada Edge dice `suscrito a induplac/localN/telemetria` y a las 23:38 recibe `local1` (Planta) y `local2` (Oficinas) sin avisos. Capturas `ansible-5` y `ansible-6` en la carpeta de evidencias.
+- **Ojo:** los datos llegan solo mientras los Wokwi están en Play en el navegador. Las EC2 siguen prendidas mientras dure la sesión del lab.
 - **Pendiente:**
-  - Volver a correr el playbook para que las EC2 bajen este cambio.
   - Decidir cómo se hace la parte del Edge en la demo (panel 🎬 Demo, dashboard de planta y modo offline), porque el guion la describe en el PC.
 

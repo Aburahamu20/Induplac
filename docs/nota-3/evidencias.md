@@ -1,7 +1,7 @@
 # 📁 Carpeta de evidencias — Nota 3
 
 > **Tarea 43.** Índice de las pruebas de que el prototipo funciona y de cómo se tomaron las decisiones, ordenadas por criterio de la pauta.
-> Se va completando a medida que el equipo termina cada parte. **Última actualización: 18/11/2026.**
+> Se va completando a medida que el equipo termina cada parte. **Última actualización: 18/11/2026, 23:40.**
 > ✅ = evidencia lista · ⏳ = falta (dice quién)
 
 ## Resumen
@@ -37,13 +37,16 @@
 | CI con 6 checks en cada PR (build, pruebas, gitleaks, dependencias, SAST y DAST con ZAP) | Última ejecución en `main`, **6 de 6 en verde** (18/11): [CI #44416528202](https://github.com/Aburahamu20/Induplac/actions/runs/44416528202) | ✅ enlace · ⏳ captura `ci-1-checks.png` (Abraham) |
 | `main` protegida: solo entra código por PR y con los 6 checks | Ruleset `proteger-main` ([`../devops.md`](../devops.md), sección *Configuración*) · 75 PRs aceptados al 18/11 | ✅ |
 | Despliegue a AWS (S3 + Lambdas) con prueba de `/health` | Workflow `deploy.yml`: [última ejecución OK](https://github.com/Aburahamu20/Induplac/actions/runs/41936677907) | ✅ |
-| Ansible: inventario, ping, primera pasada e idempotencia | [`../../ansible/README.md`](../../ansible/README.md) · capturas abajo | ✅ |
+| Ansible: inventario, ping, primera pasada, idempotencia y el Edge corriendo como servicio en cada EC2 | [`../../ansible/README.md`](../../ansible/README.md) · capturas abajo | ✅ |
 | Versiones etiquetadas y rollback | Tags `v0.1`–`v0.7` · rollback con `-e repo_version=v0.6` | ✅ tags · ⏳ prueba del rollback (opcional) |
 
 | | |
 | --- | --- |
 | ![inventario](img/ansible-1-inventario.png) | ![ping](img/ansible-2-ping.png) |
 | ![primera pasada](img/ansible-3-primera-pasada.png) | ![idempotencia](img/ansible-4-idempotencia.png) |
+| ![servicio corriendo](img/ansible-5-edge-servicio.png) | ![recibiendo](img/ansible-6-edge-recibiendo.png) |
+
+**18/11: el Edge corre en el lab, sin depender de un PC.** Con las claves (`-e @secretos.yml`), cada EC2 queda como el Edge de su sede: el servicio `induplac-edge` está corriendo y recibe de su Wokwi (`local1` en Planta, `local2` en Oficinas). Ver [`../../ansible/README.md`](../../ansible/README.md) §4b.
 
 ## 3. Cliente-servidor y API REST
 
