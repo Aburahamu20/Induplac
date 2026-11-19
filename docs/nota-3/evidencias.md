@@ -118,7 +118,7 @@
 | Login con MFA (código de 6 dígitos) | `demo-4-mfa.png` | ⏳ Abraham |
 | Pantalla Umbrales con la simulación ("habría dado N alertas") | `demo-5-umbrales.png` | ⏳ Abraham |
 | Auditoría (quién cambió qué y cuándo) | `demo-6-auditoria.png` | ⏳ Abraham |
-| Wokwi: el ESP32 simulado enviando lecturas | `demo-7-wokwi.png` | ⏳ Seba (tarea 23) |
+| Wokwi: el ESP32 simulado enviando lecturas, Planta y Oficinas | `demo-7-wokwi.png` (Planta) · `demo-7b-wokwi-oficinas.png` (Oficinas) | ⏳ Seba (tarea 23) |
 | Modo offline: el Edge sigue mostrando datos sin internet y después sincroniza | `demo-8-offline.png` | ⏳ Abraham |
 | Guion de la demo | [`guion-demo.md`](guion-demo.md) | ✅ |
 
