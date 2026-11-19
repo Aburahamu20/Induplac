@@ -115,7 +115,7 @@
 
 | Evidencia | Archivo | Estado |
 | --- | --- | --- |
-| Dashboard de planta con los datos actuales y su nivel (verde, amarillo, rojo) | `demo-1-planta.png` | ⏳ Abraham |
+| Dashboard de planta con los datos actuales y su nivel (verde, amarillo, rojo), servido por el Edge de la EC2 `edge-planta` por túnel SSH (18/11, 23:59). Muestra una alerta real de *posible fuga fuera de horario* | [`demo-1-planta.png`](img/demo-1-planta.png) | ✅ |
 | Dashboard de gerencia (las dos sedes) | `demo-2-gerencia.png` | ⏳ Abraham |
 | Una alerta activa y cómo se reconoce | `demo-3-alerta.png` | ⏳ Abraham |
 | Login con MFA (código de 6 dígitos) | `demo-4-mfa.png` | ⏳ Abraham |
