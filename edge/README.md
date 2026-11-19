@@ -22,7 +22,10 @@ Detalles importantes:
 - **Nada se marca como sincronizado sin respuesta 200 de AWS.**
 - El **intervalo en curso** también se sube cada 30 s (upsert): así gerencia ve datos casi en vivo, sin esperar 15 min.
 - Las **alertas generadas offline** viajan en el mismo envío (`"alertas": [...]`) y llegan a la nube con `origen = edge`, sin duplicarse.
-- Simplificación de la demo: **un solo Edge atiende las dos sedes**. En el diseño hay una Raspberry Pi por sede.
+- **Una o varias sedes por Edge**, según `LOCALES`:
+  - En el lab (desde el 18/11) hay **un Edge por sede**, en 2 EC2 que simulan la Raspberry Pi de cada una, instalados con Ansible (`ansible/README.md` §4b).
+  - En un PC, el Edge puede atender las dos sedes (`LOCALES=local1,local2`), como respaldo. **Nunca corren los dos a la vez.**
+- Cada Edge se suscribe **solo** a `induplac/<local>/telemetria` de sus sedes (`config.TOPICS_SUSCRIPCION`).
 
 ## Puesta en marcha (Windows)
 
