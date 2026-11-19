@@ -23,7 +23,7 @@ Igual que en la demo del 21/10 (cada uno maneja la parte que conoce). **Confirma
 |---|---|---|
 | **Narrador/a** | Habla y dice a quién le toca. Nadie más habla mientras el otro opera | A definir |
 | **Wokwi** | Las perillas del ESP32. Plan B: `simular_esp32.py` | Sebastián |
-| **Edge** | La consola del Edge y el dashboard de planta (panel 🎬 Demo) | Abraham |
+| **Edge** | La consola del Edge (en la EC2 `edge-planta`) y el dashboard de planta (panel 🎬 Demo), por túnel SSH | Abraham |
 | **AWS** | Learner Lab, consola de DynamoDB, `curl`, dashboard de gerencia en S3 | Felipe |
 | **Reloj** | Avisa con la mano a los 5 min. Toma nota de lo que falló para el ensayo | Lisandra o Bárbara |
 
@@ -36,17 +36,18 @@ Igual que en la demo del 21/10 (cada uno maneja la parte que conoce). **Confirma
 - [ ] Ensayar el guion completo **con cronómetro**, dos veces.
 - [ ] Grabar el segundo ensayo: sirve de **grabación de respaldo** (es un entregable) y de **plan C** si el día 25 falla todo.
 - [ ] Revisar que entra la **cuenta de Abraham** (*admin general*, pide MFA: tener su celular con Microsoft Authenticator a mano). Si se va a mostrar el paso opcional de roles, revisar también la cuenta de **Lisandra** (*operaria* de Planta).
-- [ ] Dejar escritos en un `.txt` los comandos `curl` del paso 3, para copiar y pegar.
+- [ ] Dejar escritos en un `.txt` los comandos `curl` del paso 3 y los 3 comandos del Edge (panel Demo, túnel y consola: [`ansible/README.md`](../../ansible/README.md) §4c), para copiar y pegar.
+- [ ] Comprobar que la cuenta del **login de planta** existe en el Edge de la EC2 y que el MFA funciona. Las cuentas del PC no se traspasan (§4c).
 
 ### 30 minutos antes (miércoles 25/11)
 
 | # | Qué | Quién | Cómo se sabe que está bien |
 |---|---|---|---|
-| 1 | **Start Lab** en el Learner Lab y encender **RDS** | AWS | RDS en *Available*; `curl.exe <API>/health` responde `{"ok": true}` |
-| 2 | Edge con **`DEMO=1`** en `edge/.env` y corriendo (`py edge_gateway.py`) | Edge | La consola dice `demo ON` y `Conectado al broker` |
-| 3 | Wokwi en **Play** con las perillas en valores normales (energía ~15 %, agua ~2 %, UV bajo) | Wokwi | La consola del Edge muestra `local1: lectura seq=…` |
-| 4 | Abrir el **dashboard de planta** (`http://localhost:8080`) y el **de gerencia** (link de S3), con sesión iniciada | Edge / AWS | Las dos en 🟢 **En vivo** |
-| 5 | Pestañas en orden: Wokwi · consola del Edge · dashboard planta · dashboard gerencia · DynamoDB (`induplac-intervalos`) · terminal con los `curl` | Quien proyecta | — |
+| 1 | **Start Lab** en el Learner Lab y encender **RDS** y las **2 EC2** (el Edge de cada sede arranca solo) | AWS | RDS en *Available*; EC2 en *Running*; `curl.exe <API>/health` responde `{"ok": true}` |
+| 2 | IP nuevas de las EC2 en `ansible/inventario.ini` y panel Demo encendido: `ansible-playbook edge-baseline.yml -e @secretos.yml -e edge_demo=true` (WSL) | Edge | El resumen dice `servicio corriendo, panel Demo ON` |
+| 3 | Los **2 Wokwi** (Planta y Oficinas) en **Play**, con las perillas en valores normales (Planta: energía ~15 %, agua ~2 %, UV bajo) | Wokwi | La consola del Edge (`journalctl … -f`, §4c) muestra `local1: lectura seq=…` |
+| 4 | Abrir el **túnel SSH** a `edge-planta` (terminal abierta, §4c) y entrar al **dashboard de planta** (`http://localhost:8080`) y al **de gerencia** (link de S3), con sesión iniciada | Edge / AWS | Las dos en 🟢 **En vivo** |
+| 5 | Pestañas en orden: Wokwi · consola del Edge (terminal con `journalctl`) · dashboard planta · dashboard gerencia · DynamoDB (`induplac-intervalos`) · terminal con los `curl` | Quien proyecta | — |
 | 6 | Letra grande: zoom del navegador al 125 % y fuente de la terminal en 18 o más | Quien proyecta | Se lee desde el fondo de la sala |
 | 7 | Celular en silencio, notificaciones del computador apagadas | Todos | — |
 
@@ -65,7 +66,7 @@ Los tiempos son **acumulados**. Lo que va entre comillas es una sugerencia de qu
 ### Paso 2 · El Edge recibe y valida (0:45 – 1:30) · Edge
 
 - **Se hace:** pasar a la consola del Edge.
-- **Se dice:** "En la demo el Edge corre en este PC; en la planta real sería una Raspberry Pi. Recibe cada lectura, **revisa que esté en rango** (por ejemplo, energía entre 0 y 250 kW) y la guarda en **SQLite**. Cada 15 minutos arma un resumen y lo sube a AWS."
+- **Se dice:** "Cada sede tiene su Edge en una máquina de AWS que simula la Raspberry Pi que iría en la planta, instalada con Ansible. Esta es la de la Planta. Recibe cada lectura, **revisa que esté en rango** (por ejemplo, energía entre 0 y 250 kW) y la guarda en **SQLite**. Cada 15 minutos arma un resumen y lo sube a AWS."
 - **Se tiene que ver:** líneas `local1: lectura seq=… · … kW · UV …`.
 
 ### Paso 3 · La API REST: envío y consulta (1:30 – 2:45) · AWS
@@ -110,7 +111,9 @@ Las dos operaciones que pide el criterio 3. Los comandos exactos están en [`api
 2. **Estado de las sedes:** último dato, pendientes y si RDS está encendido. Es nuestro monitoreo (etapa 8 del pipeline).
 3. **Auditoría:** quién cambió qué y desde dónde.
 
-> El **pipeline** (PR con los 6 controles en verde) y **Ansible** (`changed=0`) **no van en la demo**: se muestran con capturas en las diapositivas del criterio 2. Así la demo no depende de las EC2.
+> El **pipeline** (PR con los 6 controles en verde) y **Ansible** (`changed=0`) se muestran con capturas en las diapositivas del criterio 2. La demo **sí depende de las EC2**, porque el Edge de cada sede corre ahí (decisión de Abraham, 18/11). Por eso el paso 1 de "30 minutos antes" es prender el lab y las EC2.
+
+> **Después de presentar:** apagar el panel Demo con `-e edge_demo=false`.
 
 ## 5. Si algo falla (plan B)
 
@@ -120,7 +123,8 @@ La regla: **no arreglar en vivo más de 30 segundos.** Se dice "pasamos al plan 
 |---|---|---|
 | Wokwi no envía o va muy lento (se ha visto ~1 lectura cada 25 s) | Detener Wokwi y correr `py simular_esp32.py`. **Nunca los dos a la vez**: usan el mismo `device_id` | Wokwi |
 | La alerta UV no sale con la perilla | `py simular_esp32.py --uv 9.5`, o el botón **UV alto** del panel 🎬 Demo | Wokwi / Edge |
-| El panel 🎬 Demo responde 404 | Falta `DEMO=1` en `edge/.env`: ponerlo y reiniciar el Edge (≈ 20 s) | Edge |
+| El panel 🎬 Demo responde 404 | Falta el panel: `ansible-playbook edge-baseline.yml -e @secretos.yml -e edge_demo=true` (≈ 1 min) | Edge |
+| El dashboard de planta no abre | Revisar que la terminal del túnel siga abierta y que la IP de `edge-planta` sea la actual. Si la EC2 no responde: *Start Lab* y encenderla; el Edge arranca solo | Edge |
 | AWS no responde (lab apagado o credenciales vencidas, duran ~4 h) | Hacer *Start Lab*. Mientras tanto, seguir con el dashboard de planta: el Edge queda OFFLINE y **eso mismo es la demo del paso 5** | AWS |
 | No entra el login (MFA, clave) | Revisar la hora del celular (el código MFA depende de ella) y reintentar. Si no entra, mostrar el dashboard de planta (login de planta, sin Cognito) | Edge |
 | Se cae todo | Poner la **grabación del ensayo** del 24/11 y narrarla en vivo | Narrador/a |

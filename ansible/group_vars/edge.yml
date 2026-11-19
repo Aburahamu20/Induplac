@@ -24,6 +24,13 @@ mqtt_usuario: "edge-{{ local_id }}"   # cada sede con su usuario del broker: edg
 aws_api_url: https://3j82c54obf.execute-api.us-east-1.amazonaws.com
 api_port: 8080
 
+# Demo (Nota 3): panel 🎬 Demo del dashboard de planta (cortar/restablecer internet, UV alto, sobreconsumo).
+# Nunca en producción. Se prende solo para la presentación: -e edge_demo=true
+edge_demo: false
+# Dashboard de planta: se compila en el equipo de control (WSL, necesita Node 20+) y se copia a cada Edge.
+# Solo cuando cambia el dashboard: -e edge_dashboard=true
+edge_dashboard: false
+
 # Secretos: NUNCA en el repo. Van en ansible/secretos.yml (ignorado por git) o con -e.
 #   clave_ingesta y mqtt_claves (una por sede: local1 → edge-local1, local2 → edge-local2)
 # Sin secretos, el Edge queda instalado pero el servicio detenido.
