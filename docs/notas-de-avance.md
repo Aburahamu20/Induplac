@@ -1109,5 +1109,7 @@ Abraham (con Claude). Rama `tarea-23-wokwi-oficinas`. Abraham pasó los 3 archiv
   - Alertas locales: energía sobre el 120 % del promedio y posible fuga fuera de horario.
 - **Probado:** el JSON pasa `reglas.validar` del Edge, incluso con todas las perillas al máximo. **Falta** correrlo en Wokwi, porque necesita la clave de `esp32-local2`.
 - **Seguridad:** el `sketch.ino` de la Planta que se pasó por chat tenía la contraseña real de `esp32-local1`. En el repo sigue con `"CLAVE"`, y el de Oficinas también. Se recomienda cambiar esa contraseña en EMQX porque es débil y ya circuló.
-- **Pendiente:** probarlo en Wokwi con la clave, correr las dos sedes a la vez y sacar las capturas (`demo-7` y `demo-7b`).
+- **Probado en Wokwi (21:10):** las dos sedes conectan a EMQX a la vez y publican. La pantalla OLED de Oficinas muestra bien los valores, y la alerta local de energía salta con el total sobre el 120 % del promedio.
+- **Corregido (en los 2 sketches):** la línea `[MQTT] seq=…` del Serial Monitor mostraba los números corridos (`ts=0 energia=0.0` y cada valor en el campo siguiente). `ts` es `time_t` de 64 bits y se imprimía con `%lu`, que lee 32. Ahora se imprime con `(long)r.ts` y `%ld`. Era solo el texto del monitor: el JSON que se envía ya usaba `(long)r.ts` y estaba bien.
+- **Pendiente:** el dashboard de la nube dice *"sin datos desde el 21/10"*, así que hay que levantar el Edge (`py edge_gateway.py`) con el lab encendido para ver Wokwi → dashboard. Faltan las capturas `demo-7` y `demo-7b`, sin la contraseña a la vista.
 

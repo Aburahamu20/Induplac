@@ -394,8 +394,8 @@ bool publicarRegistro(const Registro &r) {
   String payload = buildPayload(r);
   bool ok = mqttClient.publish(MQTT_TOPIC, payload.c_str(), false);
   if (ok) {
-    Serial.printf("[MQTT] seq=%u ts=%lu energia=%.1f (clima=%.1f ilum=%.1f) agua=%.2f\n",
-                  r.seq, r.ts, r.energia_kw, r.clima_kw, r.ilum_kw, r.agua_m3h);
+    Serial.printf("[MQTT] seq=%u ts=%ld energia=%.1f (clima=%.1f ilum=%.1f) agua=%.2f\n",
+                  r.seq, (long)r.ts, r.energia_kw, r.clima_kw, r.ilum_kw, r.agua_m3h);
   } else {
     Serial.printf("[MQTT] FALLO al publicar seq=%u\n", r.seq);
   }
