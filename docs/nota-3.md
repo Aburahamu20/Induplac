@@ -24,10 +24,10 @@
 | 2 | Pipeline DevOps (IL 2.4 · 10 %) | Cómo se administra un cambio: requerimiento → desarrollo → Git → pruebas → validación → despliegue → operación → monitoreo → retroalimentación | [`devops.md`](devops.md): CI con pruebas, DevSecOps (PR #59), regla de `main`, despliegue con `/health` | **Ansible** (actividad 3.3.1) | ✅ Listo: CI con DevSecOps, `main` protegida, Ansible (tarea 33) y versiones con nombre (tarea 47) |
 | 3 | Cliente-servidor y API REST (IL 3.3 · 10 %) | Cómo se envían y consultan los datos simulados; operaciones de envío y consulta | Endpoints en [`api-dashboard.md`](api-dashboard.md); arquitectura en [`arquitectura.md`](arquitectura.md) | ✅ Diagrama cliente-servidor, comandos de envío/consulta y las 5 capturas en [`nota-3/api-rest.md`](nota-3/api-rest.md) (tarea 34). Endpoints en [`api-dashboard.md`](api-dashboard.md) | — |
 | 4 | Backend (IL 3.4 · 10 %) | Cómo recibe, valida, procesa, almacena y entrega la información, con la tecnología justificada | Lambdas en `backend/`, Edge en `edge/`; [`cloud-tecnologias.md`](cloud-tecnologias.md), [`decisiones-tecnicas.md`](decisiones-tecnicas.md) | Explicación en 5 pasos + **por qué Lambda y no Flask/FastAPI** | 35 |
-| 5 | Ágil y Lean (IL 4.1 · 15 %) | Evidencia real: Product Backlog, historias de usuario, Sprint, Kanban, priorización, trabajo en proceso | [`scrum-pmi.md`](scrum-pmi.md), [`roles-raci-gantt.md`](roles-raci-gantt.md), [`EN-CURSO.md`](EN-CURSO.md) (nuestro Kanban), PRs en GitHub | **Product Backlog con historias de usuario priorizadas** y presentar EN-CURSO como Kanban | ✅ Listo (tarea 37) |
+| 5 | Ágil y Lean (IL 4.1 · 15 %) | Evidencia real: Product Backlog, historias de usuario, Sprint, Kanban, priorización, trabajo en proceso | [`scrum-pmi.md`](scrum-pmi.md), [`roles-raci-gantt.md`](roles-raci-gantt.md), [`EN-CURSO.md`](EN-CURSO.md) (nuestro Kanban), PRs en GitHub | **Product Backlog con historias de usuario priorizadas** y presentar EN-CURSO como Kanban | ✅ Listo (tarea 37). Scrum + PRINCE2 = PRINCE2 Agile ([`prince2.md`](nota-3/prince2.md)) |
 | 6 | Transferencia tecnológica (IL 4.4 · 15 %) | Cómo el MVP pasa a una implementación real | Algo en [`conclusiones.md`](conclusiones.md) | ✅ [**Roadmap de transferencia**](nota-3/transferencia-tecnologica.md) (tarea 38): 8 etapas, ~13 semanas hasta la puesta en marcha, piloto en el Local 1 y metas | — |
 | 7 | Gestión del equipo (IL 4.5 · 15 %) | Al menos una herramienta (lluvia de ideas, diagrama de afinidad, SIPOC u otra), qué información dio y cómo influyó en la solución | Roles y RACI en [`roles-raci-gantt.md`](roles-raci-gantt.md); decisiones del equipo en [`notas-de-avance.md`](notas-de-avance.md) | **SIPOC** o **afinidad** + qué decisiones cambió | ✅ Listo (tarea 39) |
-| 8 | Herramientas de calidad (IL 4.6 · 15 %) | Usadas de verdad en el proyecto, no solo nombradas | Pruebas automáticas y quality gate en [`devops.md`](devops.md) | ✅ [**Plan de pruebas e inspección**](nota-3/plan-de-pruebas.md) (tarea 41): 112 pruebas en 17 requisitos + checklists. Quality gate en [`devops.md`](devops.md) | ✅ [**Ishikawa**](nota-3/ishikawa.md) (tarea 40): 18 causas en 6M con su control. Falta el **gráfico de control** (42). El **diagrama de flujo** (pipeline y recorrido de un dato) también cuenta. Mostrar **cómo se usaron**, no solo nombrarlas |
+| 8 | Herramientas de calidad (IL 4.6 · 15 %) | Usadas de verdad en el proyecto, no solo nombradas | Pruebas automáticas y quality gate en [`devops.md`](devops.md) | ✅ [**Plan de pruebas e inspección**](nota-3/plan-de-pruebas.md) (tarea 41): 112 pruebas en 17 requisitos + checklists. Quality gate en [`devops.md`](devops.md) | ✅ [**Ishikawa**](nota-3/ishikawa.md) (tarea 40): 18 causas en 6M con su control. ✅ [**PRINCE2**](nota-3/prince2.md) (tarea 49, pedido por el profe el 18/11): ordena todas las herramientas en un solo sistema de calidad. Falta el **gráfico de control** (42). El **diagrama de flujo** (pipeline y recorrido de un dato) también cuenta. Mostrar **cómo se usaron**, no solo nombrarlas |
 
 > ⚠️ Los criterios 5 a 8 valen **60 % de la nota** y son los que menos tenemos.
 
@@ -35,7 +35,7 @@
 
 | Integrante | Tareas |
 |---|---|
-| Abraham Castro | 33 Ansible · 34 API REST · 41 Plan de pruebas · 43 Evidencias |
+| Abraham Castro | 33 Ansible · 34 API REST · 41 Plan de pruebas · 43 Evidencias · 49 PRINCE2 |
 | Felipe Murúa | 33 Ansible · 34 API REST (demo) · 35 Backend |
 | Sebastián Fuentes | 23 Wokwi para la demo · 42 Gráfico de control |
 | Bárbara Saavedra | 37 Ágil y Lean · 39 Gestión del equipo · 17 PowerPoint |
@@ -67,7 +67,7 @@ El PPT se arma al final, con todas las partes listas. Al armarlo:
 - **Criterio 1:** además de la técnica (5 Porqués), mostrar **cómo evolucionó el MVP**. La línea de tiempo sale de las versiones (`v0.1` diseño → `v0.2` demo del 21/10 → `v0.3` planta autónoma → `v0.4` roles, auditoría y umbrales → `v0.5` dashboard de 7 pantallas → `v0.6` DevSecOps → `v0.7` Ansible) y de los sprints de [`nota-3/backlog.md`](nota-3/backlog.md).
 - **Criterio 2:** el diagrama del pipeline de [`devops.md`](devops.md) **con Ansible**, y la tabla que responde las 5 preguntas del PPT de preparación (quién cambió, si se probó, qué versión quedó, si quedó igual en todos los nodos y cómo saber si falló).
 - **Criterio 3:** las dos operaciones **funcionando**: envío y consulta.
-- **Criterio 8:** cada herramienta con **cómo se usó** en Induplac.
+- **Criterio 8:** cada herramienta con **cómo se usó** en Induplac. Abrir la sección con **PRINCE2** (1 o 2 diapositivas, [`prince2.md`](nota-3/prince2.md) §8): el profe pidió enfocarse en eso, y el diagrama del tema Calidad muestra dónde va cada herramienta.
 - **Diapositiva de cierre:** responder las 6 preguntas de la "idea central" del correo:
 
 | El profe quiere ver… | Respuesta en Induplac |

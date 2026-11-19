@@ -89,6 +89,7 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 | Arquitectura cliente-servidor y demo de la API REST (Nota 3) | [`docs/nota-3/api-rest.md`](docs/nota-3/api-rest.md) |
 | 5 Porqués y evolución del MVP (Nota 3, criterio 1) | [`docs/nota-3/5-porques.md`](docs/nota-3/5-porques.md) |
 | Diagrama de Ishikawa (Nota 3, criterio 8) | [`docs/nota-3/ishikawa.md`](docs/nota-3/ishikawa.md) |
+| PRINCE2 aplicado a Induplac: etapas, roles y sistema de calidad (Nota 3, criterio 8) | [`docs/nota-3/prince2.md`](docs/nota-3/prince2.md) |
 | Transferencia tecnológica: del MVP a Induplac (Nota 3, criterio 6) | [`docs/nota-3/transferencia-tecnologica.md`](docs/nota-3/transferencia-tecnologica.md) |
 | Carpeta de evidencias de la Nota 3 (índice por criterio) | [`docs/nota-3/evidencias.md`](docs/nota-3/evidencias.md) |
 | Broker MQTT | [`docs/broker-mqtt.md`](docs/broker-mqtt.md) |
@@ -911,7 +912,7 @@ Detalle en [`CONTRIBUTING.md`](CONTRIBUTING.md). Las IA siguen [`AGENTS.md`](AGE
 
 **Dashboard en la nube:** [induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html](https://induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html) (login con Cognito y MFA).
 
-**En curso:** Wokwi para la demo (tarea 23), umbrales en el Edge (tarea 44) y la **Nota 3**: backend, gráfico de control, ensayo y evidencias (tareas 35, 42 y 43, [`docs/nota-3.md`](docs/nota-3.md)). **18/11:** listos los [5 Porqués](docs/nota-3/5-porques.md), el [Ishikawa](docs/nota-3/ishikawa.md) y la [transferencia tecnológica](docs/nota-3/transferencia-tecnologica.md) (tareas 36, 38 y 40, Lisandra).
+**En curso:** Wokwi para la demo (tarea 23), umbrales en el Edge (tarea 44) y la **Nota 3**: backend, gráfico de control, ensayo y evidencias (tareas 35, 42 y 43, [`docs/nota-3.md`](docs/nota-3.md)). **18/11:** listos los [5 Porqués](docs/nota-3/5-porques.md), el [Ishikawa](docs/nota-3/ishikawa.md) y la [transferencia tecnológica](docs/nota-3/transferencia-tecnologica.md) (tareas 36, 38 y 40, Lisandra). **19/11:** [PRINCE2 aplicado a Induplac](docs/nota-3/prince2.md) (tarea 49): el profe pidió enfocarse en PRINCE2, y el documento une las herramientas de calidad en un solo sistema.
 
 El estado de cada tarea está en [`docs/EN-CURSO.md`](docs/EN-CURSO.md) y el detalle de cada sesión en [`docs/notas-de-avance.md`](docs/notas-de-avance.md). Los datos son ficticios.
 

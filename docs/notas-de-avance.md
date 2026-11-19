@@ -1157,3 +1157,21 @@ Abraham (con Claude). Rama `edge-demo-en-ec2`. **Decisión de Abraham: el Edge n
   - Crear la cuenta del login de planta en la EC2 y registrar el MFA.
   - Probar el túnel.
 
+
+---
+
+## 2026-11-19 — PRINCE2 aplicado a Induplac (tarea 49)
+
+Abraham (con Claude). Rama `docs/tarea-49-prince2`, [PR #85](https://github.com/Aburahamu20/Induplac/pull/85). En la clase 3.4.1 (*Asegurando la calidad*, 18/11) el profe pidió **enfocarse en PRINCE2** para la Nota 3.
+
+- **Hecho:** [`nota-3/prince2.md`](nota-3/prince2.md), con:
+  - Una explicación simple para el equipo.
+  - Los 7 principios, cada uno con evidencia del repo.
+  - Las excepciones reales: broker, RDS, Edge en EC2 y VPN.
+  - Los 7 procesos mapeados a lo que hicimos y nuestras 4 etapas.
+  - Los roles PRINCE2 ↔ el equipo.
+  - El **tema Calidad**, que une el plan de pruebas, el Ishikawa, el CI y el gráfico de control en un solo sistema.
+  - Lo que no aplicamos completo y 2 diapositivas con preguntas probables.
+- **Decidido:** PRINCE2 va en el **criterio 8** (calidad), al inicio de esa sección del PPT, y se menciona en el criterio 5 como **PRINCE2 Agile** (Scrum para construir, PRINCE2 para controlar). Se agregó a [`nota-3.md`](nota-3.md), la [guía del equipo](GUIA-EQUIPO.md) §14 y §17 y el README.
+- **Ojo:** el PPT de la clase usa los nombres de la 6.ª edición ("temas"). La 7.ª edición (2023) los llama "prácticas" y agrega *Personas*; queda anotado por si el profe pregunta.
+- **Pendiente:** que el equipo revise el reparto de roles PRINCE2 (§5), y que Bárbara agregue las 2 diapositivas al PowerPoint (tarea 17).

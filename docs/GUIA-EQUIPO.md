@@ -432,6 +432,21 @@ Wokwi Oficinas ─► EMQX ─► EC2 edge-oficinas (local2) ─┘
 - **Lean:** reservar antes de empezar (no repetir trabajo), cada uno toma tarjetas libres (sistema *pull*), cambios chicos por PR (lotes pequeños) y el CI prueba todo (calidad desde el origen).
 - **Gestión del equipo:** la **lluvia de ideas** del 07/10 (documento *Decisiones Cloud*) y su orden en un **diagrama de afinidad** mostraron decisiones clave, como poner las alertas también en el Edge para no quedar a ciegas sin internet.
 
+### PRINCE2: cómo controlamos el proyecto completo
+
+> El profe pidió **enfocarse en PRINCE2** (clase 3.4.1, 18/11). Va en el criterio 8 (calidad). Detalle en [`nota-3/prince2.md`](nota-3/prince2.md).
+
+**Para qué sirve:** Scrum dice cómo **construimos** semana a semana. **PRINCE2** dice cómo se **controla** el proyecto entero: por etapas, con roles claros y revisando la calidad de cada entrega. Usarlos juntos se llama **PRINCE2 Agile**.
+
+Piénsalo como construir una casa para un cliente: se avanza **por etapas** y el cliente revisa al final de cada una; cada uno sabe **qué le toca**; el cliente no mira cada ladrillo, solo pone límites y lo llaman **si algo se sale** (gestión por excepción); y cada parte se **revisa contra lo pedido** antes de darla por terminada.
+
+En Induplac:
+- **Etapas:** inicio → MVP (demo 21/10, Nota 2) → mejoras (Nota 3, 25/11) → cierre (examen 16/12). Cada una la cierra la evaluación del profe.
+- **Roles:** el profe es la junta (decide), Abraham es el director del proyecto (PO), Bárbara es el apoyo (SM, tablero y Gantt) y todos somos el equipo.
+- **Paquetes de trabajo:** cada tarea de [`EN-CURSO.md`](EN-CURSO.md). Se reserva, se hace en una rama, entra por PR y se acepta con el merge.
+- **Excepciones:** lo que cambiaba el plan se decidió en equipo: EMQX en vez de HiveMQ, RDS de vuelta al MVP y el Edge en las EC2.
+- **Calidad:** primero se define qué es "bien hecho" (criterios de aceptación) y después se controla en cada cambio (CI + revisión) y queda registrado (plan de pruebas y checks de los PR). El **Ishikawa**, el **plan de pruebas** y el **gráfico de control** son piezas de ese mismo sistema.
+
 ---
 
 ## 15. La demo para el profe
@@ -472,7 +487,7 @@ Otras cosas que se pueden mostrar:
 - Pipeline DevOps: ramas + PR, CI con 6 controles (incluida seguridad), `main` protegida, versiones `v0.1` a `v0.7`, despliegue con `/health` y **Ansible** para el Edge.
 - Backlog con historias de usuario, Kanban y gestión del equipo (criterios 5 y 7).
 
-**⏳ Falta para la Nota 3 (25/11):** Wokwi listo para la demo, gráfico de control, explicación del backend, ensayo de la demo, PowerPoint y grabación (tareas 18, 23, 35, 42 y 43). Ya están el guion de la demo (tarea 18), la API REST (tarea 34), el [plan de pruebas](nota-3/plan-de-pruebas.md) (tarea 41) y, de Lisandra (18/11): los [5 Porqués](nota-3/5-porques.md) (36), la [transferencia tecnológica](nota-3/transferencia-tecnologica.md) (38) y el [Ishikawa](nota-3/ishikawa.md) (40). Sirven para explicar **por qué** existe el problema, **qué podría fallar** en nuestra solución y **cómo se llevaría** a Induplac de verdad.
+**⏳ Falta para la Nota 3 (25/11):** Wokwi listo para la demo, gráfico de control, explicación del backend, ensayo de la demo, PowerPoint y grabación (tareas 18, 23, 35, 42 y 43). Ya están el guion de la demo (tarea 18), la API REST (tarea 34), el [plan de pruebas](nota-3/plan-de-pruebas.md) (tarea 41) y, de Lisandra (18/11): los [5 Porqués](nota-3/5-porques.md) (36), la [transferencia tecnológica](nota-3/transferencia-tecnologica.md) (38) y el [Ishikawa](nota-3/ishikawa.md) (40), y **PRINCE2** ([`prince2.md`](nota-3/prince2.md), tarea 49, 19/11), que une las herramientas de calidad en un solo sistema. Sirven para explicar **por qué** existe el problema, **qué podría fallar** en nuestra solución y **cómo se llevaría** a Induplac de verdad.
 
 **📁 Evidencias:** todas las pruebas de que el prototipo funciona están ordenadas por criterio en [`nota-3/evidencias.md`](nota-3/evidencias.md): capturas, reporte de ZAP y links al CI. Ahí se ve qué falta y quién lo saca. La grabación del ensayo del 24/11 se deja como link en ese mismo archivo.
 
@@ -603,6 +618,15 @@ Otras cosas que se pueden mostrar:
 
 **¿Cómo se organizaron como equipo?**
 > Con Scrum en sprints de una semana, un backlog de historias de usuario priorizadas con MoSCoW y un tablero Kanban en el repositorio. Cada tarea se reserva antes de empezar y entra por Pull Request, así siempre se sabe quién hace qué.
+
+**¿Por qué PRINCE2 si ya usan Scrum?**
+> Scrum organiza el trabajo de cada semana, pero no dice cómo se controla el proyecto completo ni quién autoriza cada etapa. PRINCE2 agrega eso: etapas que cierran con una revisión, roles de decisión y un sistema de calidad. Usarlos juntos se llama PRINCE2 Agile.
+
+**¿Qué es gestionar por excepción en su proyecto?**
+> Cada uno resuelve su tarea sin pedir permiso, pero si algo cambia el plan (como pasar el Edge a las EC2 o cambiar de broker) se lleva al equipo, se decide y queda registrado en la bitácora.
+
+**¿Cuál es su registro de calidad?**
+> La matriz del plan de pruebas (requisito → pruebas → resultado) y el historial de checks de cada Pull Request en GitHub: ahí queda qué se revisó, cuándo y con qué resultado.
 
 **¿Cómo podría pasar esto a una empresa real?** *(transferencia tecnológica)*
 > Por etapas: validar con la empresa, hacer un **piloto** en una sede, probar, documentar, capacitar a los usuarios, ponerlo en marcha, darle soporte y mejorarlo con lo que se aprenda. El roadmap detallado es la tarea 38.
