@@ -1175,3 +1175,19 @@ Abraham (con Claude). Rama `docs/tarea-49-prince2`, [PR #85](https://github.com/
 - **Decidido:** PRINCE2 va en el **criterio 8** (calidad), al inicio de esa sección del PPT, y se menciona en el criterio 5 como **PRINCE2 Agile** (Scrum para construir, PRINCE2 para controlar). Se agregó a [`nota-3.md`](nota-3.md), la [guía del equipo](GUIA-EQUIPO.md) §14 y §17 y el README.
 - **Ojo:** el PPT de la clase usa los nombres de la 6.ª edición ("temas"). La 7.ª edición (2023) los llama "prácticas" y agrega *Personas*; queda anotado por si el profe pregunta.
 - **Pendiente:** que el equipo revise el reparto de roles PRINCE2 (§5), y que Bárbara agregue las 2 diapositivas al PowerPoint (tarea 17).
+
+---
+
+## 2026-11-19 — Excel del equipo al día con la Nota 3 (tarea 50)
+
+Abraham (con Claude). Rama `docs/tarea-50-excel-nota3`, [PR #87](https://github.com/Aburahamu20/Induplac/pull/87).
+
+- **Hecho:** `planificacion/Induplac_Roles_Equipo.xlsx` tiene una hoja nueva al inicio, **"Nota 3 — Qué falta"**:
+  - Las 21 tareas de la Nota 3, con criterio, responsable, estado, fecha y qué falta. Primero van las pendientes.
+  - Colores por estado y lista desplegable para cambiarlo.
+  - Un resumen por integrante con fórmulas: tareas, listas, faltan y % de avance.
+- **Hecho:** en la hoja "Tareas por integrante" se actualizaron 2 estados que estaban viejos: Wokwi Local 2 (en curso) y casos de prueba (plan de pruebas listo). Las demás hojas siguen siendo de la Nota 2.
+- **Pendiente (19/11):**
+  - Sebastián: gráfico de control (42) y Wokwi para la demo (23).
+  - Felipe: revisión del PR #74 (35).
+  - Todos: evidencias, ensayo y grabación (24/11), y el PPT al final.
