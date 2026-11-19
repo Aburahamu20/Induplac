@@ -1140,3 +1140,20 @@ Abraham (con Claude). Rama `edge-topic-por-sede`.
 - **Pendiente:**
   - Decidir cómo se hace la parte del Edge en la demo (panel 🎬 Demo, dashboard de planta y modo offline), porque el guion la describe en el PC.
 
+---
+
+## 2026-11-18 — La demo usa el Edge de la EC2 (no el PC)
+
+Abraham (con Claude). Rama `edge-demo-en-ec2`. **Decisión de Abraham: el Edge no corre en su PC, corre en la EC2**, también durante la demo.
+
+- **Hecho (Ansible):**
+  - `edge_demo` (por defecto `false`) prende el panel 🎬 Demo con `-e edge_demo=true`.
+  - `edge_dashboard` compila el dashboard de planta en WSL (`npm run build:planta`) y lo copia a cada EC2. El build se probó en el entorno de Claude.
+  - El resumen de cada sede avisa si el panel Demo está encendido.
+- **Hecho (acceso sin abrir puertos):** el dashboard de planta se ve por **túnel SSH** (`ssh -L 8080:localhost:8080`) en `http://localhost:8080`, y la consola del Edge con `journalctl -f`. Comandos en `ansible/README.md` §4c.
+- **Hecho (guion):** se actualizaron la lista de "30 minutos antes", el paso 2 y el plan B.
+- **Pendiente (Abraham, con el lab encendido):**
+  - Correr el playbook con `-e edge_dashboard=true` (necesita Node en WSL).
+  - Crear la cuenta del login de planta en la EC2 y registrar el MFA.
+  - Probar el túnel.
+
