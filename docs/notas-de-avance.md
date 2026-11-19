@@ -1126,3 +1126,16 @@ Abraham (con Claude). Rama `tarea-33b-edge-en-ec2`. Decisión de Abraham: **todo
   - Se probó el render del `.env` de las dos sedes, con y sin claves, y el `--syntax-check`.
 - **Pendiente:** con el lab encendido, poner las IP en el inventario, completar `secretos.yml` y correr el playbook. Después, actualizar el guion de la demo y la guía, porque el Edge ya no está en el PC.
 
+---
+
+## 2026-11-18 — Edge en las EC2: funcionando + topic por sede
+
+Abraham (con Claude). Rama `edge-topic-por-sede`.
+
+- **Hecho (Abraham, 22:55):** `ansible-playbook edge-baseline.yml -e @secretos.yml` dejó el servicio corriendo en las dos sedes (`failed=0`). A las 23:27, `journalctl` mostró `local1: lectura …` en `edge-planta` y `local2: lectura …` en `edge-oficinas`, recibiendo de los dos Wokwi. El Edge ya no depende del PC.
+- **Problema encontrado:** cada Edge se suscribía a `induplac/+/telemetria`, recibía también la otra sede y la descartaba con `WARNING Topic ignorado`.
+- **Arreglado:** ahora cada Edge se suscribe solo a los topics de sus `LOCALES` (`config.TOPICS_SUSCRIPCION`). En el PC, con las dos sedes, se suscribe a las dos, igual que antes. Las 61 pruebas del Edge siguen OK.
+- **Pendiente:**
+  - Volver a correr el playbook para que las EC2 bajen este cambio.
+  - Decidir cómo se hace la parte del Edge en la demo (panel 🎬 Demo, dashboard de planta y modo offline), porque el guion la describe en el PC.
+

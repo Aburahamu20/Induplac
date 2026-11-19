@@ -44,8 +44,8 @@ def al_conectar(cliente, _userdata, _flags, codigo, _props=None):
         log.error("El broker rechazó la conexión: %s", codigo)
         return
     # Se suscribe en CADA conexión: si el broker nos desconecta, al volver recupera la suscripción
-    cliente.subscribe(config.TOPIC_SUSCRIPCION, qos=1)
-    log.info("Conectado al broker y suscrito a %s", config.TOPIC_SUSCRIPCION)
+    cliente.subscribe([(t, 1) for t in config.TOPICS_SUSCRIPCION])
+    log.info("Conectado al broker y suscrito a %s", ", ".join(config.TOPICS_SUSCRIPCION))
 
 
 def al_desconectar(_cliente, _userdata, *args):

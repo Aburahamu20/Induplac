@@ -40,7 +40,7 @@ MQTT_USUARIO = os.environ.get("MQTT_USUARIO", "")
 MQTT_CLAVE = os.environ.get("MQTT_CLAVE", "")
 MQTT_CLIENT_ID = os.environ.get("MQTT_CLIENT_ID", "edge-local-01")
 # Topics constantes (lección de la prueba: nada de topics armados a mano)
-TOPIC_SUSCRIPCION = "induplac/+/telemetria"
+TOPIC_TELEMETRIA = "induplac/{local}/telemetria"
 
 # ---- AWS ----
 AWS_API_URL = os.environ.get("AWS_API_URL", "").rstrip("/")
@@ -49,6 +49,8 @@ CLAVE_INGESTA = os.environ.get("CLAVE_INGESTA", "")
 # ---- Funcionamiento ----
 # En la demo un solo Edge atiende las dos sedes; en el diseño hay uno por sede.
 LOCALES = [l.strip() for l in os.environ.get("LOCALES", "local1,local2").split(",") if l.strip()]
+# Cada Edge se suscribe SOLO a las sedes que atiende (en las EC2: una; en la demo en un PC: las dos)
+TOPICS_SUSCRIPCION = [TOPIC_TELEMETRIA.format(local=l) for l in LOCALES]
 DB = CARPETA / os.environ.get("DB", "edge.db")
 SYNC_SEG = _num("SYNC_SEG", 30)          # cada cuánto se intenta sincronizar con AWS
 HEALTH_SEG = _num("HEALTH_SEG", 10)      # cada cuánto se revisa el enlace (modo-offline.md §6.2)
