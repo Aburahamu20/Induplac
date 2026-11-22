@@ -1175,3 +1175,18 @@ Abraham (con Claude). Rama `docs/tarea-49-prince2`, [PR #85](https://github.com/
 - **Decidido:** PRINCE2 va en el **criterio 8** (calidad), al inicio de esa sección del PPT, y se menciona en el criterio 5 como **PRINCE2 Agile** (Scrum para construir, PRINCE2 para controlar). Se agregó a [`nota-3.md`](nota-3.md), la [guía del equipo](GUIA-EQUIPO.md) §14 y §17 y el README.
 - **Ojo:** el PPT de la clase usa los nombres de la 6.ª edición ("temas"). La 7.ª edición (2023) los llama "prácticas" y agrega *Personas*; queda anotado por si el profe pregunta.
 - **Pendiente:** que el equipo revise el reparto de roles PRINCE2 (§5), y que Bárbara agregue las 2 diapositivas al PowerPoint (tarea 17).
+
+---
+
+## 2026-11-22 — Gráfico de control con datos simulados de consumo (tarea 42)
+
+Sebastián Fuentes (con Claude). Rama `docs/tarea-42-grafico-control`.
+
+- **Hecho:** [`nota-3/grafico-control.md`](nota-3/grafico-control.md) + [`nota-3/img/grafico-control.png`](nota-3/img/grafico-control.png).
+  - **25 lecturas ficticias** de energía de la Planta (`local1`), generadas con la misma lógica que `edge/simular_esp32.py` para turno de día (base 38 kW ± 8 %).
+  - **Dos picos a propósito** (lectura 8 = 48.72 kW, lectura 19 = 47.95 kW) que representan arranque simultáneo de equipos de alto consumo.
+  - **Análisis Fase I de SPC:** límites calculados con las 23 lecturas normales. x̄ = 37.56 kW · σ = 1.81 kW · UCL = 42.99 kW · LCL = 32.13 kW. Los dos picos quedan fuera del UCL (+29.7 % y +27.7 % sobre la media).
+  - **Conexión con la alerta del Edge:** el umbral operacional del +20 % queda en 45.07 kW; ambos picos lo superan. El UCL estadístico y la regla del Edge son consistentes: lo que el SPC marca como causa asignable también dispara la alerta en Induplac.
+  - Datos y documento con el mismo estilo que `ishikawa.md`: qué es, cómo lo hicimos, qué muestra, conexión con la alerta y apartado "Para la presentación".
+- **Decidido:** todos los datos son ficticios (Ley 19.628). El gráfico va en el criterio 8 del PPT, como tercera herramienta de calidad (después de PRINCE2 e Ishikawa).
+- **Pendiente:** que Bárbara agregue la diapositiva al PowerPoint (tarea 17).
