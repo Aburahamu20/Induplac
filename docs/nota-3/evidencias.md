@@ -11,7 +11,7 @@
 | 1 | Problema y evolución del MVP | 10 % | ✅ |
 | 2 | Pipeline DevOps | 10 % | ✅ (falta 1 captura de CI) |
 | 3 | Cliente-servidor y API REST | 10 % | ✅ |
-| 4 | Backend | 10 % | 🟡 borrador en revisión |
+| 4 | Backend | 10 % | ✅ |
 | 5 | Ágil y Lean | 15 % | ✅ |
 | 6 | Transferencia tecnológica | 15 % | ✅ |
 | 7 | Gestión del equipo | 15 % | ✅ |
@@ -66,8 +66,8 @@
 
 | Evidencia | Dónde | Estado |
 | --- | --- | --- |
-| Recibe → valida → procesa → almacena → entrega, con una captura por paso | [`backend.md`](backend.md) ([PR #74](https://github.com/Aburahamu20/Induplac/pull/74)) | 🟡 Felipe lo revisa |
-| Por qué Lambda y no Flask/FastAPI | [`backend.md`](backend.md) §4 | 🟡 |
+| Recibe → valida → procesa → almacena → entrega, con una captura por paso | [`backend.md`](backend.md) ([PR #74](https://github.com/Aburahamu20/Induplac/pull/74)) | ✅ |
+| Por qué Lambda y no Flask/FastAPI | [`backend.md`](backend.md) §4 | ✅ |
 | Código de las Lambdas | [`../../backend/lambda_api/`](../../backend/lambda_api/) · [`../../backend/lambda_config/`](../../backend/lambda_config/) | ✅ |
 | Decisiones técnicas (bases de datos, alertas en 2 niveles, MFA) | [`../decisiones-tecnicas.md`](../decisiones-tecnicas.md) (ADR-01 a ADR-09) | ✅ |
 
