@@ -1200,3 +1200,24 @@ Sebastián Fuentes (con Claude). Rama `docs/tarea-42-grafico-control`.
   - Datos y documento con el mismo estilo que `ishikawa.md`: qué es, cómo lo hicimos, qué muestra, conexión con la alerta y apartado "Para la presentación".
 - **Decidido:** todos los datos son ficticios (Ley 19.628). El gráfico va en el criterio 8 del PPT, como tercera herramienta de calidad (después de PRINCE2 e Ishikawa).
 - **Pendiente:** que Bárbara agregue la diapositiva al PowerPoint (tarea 17).
+
+---
+
+## 2026-11-23 — Criterios de la pauta al 100 % (gráfico de control y backend en `main`)
+
+Abraham (con Claude).
+
+- **Hecho:** PR #88 (gráfico de control, Sebastián). Antes de aceptarlo, Abraham lo revisó y pidió 5 cambios por WhatsApp:
+  - Corregir el umbral fijo: 45 kW es advertencia y 55 kW es alerta.
+  - Arreglar el texto que se superponía en la imagen.
+  - Agregar la tabla de las 25 lecturas (`seed=42`).
+  - Cambiar "habría alertado".
+  - Dejar la tarea en ✅.
+  Los cálculos se verificaron con la tabla: x̄ 37,56 · σ 1,81 · UCL 42,99 · LCL 32,13, con las lecturas 8 y 19 fuera de control.
+- **Hecho:** PR #74 (backend). Se resolvió el conflicto con `nota-3.md` y se actualizó §5: el Edge ahora corre en una EC2 por sede, no en un PC. Se volvieron a correr las pruebas: 46 de la Lambda de la API y 5 de la de configuración, todas OK.
+- **Estado:** los 8 criterios de la pauta tienen su evidencia en `main`.
+- **Ojo (PRINCE2):** ninguno de los dos PRs quedó con una aprobación registrada en GitHub. La revisión del #88 se hizo por WhatsApp.
+- **Pendiente:**
+  - Felipe ensaya el backend.
+  - Ensayo de la demo, PPT y grabación (24/11).
+
