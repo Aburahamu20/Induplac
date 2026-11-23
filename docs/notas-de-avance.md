@@ -1105,3 +1105,98 @@ Abraham (con Claude). Rama `tarea-43-evidencias`. Entregables de la Nota 3.
   - Seba: Wokwi (`demo-7`) y el gráfico de control (42).
   - Todos: grabación (24/11).
 
+---
+
+## 2026-11-18 — Wokwi de Oficinas (tarea 23)
+
+Abraham (con Claude). Rama `tarea-23-wokwi-oficinas`. Abraham pasó los 3 archivos del Wokwi de la Planta para hacer el de Oficinas.
+
+- **Hecho:** `simulation/wokwi-local2/` con `sketch.ino`, `diagram.json`, `libraries.txt` y su README. Se tomó el prototipo de la Planta de Sebastián y se ajustó a la sede:
+  - Usuario `esp32-local2`, Client ID `esp32-local-02-xxxx` y topic `induplac/local2/telemetria`.
+  - Energía con 2 perillas: climatización (0–60 kW) e iluminación (0–20 kW). El total es la suma, que es el mismo JSON que `simular_esp32.py` manda para `local2`.
+  - Agua de 0 a 1 m³/h, con 2 decimales, porque la fuga de Oficinas es 0,05 m³/h.
+  - Sin UV ni producción. Botón de personal 20 ↔ 0.
+  - Alertas locales: energía sobre el 120 % del promedio y posible fuga fuera de horario.
+- **Probado:** el JSON pasa `reglas.validar` del Edge, incluso con todas las perillas al máximo. **Falta** correrlo en Wokwi, porque necesita la clave de `esp32-local2`.
+- **Seguridad:** el `sketch.ino` de la Planta que se pasó por chat tenía la contraseña real de `esp32-local1`. En el repo sigue con `"CLAVE"`, y el de Oficinas también. Se recomienda cambiar esa contraseña en EMQX porque es débil y ya circuló.
+- **Probado en Wokwi (21:10):** las dos sedes conectan a EMQX a la vez y publican. La pantalla OLED de Oficinas muestra bien los valores, y la alerta local de energía salta con el total sobre el 120 % del promedio.
+- **Corregido (en los 2 sketches):** la línea `[MQTT] seq=…` del Serial Monitor mostraba los números corridos (`ts=0 energia=0.0` y cada valor en el campo siguiente). `ts` es `time_t` de 64 bits y se imprimía con `%lu`, que lee 32. Ahora se imprime con `(long)r.ts` y `%ld`. Era solo el texto del monitor: el JSON que se envía ya usaba `(long)r.ts` y estaba bien.
+- **Pendiente:** el dashboard de la nube dice *"sin datos desde el 21/10"*, así que hay que levantar el Edge (`py edge_gateway.py`) con el lab encendido para ver Wokwi → dashboard. Faltan las capturas `demo-7` y `demo-7b`, sin la contraseña a la vista.
+
+---
+
+## 2026-11-18 — Edge corriendo en las EC2 del lab (opción B)
+
+Abraham (con Claude). Rama `tarea-33b-edge-en-ec2`. Decisión de Abraham: **todo debe funcionar en el lab**, sin depender de su PC.
+
+- **Decidido:** cada EC2 es el Edge de su sede, corriendo como servicio `induplac-edge`, como sería una Raspberry Pi en cada sede. El Edge del PC queda solo como respaldo y nunca corre a la vez que el de la EC2.
+- **Hecho (Ansible):** el playbook ya instalaba el servicio, pero usaba `edge-local1` en las dos sedes. Ahora cada EC2 usa su propio usuario del broker:
+  - `mqtt_usuario: edge-{{ local_id }}`.
+  - `secretos.yml` tiene una clave por sede (`mqtt_claves.local1` / `local2`).
+  - Se probó el render del `.env` de las dos sedes, con y sin claves, y el `--syntax-check`.
+- **Pendiente:** con el lab encendido, poner las IP en el inventario, completar `secretos.yml` y correr el playbook. Después, actualizar el guion de la demo y la guía, porque el Edge ya no está en el PC.
+
+---
+
+## 2026-11-18 — Edge en las EC2: funcionando + topic por sede
+
+Abraham (con Claude). Rama `edge-topic-por-sede`.
+
+- **Hecho (Abraham, 22:55):** `ansible-playbook edge-baseline.yml -e @secretos.yml` dejó el servicio corriendo en las dos sedes (`failed=0`). A las 23:27, `journalctl` mostró `local1: lectura …` en `edge-planta` y `local2: lectura …` en `edge-oficinas`, recibiendo de los dos Wokwi. El Edge ya no depende del PC.
+- **Problema encontrado:** cada Edge se suscribía a `induplac/+/telemetria`, recibía también la otra sede y la descartaba con `WARNING Topic ignorado`.
+- **Arreglado:** ahora cada Edge se suscribe solo a los topics de sus `LOCALES` (`config.TOPICS_SUSCRIPCION`). En el PC, con las dos sedes, se suscribe a las dos, igual que antes. Las 61 pruebas del Edge siguen OK.
+- **Hecho (23:34):** se volvió a correr el playbook (versión `e0c1455`). Cada Edge dice `suscrito a induplac/localN/telemetria` y a las 23:38 recibe `local1` (Planta) y `local2` (Oficinas) sin avisos. Capturas `ansible-5` y `ansible-6` en la carpeta de evidencias.
+- **Ojo:** los datos llegan solo mientras los Wokwi están en Play en el navegador. Las EC2 siguen prendidas mientras dure la sesión del lab.
+- **Pendiente:**
+  - Decidir cómo se hace la parte del Edge en la demo (panel 🎬 Demo, dashboard de planta y modo offline), porque el guion la describe en el PC.
+
+---
+
+## 2026-11-18 — La demo usa el Edge de la EC2 (no el PC)
+
+Abraham (con Claude). Rama `edge-demo-en-ec2`. **Decisión de Abraham: el Edge no corre en su PC, corre en la EC2**, también durante la demo.
+
+- **Hecho (Ansible):**
+  - `edge_demo` (por defecto `false`) prende el panel 🎬 Demo con `-e edge_demo=true`.
+  - `edge_dashboard` compila el dashboard de planta en WSL (`npm run build:planta`) y lo copia a cada EC2. El build se probó en el entorno de Claude.
+  - El resumen de cada sede avisa si el panel Demo está encendido.
+- **Hecho (acceso sin abrir puertos):** el dashboard de planta se ve por **túnel SSH** (`ssh -L 8080:localhost:8080`) en `http://localhost:8080`, y la consola del Edge con `journalctl -f`. Comandos en `ansible/README.md` §4c.
+- **Hecho (guion):** se actualizaron la lista de "30 minutos antes", el paso 2 y el plan B.
+- **Pendiente (Abraham, con el lab encendido):**
+  - Correr el playbook con `-e edge_dashboard=true` (necesita Node en WSL).
+  - Crear la cuenta del login de planta en la EC2 y registrar el MFA.
+  - Probar el túnel.
+
+
+---
+
+## 2026-11-19 — PRINCE2 aplicado a Induplac (tarea 49)
+
+Abraham (con Claude). Rama `docs/tarea-49-prince2`, [PR #85](https://github.com/Aburahamu20/Induplac/pull/85). En la clase 3.4.1 (*Asegurando la calidad*, 18/11) el profe pidió **enfocarse en PRINCE2** para la Nota 3.
+
+- **Hecho:** [`nota-3/prince2.md`](nota-3/prince2.md), con:
+  - Una explicación simple para el equipo.
+  - Los 7 principios, cada uno con evidencia del repo.
+  - Las excepciones reales: broker, RDS, Edge en EC2 y VPN.
+  - Los 7 procesos mapeados a lo que hicimos y nuestras 4 etapas.
+  - Los roles PRINCE2 ↔ el equipo.
+  - El **tema Calidad**, que une el plan de pruebas, el Ishikawa, el CI y el gráfico de control en un solo sistema.
+  - Lo que no aplicamos completo y 2 diapositivas con preguntas probables.
+- **Decidido:** PRINCE2 va en el **criterio 8** (calidad), al inicio de esa sección del PPT, y se menciona en el criterio 5 como **PRINCE2 Agile** (Scrum para construir, PRINCE2 para controlar). Se agregó a [`nota-3.md`](nota-3.md), la [guía del equipo](GUIA-EQUIPO.md) §14 y §17 y el README.
+- **Ojo:** el PPT de la clase usa los nombres de la 6.ª edición ("temas"). La 7.ª edición (2023) los llama "prácticas" y agrega *Personas*; queda anotado por si el profe pregunta.
+- **Pendiente:** que el equipo revise el reparto de roles PRINCE2 (§5), y que Bárbara agregue las 2 diapositivas al PowerPoint (tarea 17).
+
+---
+
+## 2026-11-22 — Gráfico de control con datos simulados de consumo (tarea 42)
+
+Sebastián Fuentes (con Claude). Rama `docs/tarea-42-grafico-control`.
+
+- **Hecho:** [`nota-3/grafico-control.md`](nota-3/grafico-control.md) + [`nota-3/img/grafico-control.png`](nota-3/img/grafico-control.png).
+  - **25 lecturas ficticias** de energía de la Planta (`local1`), generadas con la misma lógica que `edge/simular_esp32.py` para turno de día (base 38 kW ± 8 %).
+  - **Dos picos a propósito** (lectura 8 = 48.72 kW, lectura 19 = 47.95 kW) que representan arranque simultáneo de equipos de alto consumo.
+  - **Análisis Fase I de SPC:** límites calculados con las 23 lecturas normales. x̄ = 37.56 kW · σ = 1.81 kW · UCL = 42.99 kW · LCL = 32.13 kW. Los dos picos quedan fuera del UCL (+29.7 % y +27.7 % sobre la media).
+  - **Conexión con la alerta del Edge:** el umbral operacional del +20 % queda en 45.07 kW; ambos picos lo superan. El UCL estadístico y la regla del Edge son consistentes: lo que el SPC marca como causa asignable también dispara la alerta en Induplac.
+  - Datos y documento con el mismo estilo que `ishikawa.md`: qué es, cómo lo hicimos, qué muestra, conexión con la alerta y apartado "Para la presentación".
+- **Decidido:** todos los datos son ficticios (Ley 19.628). El gráfico va en el criterio 8 del PPT, como tercera herramienta de calidad (después de PRINCE2 e Ishikawa).
+- **Pendiente:** que Bárbara agregue la diapositiva al PowerPoint (tarea 17).

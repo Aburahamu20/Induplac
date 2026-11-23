@@ -68,8 +68,8 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 
 | Parte | Cómo | Guía |
 |---|---|---|
-| **ESP32** | Abrir el proyecto en Wokwi con los archivos de `simulation/wokwi-local1/` y darle *Play* | [README](simulation/wokwi-local1/README.md) |
-| **Edge** | `cd edge` → copiar `.env.example` a `.env` → `py edge_gateway.py` (sin Wokwi: `py simular_esp32.py`) | [README](edge/README.md) |
+| **ESP32** | Abrir un proyecto en Wokwi por sede con los archivos de `simulation/wokwi-local1/` (Planta) y `simulation/wokwi-local2/` (Oficinas) y darle *Play* | [Planta](simulation/wokwi-local1/README.md) · [Oficinas](simulation/wokwi-local2/README.md) |
+| **Edge** | En el lab: ya corre solo en las 2 EC2 (una por sede), instalado con `ansible-playbook edge-baseline.yml -e @secretos.yml`. Para desarrollo en un PC: `cd edge` → copiar `.env.example` a `.env` → `py edge_gateway.py` (sin Wokwi: `py simular_esp32.py`) | [Ansible §4b](ansible/README.md) · [README](edge/README.md) |
 | **Backend AWS** | API Gateway + Lambdas + DynamoDB + RDS en el Learner Lab. Prueba: `curl <API>/health` y `curl <API>/config/umbrales` | [README](backend/README.md) |
 | **Dashboard** | `cd dashboard` → `npm install` → `npm run dev` (o el build publicado en S3) | `dashboard/.env.example` |
 | **Pruebas automáticas** | `cd edge` → `py -m unittest discover -s tests -v` (también corren solas en cada PR, junto con los controles de seguridad) | [DevOps](docs/devops.md) |
@@ -89,6 +89,7 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 | Arquitectura cliente-servidor y demo de la API REST (Nota 3) | [`docs/nota-3/api-rest.md`](docs/nota-3/api-rest.md) |
 | 5 Porqués y evolución del MVP (Nota 3, criterio 1) | [`docs/nota-3/5-porques.md`](docs/nota-3/5-porques.md) |
 | Diagrama de Ishikawa (Nota 3, criterio 8) | [`docs/nota-3/ishikawa.md`](docs/nota-3/ishikawa.md) |
+| PRINCE2 aplicado a Induplac: etapas, roles y sistema de calidad (Nota 3, criterio 8) | [`docs/nota-3/prince2.md`](docs/nota-3/prince2.md) |
 | Transferencia tecnológica: del MVP a Induplac (Nota 3, criterio 6) | [`docs/nota-3/transferencia-tecnologica.md`](docs/nota-3/transferencia-tecnologica.md) |
 | Carpeta de evidencias de la Nota 3 (índice por criterio) | [`docs/nota-3/evidencias.md`](docs/nota-3/evidencias.md) |
 | Backend: los 5 pasos de un dato y por qué Lambda (Nota 3) | [`docs/nota-3/backend.md`](docs/nota-3/backend.md) |
@@ -545,6 +546,7 @@ La **demo es 100 % en Wokwi** (sin hardware físico). Cada ESP32 simulado emula 
 - **Electricidad (kW):** potenciómetro analógico que simula un transformador de corriente (sensor CT SCT-013).
 - **Consumo de agua (m³):** generador de pulsos que simula un caudalímetro de turbina tipo YF-S201.
 - **Radiación solar (UV):** sensor analógico que simula un fotodiodo UV con escala UVI 0–12.
+- **Oficinas (Local 2):** sin UV ni producción. La energía se mide con dos potenciómetros, **climatización** e **iluminación**, y el total es la suma. Prototipo en [`simulation/wokwi-local2/`](simulation/wokwi-local2/README.md).
 
 ### Formato de Telemetría (Payload JSON MQTT)
 
@@ -738,7 +740,7 @@ Induplac/
 | **Microcontrolador** | ESP32 (sensores analógicos y digitales) | ✅ Funcionando (Wokwi) |
 | **Simulación** | Wokwi (Wi-Fi virtual `Wokwi-GUEST`) | ✅ Funcionando |
 | **Broker MQTT** | EMQX Serverless (MQTTS 8883) · diseño real: Mosquitto en la Raspberry Pi | ✅ Funcionando |
-| **Edge Gateway** | Raspberry Pi + Python + SQLite (`is_synced`) | ✅ Funcionando (en PC para la demo) |
+| **Edge Gateway** | Raspberry Pi + Python + SQLite (`is_synced`) | ✅ Funcionando: un Edge por sede en 2 EC2 del lab (servicio `induplac-edge`, desde el 18/11) |
 | **API** | Amazon API Gateway (HTTP API) | ✅ Funcionando |
 | **Cómputo cloud** | AWS Lambda (Python 3.12): `induplac-api` y `induplac-config` | ✅ Funcionando |
 | **Base de datos cloud** | Amazon DynamoDB on-demand (intervalos y alertas) | ✅ Funcionando |
@@ -752,7 +754,7 @@ Induplac/
 | **Control de versiones** | Git + GitHub (ramas, Pull Requests, `main` protegida con el ruleset `proteger-main` y versiones `v0.1` a `v0.7`) | En uso |
 | **CI/CD** | GitHub Actions: build, lint, pruebas y despliegue a S3 y Lambda con verificación `/health` | ✅ En uso |
 | **DevSecOps** | `gitleaks`, `npm audit`, `pip-audit`, Bandit, Semgrep y OWASP ZAP (baseline) en cada PR | ✅ En uso (desde el 13/11) |
-| **Configuración de equipos** | Ansible: playbook baseline del Edge, idempotente, con vuelta a una versión anterior ([`ansible/`](ansible/README.md)) | ✅ Probado en 2 EC2 (17/11) |
+| **Configuración de equipos** | Ansible: playbook baseline del Edge, idempotente, con vuelta a una versión anterior ([`ansible/`](ansible/README.md)) | ✅ Probado en 2 EC2 (17/11) y dejando el Edge corriendo en cada una (18/11) |
 | **Documentación** | Markdown + Mermaid | En uso |
 
 ---
@@ -911,7 +913,7 @@ Detalle en [`CONTRIBUTING.md`](CONTRIBUTING.md). Las IA siguen [`AGENTS.md`](AGE
 
 **Dashboard en la nube:** [induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html](https://induplac-dashboard-aslfb.s3.us-east-1.amazonaws.com/index.html) (login con Cognito y MFA).
 
-**En curso:** Wokwi para la demo (tarea 23), umbrales en el Edge (tarea 44) y la **Nota 3**: backend, gráfico de control, ensayo y evidencias (tareas 35, 42 y 43, [`docs/nota-3.md`](docs/nota-3.md)). **18/11:** listos los [5 Porqués](docs/nota-3/5-porques.md), el [Ishikawa](docs/nota-3/ishikawa.md) y la [transferencia tecnológica](docs/nota-3/transferencia-tecnologica.md) (tareas 36, 38 y 40, Lisandra).
+**En curso:** Wokwi para la demo (tarea 23), umbrales en el Edge (tarea 44) y la **Nota 3**: backend, gráfico de control, ensayo y evidencias (tareas 35, 42 y 43, [`docs/nota-3.md`](docs/nota-3.md)). **18/11:** listos los [5 Porqués](docs/nota-3/5-porques.md), el [Ishikawa](docs/nota-3/ishikawa.md) y la [transferencia tecnológica](docs/nota-3/transferencia-tecnologica.md) (tareas 36, 38 y 40, Lisandra). **19/11:** [PRINCE2 aplicado a Induplac](docs/nota-3/prince2.md) (tarea 49): el profe pidió enfocarse en PRINCE2, y el documento une las herramientas de calidad en un solo sistema.
 
 El estado de cada tarea está en [`docs/EN-CURSO.md`](docs/EN-CURSO.md) y el detalle de cada sesión en [`docs/notas-de-avance.md`](docs/notas-de-avance.md). Los datos son ficticios.
 

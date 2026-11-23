@@ -93,7 +93,54 @@ cd ~/Induplac/ansible
 | 4 | **Idempotencia** | `ansible-playbook edge-baseline.yml` (otra vez) | `changed=0` en las dos sedes |
 | 5 | Verificación | `ansible edge -a "systemctl is-enabled induplac-edge"` | `enabled` en las dos |
 
-> **Opcional (Edge corriendo de verdad):** copia `secretos.example.yml` como `secretos.yml`, completa las claves de `edge/.env` y corre `ansible-playbook edge-baseline.yml -e @secretos.yml`. Después: `ansible edge -a "systemctl is-active induplac-edge"` → `active`.
+### 4b. El Edge corriendo en el lab (sin depender de un PC)
+
+Con las claves, cada EC2 queda como el Edge de **su** sede, corriendo como servicio de Linux. Se levanta solo cada vez que la EC2 arranca y se reinicia si falla, igual que en una Raspberry Pi. Desde el 18/11 es **así como funciona la demo**: el Edge ya no corre en el PC.
+
+| EC2 | Sede | Usuario del broker | Lee |
+| --- | --- | --- | --- |
+| `edge-planta` | Planta | `edge-local1` | `local1` |
+| `edge-oficinas` | Oficinas | `edge-local2` | `local2` |
+
+1. `cp secretos.example.yml secretos.yml` y completar con `nano secretos.yml`:
+   - `clave_ingesta`: la `CLAVE_INGESTA` de `edge/.env`.
+   - `mqtt_claves.local1` y `mqtt_claves.local2`: las contraseñas de `edge-local1` y `edge-local2` en EMQX.
+2. `ansible-playbook edge-baseline.yml -e @secretos.yml`: el resumen debe decir `servicio corriendo` en las dos sedes.
+3. `ansible edge -a "systemctl is-active induplac-edge"` → `active` en las dos.
+4. Ver lo que recibe cada uno: `ansible edge -b -a "journalctl -u induplac-edge -n 5 --no-pager"` → líneas `local1: lectura …` y `local2: lectura …`.
+5. **Apagar el Edge del PC** si estaba corriendo: dos Edge de la misma sede leerían y subirían lo mismo dos veces.
+
+### 4c. Para la demo: panel 🎬 Demo, dashboard de planta y consola del Edge
+
+El Edge de la demo es el de **`edge-planta`** (EC2). No se abre ningún puerto: el dashboard de planta se ve por un **túnel SSH**, cifrado y con la misma llave de Ansible.
+
+**Una sola vez** (y otra vez solo si cambia el dashboard): compilar el dashboard de planta en WSL y copiarlo a las EC2. Necesita Node en WSL (`node -v`; se recomienda Node 22).
+```bash
+ansible-playbook edge-baseline.yml -e @secretos.yml -e edge_dashboard=true
+```
+
+**Una sola vez:** crear la cuenta del login de planta en el Edge de la EC2. Las cuentas viven en el SQLite de cada Edge, así que las del PC no se traspasan. La clave temporal aparece **una vez**: se cambia en el primer inicio y se registra el MFA de nuevo.
+```bash
+ansible edge-planta -b --become-user induplac -a "chdir=/opt/induplac/repo/edge /opt/induplac/venv/bin/python usuarios.py crear <alias> --rol administrador --locales local1"
+```
+
+**El día de la demo:**
+1. Prender el panel Demo (y apagarlo después de presentar con `-e edge_demo=false`):
+   ```bash
+   ansible-playbook edge-baseline.yml -e @secretos.yml -e edge_demo=true
+   ```
+   El resumen debe decir `servicio corriendo, panel Demo ON`.
+2. Túnel al dashboard de planta (dejar la terminal abierta):
+   ```bash
+   ssh -i ~/.ssh/labsuser.pem -N -L 8080:localhost:8080 ubuntu@<IP de edge-planta>
+   ```
+   Y en el navegador de Windows: **`http://localhost:8080`**.
+3. Consola del Edge en vivo (otra terminal):
+   ```bash
+   ssh -t -i ~/.ssh/labsuser.pem ubuntu@<IP de edge-planta> "journalctl -u induplac-edge -f -o cat"
+   ```
+
+> ⚠️ **Learner Lab:** las EC2 se detienen cuando termina la sesión del lab, y con ellas el Edge. Al volver a iniciar el lab y las EC2, el servicio arranca solo. No hace falta correr Ansible de nuevo; solo se actualizan las IP en `inventario.ini` si vas a usar Ansible.
 
 ### 5. Al terminar
 

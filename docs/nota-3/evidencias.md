@@ -1,7 +1,7 @@
 # 📁 Carpeta de evidencias — Nota 3
 
 > **Tarea 43.** Índice de las pruebas de que el prototipo funciona y de cómo se tomaron las decisiones, ordenadas por criterio de la pauta.
-> Se va completando a medida que el equipo termina cada parte. **Última actualización: 18/11/2026.**
+> Se va completando a medida que el equipo termina cada parte. **Última actualización: 18/11/2026, 23:40.**
 > ✅ = evidencia lista · ⏳ = falta (dice quién)
 
 ## Resumen
@@ -15,7 +15,7 @@
 | 5 | Ágil y Lean | 15 % | ✅ |
 | 6 | Transferencia tecnológica | 15 % | ✅ |
 | 7 | Gestión del equipo | 15 % | ✅ |
-| 8 | Herramientas de calidad | 15 % | 🟡 falta el gráfico de control |
+| 8 | Herramientas de calidad | 15 % | ✅ |
 | — | Demo en vivo y dashboard | — | ⏳ capturas del dashboard, Wokwi y modo offline |
 | — | Grabación | — | ⏳ 24/11 |
 
@@ -37,13 +37,16 @@
 | CI con 6 checks en cada PR (build, pruebas, gitleaks, dependencias, SAST y DAST con ZAP) | Última ejecución en `main`, **6 de 6 en verde** (18/11): [CI #44416528202](https://github.com/Aburahamu20/Induplac/actions/runs/44416528202) | ✅ enlace · ⏳ captura `ci-1-checks.png` (Abraham) |
 | `main` protegida: solo entra código por PR y con los 6 checks | Ruleset `proteger-main` ([`../devops.md`](../devops.md), sección *Configuración*) · 75 PRs aceptados al 18/11 | ✅ |
 | Despliegue a AWS (S3 + Lambdas) con prueba de `/health` | Workflow `deploy.yml`: [última ejecución OK](https://github.com/Aburahamu20/Induplac/actions/runs/41936677907) | ✅ |
-| Ansible: inventario, ping, primera pasada e idempotencia | [`../../ansible/README.md`](../../ansible/README.md) · capturas abajo | ✅ |
+| Ansible: inventario, ping, primera pasada, idempotencia y el Edge corriendo como servicio en cada EC2 | [`../../ansible/README.md`](../../ansible/README.md) · capturas abajo | ✅ |
 | Versiones etiquetadas y rollback | Tags `v0.1`–`v0.7` · rollback con `-e repo_version=v0.6` | ✅ tags · ⏳ prueba del rollback (opcional) |
 
 | | |
 | --- | --- |
 | ![inventario](img/ansible-1-inventario.png) | ![ping](img/ansible-2-ping.png) |
 | ![primera pasada](img/ansible-3-primera-pasada.png) | ![idempotencia](img/ansible-4-idempotencia.png) |
+| ![servicio corriendo](img/ansible-5-edge-servicio.png) | ![recibiendo](img/ansible-6-edge-recibiendo.png) |
+
+**18/11: el Edge corre en el lab, sin depender de un PC.** Con las claves (`-e @secretos.yml`), cada EC2 queda como el Edge de su sede: el servicio `induplac-edge` está corriendo y recibe de su Wokwi (`local1` en Planta, `local2` en Oficinas). Ver [`../../ansible/README.md`](../../ansible/README.md) §4b.
 
 ## 3. Cliente-servidor y API REST
 
@@ -96,7 +99,7 @@
 | --- | --- | --- |
 | Plan de pruebas: 17 requisitos → 112 pruebas, todas OK (17/11), y checklists de inspección | [`plan-de-pruebas.md`](plan-de-pruebas.md) | ✅ |
 | Diagrama de Ishikawa: 18 causas en 6M, cada una con su control | [`ishikawa.md`](ishikawa.md) | ✅ |
-| Gráfico de control con los datos simulados de consumo | `grafico-control.md` (tarea 42) | ⏳ Seba |
+| Gráfico de control con los datos simulados de consumo (25 lecturas · x̄ = 37.56 kW · UCL = 42.99 kW · 2 puntos fuera de control) | [`grafico-control.md`](grafico-control.md) · [`img/grafico-control.png`](img/grafico-control.png) | ✅ |
 | Reporte de seguridad de OWASP ZAP | [`evidencias/reporte-zap.html`](evidencias/reporte-zap.html) (descargar y abrir en el navegador) · [JSON](evidencias/reporte-zap.json) | ✅ |
 | Diagrama de flujo (pipeline y recorrido de un dato) | [`../devops.md`](../devops.md) · [`backend.md`](backend.md) §3 | ✅ |
 
@@ -112,13 +115,13 @@
 
 | Evidencia | Archivo | Estado |
 | --- | --- | --- |
-| Dashboard de planta con los datos actuales y su nivel (verde, amarillo, rojo) | `demo-1-planta.png` | ⏳ Abraham |
+| Dashboard de planta con los datos actuales y su nivel (verde, amarillo, rojo), servido por el Edge de la EC2 `edge-planta` por túnel SSH (18/11, 23:59). Muestra una alerta real de *posible fuga fuera de horario* | [`demo-1-planta.png`](img/demo-1-planta.png) | ✅ |
 | Dashboard de gerencia (las dos sedes) | `demo-2-gerencia.png` | ⏳ Abraham |
 | Una alerta activa y cómo se reconoce | `demo-3-alerta.png` | ⏳ Abraham |
 | Login con MFA (código de 6 dígitos) | `demo-4-mfa.png` | ⏳ Abraham |
 | Pantalla Umbrales con la simulación ("habría dado N alertas") | `demo-5-umbrales.png` | ⏳ Abraham |
 | Auditoría (quién cambió qué y cuándo) | `demo-6-auditoria.png` | ⏳ Abraham |
-| Wokwi: el ESP32 simulado enviando lecturas | `demo-7-wokwi.png` | ⏳ Seba (tarea 23) |
+| Wokwi: el ESP32 simulado enviando lecturas, Planta y Oficinas | `demo-7-wokwi.png` (Planta) · `demo-7b-wokwi-oficinas.png` (Oficinas) | ⏳ Seba (tarea 23) |
 | Modo offline: el Edge sigue mostrando datos sin internet y después sincroniza | `demo-8-offline.png` | ⏳ Abraham |
 | Guion de la demo | [`guion-demo.md`](guion-demo.md) | ✅ |
 

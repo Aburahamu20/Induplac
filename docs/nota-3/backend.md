@@ -112,7 +112,7 @@ El dashboard pide los datos con `GET /api/...` y su token. La Lambda:
 
 ## 5. Y sin internet: el "backend local" del Edge
 
-El Edge (Raspberry Pi en la planta real; en la demo, un PC) también hace de backend **local**. Recibe por MQTT, valida, resume cada 15 min, evalúa las **mismas alertas** y guarda en SQLite. Además, entrega su propia API en el puerto `8080` para que la planta siga viendo sus datos **aunque se corte internet**. Cuando vuelve la conexión, envía lo pendiente, y gracias al paso ④ no se duplica nada.
+El Edge (una Raspberry Pi en la planta real; en el prototipo, una EC2 por sede que la simula, instalada con Ansible) también hace de backend **local**. Cada uno recibe por MQTT solo los datos de su sede, valida, resume cada 15 min, evalúa las **mismas alertas** y guarda en SQLite. Además, entrega su propia API en el puerto `8080` para que la planta siga viendo sus datos **aunque se corte internet**. Cuando vuelve la conexión, envía lo pendiente, y gracias al paso ④ no se duplica nada.
 
 ## 6. Cómo sabemos que funciona
 
