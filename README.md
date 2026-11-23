@@ -92,6 +92,7 @@ Wokwi (ESP32) ──MQTTS──► EMQX ──► Edge (Python + SQLite) ──H
 | PRINCE2 aplicado a Induplac: etapas, roles y sistema de calidad (Nota 3, criterio 8) | [`docs/nota-3/prince2.md`](docs/nota-3/prince2.md) |
 | Transferencia tecnológica: del MVP a Induplac (Nota 3, criterio 6) | [`docs/nota-3/transferencia-tecnologica.md`](docs/nota-3/transferencia-tecnologica.md) |
 | Carpeta de evidencias de la Nota 3 (índice por criterio) | [`docs/nota-3/evidencias.md`](docs/nota-3/evidencias.md) |
+| Backend: los 5 pasos de un dato y por qué Lambda (Nota 3) | [`docs/nota-3/backend.md`](docs/nota-3/backend.md) |
 | Broker MQTT | [`docs/broker-mqtt.md`](docs/broker-mqtt.md) |
 | Modo offline y sincronización | [`docs/modo-offline.md`](docs/modo-offline.md) |
 | Ciberseguridad (5 capas) | [`docs/ciberseguridad.md`](docs/ciberseguridad.md) |
