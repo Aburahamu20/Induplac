@@ -15,7 +15,7 @@
 | 5 | Ágil y Lean | 15 % | ✅ |
 | 6 | Transferencia tecnológica | 15 % | ✅ |
 | 7 | Gestión del equipo | 15 % | ✅ |
-| 8 | Herramientas de calidad | 15 % | 🟡 falta el gráfico de control |
+| 8 | Herramientas de calidad | 15 % | ✅ |
 | — | Demo en vivo y dashboard | — | ⏳ capturas del dashboard, Wokwi y modo offline |
 | — | Grabación | — | ⏳ 24/11 |
 
@@ -99,7 +99,7 @@
 | --- | --- | --- |
 | Plan de pruebas: 17 requisitos → 112 pruebas, todas OK (17/11), y checklists de inspección | [`plan-de-pruebas.md`](plan-de-pruebas.md) | ✅ |
 | Diagrama de Ishikawa: 18 causas en 6M, cada una con su control | [`ishikawa.md`](ishikawa.md) | ✅ |
-| Gráfico de control con los datos simulados de consumo | `grafico-control.md` (tarea 42) | ⏳ Seba |
+| Gráfico de control con los datos simulados de consumo (25 lecturas · x̄ = 37.56 kW · UCL = 42.99 kW · 2 puntos fuera de control) | [`grafico-control.md`](grafico-control.md) · [`img/grafico-control.png`](img/grafico-control.png) | ✅ |
 | Reporte de seguridad de OWASP ZAP | [`evidencias/reporte-zap.html`](evidencias/reporte-zap.html) (descargar y abrir en el navegador) · [JSON](evidencias/reporte-zap.json) | ✅ |
 | Diagrama de flujo (pipeline y recorrido de un dato) | [`../devops.md`](../devops.md) · [`backend.md`](backend.md) §3 | ✅ |
 
