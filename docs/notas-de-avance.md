@@ -1221,3 +1221,11 @@ Abraham (con Claude).
   - Felipe ensaya el backend.
   - Ensayo de la demo, PPT y grabación (24/11).
 
+
+## 2026-11-24 — PRINCE2: roles confirmados y ejecutivo = gerencia de Induplac (tarea 51)
+
+Abraham (con Claude). Rama `docs/tarea-51-prince2-junta`, [PR #90](https://github.com/Aburahamu20/Induplac/pull/90).
+
+- **Decidido (equipo, WhatsApp 24/11):** todos están de acuerdo con su rol PRINCE2 (§5 de [`nota-3/prince2.md`](nota-3/prince2.md)), y el **ejecutivo de la junta es la gerencia de Induplac**, que aprueba las etapas del proyecto. En el ramo, cada etapa se le presenta en la Nota correspondiente.
+- **Hecho:** `prince2.md` (§1, §2, §3, §5, §6, §7, §8 y una pregunta nueva) y la [guía del equipo](GUIA-EQUIPO.md) §14 al día. En el PPT de Canva, la lámina 12 quedó igual al documento (jefes de equipo y junta).
+- **Pendiente:** la revisión de PRs. El documento dice que cada PR lo revisa otro integrante, pero los PRs recientes (#74, #85, #86, #88, #89) no tienen una aprobación registrada en GitHub, y la regla `proteger-main` solo exige los 6 checks del CI. Propuesta: que otro integrante apruebe en GitHub antes de cada merge, empezando por este PR.

@@ -441,8 +441,8 @@ Wokwi Oficinas ─► EMQX ─► EC2 edge-oficinas (local2) ─┘
 Piénsalo como construir una casa para un cliente: se avanza **por etapas** y el cliente revisa al final de cada una; cada uno sabe **qué le toca**; el cliente no mira cada ladrillo, solo pone límites y lo llaman **si algo se sale** (gestión por excepción); y cada parte se **revisa contra lo pedido** antes de darla por terminada.
 
 En Induplac:
-- **Etapas:** inicio → MVP (demo 21/10, Nota 2) → mejoras (Nota 3, 25/11) → cierre (examen 16/12). Cada una la cierra la evaluación del profe.
-- **Roles:** el profe es la junta (decide), Abraham es el director del proyecto (PO), Bárbara es el apoyo (SM, tablero y Gantt) y todos somos el equipo.
+- **Etapas:** inicio → MVP (demo 21/10, Nota 2) → mejoras (Nota 3, 25/11) → cierre (examen 16/12). Cada una la cierra la **gerencia de Induplac**, que aprueba la etapa (en el ramo, se le presenta en cada Nota).
+- **Roles (confirmados por el equipo el 24/11):** la **gerencia de Induplac** es el ejecutivo de la junta (aprueba cada etapa), Induplac es el usuario principal y el equipo el proveedor. Abraham es el director del proyecto (PO); los jefes de equipo son Abraham y Felipe (AWS y Edge), Seba (Wokwi) y Bárbara y Lisandra (documentación); Bárbara es además el apoyo (SM, tablero y Gantt). El aseguramiento es el CI con 6 controles + la revisión de cada PR.
 - **Paquetes de trabajo:** cada tarea de [`EN-CURSO.md`](EN-CURSO.md). Se reserva, se hace en una rama, entra por PR y se acepta con el merge.
 - **Excepciones:** lo que cambiaba el plan se decidió en equipo: EMQX en vez de HiveMQ, RDS de vuelta al MVP y el Edge en las EC2.
 - **Calidad:** primero se define qué es "bien hecho" (criterios de aceptación) y después se controla en cada cambio (CI + revisión) y queda registrado (plan de pruebas y checks de los PR). El **Ishikawa**, el **plan de pruebas** y el **gráfico de control** son piezas de ese mismo sistema.

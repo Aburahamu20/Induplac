@@ -94,7 +94,7 @@ Pauta del profesor: ver [`docs/pauta-entrega.md`](pauta-entrega.md). Lo marcado 
 | 47 | Pipeline: Ansible en el diagrama, versiones con nombre (v0.1 a v0.7) y volver a una versión anterior, reflexión de Ansible y notas para el PPT de la Nota 3 | Pipeline (2) | ✅ Listo | Abraham (con Claude) | 2026-11-17 | [PR #67](https://github.com/Aburahamu20/Induplac/pull/67) | Lo que pide el PPT de preparación de la Nota 3 (diapositivas 11, 18 y 19). |
 | 48 | CI: excepción acotada para la vulnerabilidad GHSA-fc5q-39xc-vjpf de `picomatch` (dentro de Vite, sin versión corregida) | `.github/` | ✅ Listo | Abraham (con Claude) | 2026-11-17 | [PR #70](https://github.com/Aburahamu20/Induplac/pull/70) | El control de dependencias bloqueaba todos los PR. Se quita cuando salga `picomatch` > 4.0.7. |
 | 49 | Nota 3 · PRINCE2 aplicado a Induplac (principios, procesos, roles y tema Calidad) + explicación para el equipo | Calidad (8) y Ágil (5) | ✅ Listo | Abraham (con Claude) | 2026-11-19 | [PR #85](https://github.com/Aburahamu20/Induplac/pull/85) | El profe pidió enfocarse en PRINCE2 (clase 3.4.1, 18/11). Archivo: `docs/nota-3/prince2.md`. |
-| 51 | Nota 3 · PRINCE2: roles confirmados por el equipo y ejecutivo = gerencia de Induplac (doc + PPT) | Calidad (8) | 🟡 En curso | Abraham (con Claude) | 2026-11-24 | rama `docs/tarea-51-prince2-junta` | Decisión del equipo por WhatsApp (24/11). |
+| 51 | Nota 3 · PRINCE2: roles confirmados por el equipo y ejecutivo = gerencia de Induplac (doc + PPT) | Calidad (8) | 🔵 En revisión | Abraham (con Claude) | 2026-11-24 | [PR #90](https://github.com/Aburahamu20/Induplac/pull/90) | Decisión del equipo por WhatsApp (24/11). |
 
 ---
 
