@@ -1229,3 +1229,13 @@ Abraham (con Claude). Rama `docs/tarea-51-prince2-junta`, [PR #90](https://githu
 - **Decidido (equipo, WhatsApp 24/11):** todos están de acuerdo con su rol PRINCE2 (§5 de [`nota-3/prince2.md`](nota-3/prince2.md)), y el **ejecutivo de la junta es la gerencia de Induplac**, que aprueba las etapas del proyecto. En el ramo, cada etapa se le presenta en la Nota correspondiente.
 - **Hecho:** `prince2.md` (§1, §2, §3, §5, §6, §7, §8 y una pregunta nueva) y la [guía del equipo](GUIA-EQUIPO.md) §14 al día. En el PPT de Canva, la lámina 12 quedó igual al documento (jefes de equipo y junta).
 - **Pendiente:** la revisión de PRs. El documento dice que cada PR lo revisa otro integrante, pero los PRs recientes (#74, #85, #86, #88, #89) no tienen una aprobación registrada en GitHub, y la regla `proteger-main` solo exige los 6 checks del CI. Propuesta: que otro integrante apruebe en GitHub antes de cada merge, empezando por este PR.
+
+## 2026-11-24 — PPT: PRINCE2 corregido, lámina de sistema de calidad y ensayo por separado
+
+Abraham (con Claude). Rama `docs/tarea-51-cierre`, [PR #91](https://github.com/Aburahamu20/Induplac/pull/91).
+
+- **PPT (Canva, ahora 19 láminas):** la 13 decía "Calidad con CI", que no es un principio de PRINCE2. Ahora muestra 4 de los 7 principios con su nombre real (justificación continua, por etapas, roles definidos, foco en productos) y la columna derecha se llama "Gestión por excepción". Las notas del orador nombran los otros dos (aprender de la experiencia, adaptar al entorno).
+- **Lámina nueva 14 "PRINCE2: nuestro sistema de calidad":** planificar (plan de pruebas) → controlar (CI, Ishikawa, gráfico de control) → asegurar (revisión de PR, main protegida) → registrar (Actions, EN-CURSO, notas de avance). Presenta Abraham, 45 s, y da paso al Ishikawa.
+- **`nota-3.md`:** el criterio 8 ya no dice que falta el gráfico de control (está listo desde el PR #88).
+- **Ensayo (tarea 18):** no hubo tiempo de juntarse el 24/11. Cada uno ensaya su parte solo y avisa cuánto dura; Abraham graba la demo como respaldo; pasada corta 30 min antes de la clase.
+
