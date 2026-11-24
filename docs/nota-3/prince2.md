@@ -1,7 +1,7 @@
 # 👑 PRINCE2 aplicado a Induplac — Nota 3
 
 > **Autor:** Abraham Castro (con Claude). Tarea 49 de [`EN-CURSO.md`](../EN-CURSO.md) · criterio 8 de la pauta ([`nota-3.md`](../nota-3.md), herramientas de calidad, IL 4.6, 15 %) y apoyo al criterio 5 (Ágil y Lean).
-> Origen: clase **3.4.1 "Asegurando la calidad de los productos y servicios desarrollados"** (18/11/2026). El profe pidió **enfocarse en PRINCE2**. Estado al **19/11/2026**.
+> Origen: clase **3.4.1 "Asegurando la calidad de los productos y servicios desarrollados"** (18/11/2026). El profe pidió **enfocarse en PRINCE2**. Estado al **24/11/2026** (roles confirmados por el equipo y ejecutivo = gerencia de Induplac).
 
 **En resumen:** PRINCE2 es un método para **controlar** un proyecto por etapas, con roles claros y la calidad revisada en cada entrega. No lo agregamos como algo nuevo: le pone **nombre y orden** a lo que ya veníamos haciendo. **Scrum** es cómo **construimos** dentro de cada etapa, y **PRINCE2** es cómo **controlamos** el proyecto completo. Juntos son lo que se conoce como **PRINCE2 Agile**.
 
@@ -18,7 +18,7 @@ Piensa en construir una casa para un cliente:
 - El cliente **no supervisa cada ladrillo**. Pone límites ("máximo tanto de plata, termina en tal fecha") y solo lo llaman si algo se sale de esos límites. Eso es **gestionar por excepción**.
 - Cada parte se **revisa contra lo que se pidió** antes de darla por terminada. Eso es la **calidad**.
 
-En Induplac pasa lo mismo: el **profe** revisa en cada Nota, cada uno tiene su parte, y nada entra a `main` sin pasar las pruebas y la revisión de un compañero.
+En Induplac pasa lo mismo: la **gerencia de Induplac** aprueba cada etapa (cada Nota es una revisión de fin de etapa), cada uno tiene su parte, y nada entra a `main` sin pasar las pruebas y la revisión de un compañero.
 
 ### Cómo se arma PRINCE2
 
@@ -40,7 +40,7 @@ En Induplac pasa lo mismo: el **profe** revisa en cada Nota, cada uno tiene su p
 | 1 | **Justificación comercial continua** | El proyecto debe tener sentido para la empresa durante todo el camino, no solo al inicio. | El problema (la medición del consumo existe para pagar la boleta, no para operar, así que nadie reacciona a tiempo) se analizó con 5 Porqués y se revisó en cada Nota. Las tecnologías se eligieron también por costo: Lambda solo cobra cuando se usa y RDS se mantiene apagado. | [`5-porques.md`](5-porques.md), [`cloud-tecnologias.md`](../cloud-tecnologias.md) |
 | 2 | **Aprender de la experiencia** | Registrar lo aprendido y usarlo en lo que viene. | Bitácora con cada decisión, problema y corrección. Las causas del Ishikawa salieron de **problemas reales** que tuvimos. | [`notas-de-avance.md`](../notas-de-avance.md), [`ishikawa.md`](ishikawa.md) |
 | 3 | **Roles y responsabilidades definidos** | Cada uno sabe qué le toca y de qué responde. | Roles del equipo, matriz RACI (un solo responsable final por actividad) y reparto por criterio de la Nota 3. | [`roles-raci-gantt.md`](../roles-raci-gantt.md), [`nota-3.md`](../nota-3.md) §3 |
-| 4 | **Gestión por etapas** | Avanzar por etapas con una revisión al final de cada una. | Sprints semanales agrupados en etapas que cierran con una evaluación del profe (ver §4). | [`backlog.md`](backlog.md), [`scrum-pmi.md`](../scrum-pmi.md) |
+| 4 | **Gestión por etapas** | Avanzar por etapas con una revisión al final de cada una. | Sprints semanales agrupados en etapas que cierran con una revisión ante la gerencia de Induplac: la presentación de cada Nota (ver §4). | [`backlog.md`](backlog.md), [`scrum-pmi.md`](../scrum-pmi.md) |
 | 5 | **Gestión por excepción** | Se fijan límites (tiempo, costo, alcance, calidad). Dentro de ellos el equipo decide solo; si algo se sale, se escala. | Las tareas del día a día las resuelve quien las tiene. Lo que cambiaba el plan se llevó al equipo como **excepción** (ver la tabla de abajo). | [`decisiones-tecnicas.md`](../decisiones-tecnicas.md), [`notas-de-avance.md`](../notas-de-avance.md) |
 | 6 | **Enfoque en productos** | Definir **qué se entrega** y **cuándo está bien hecho** antes de construirlo. | Historias de usuario con criterios de aceptación, contrato de datos de la API antes de programar y criterio de aceptación de cada cambio (CI + revisión). | [`backlog.md`](backlog.md), [`api-dashboard.md`](../api-dashboard.md), [`plan-de-pruebas.md`](plan-de-pruebas.md) §3 |
 | 7 | **Adaptar al proyecto** | Usar PRINCE2 a la medida, no todo el papeleo. | Somos 5 personas en un ramo: no hay actas formales. Los "documentos" de PRINCE2 son archivos del repo y las aprobaciones son Pull Requests. | Este archivo, §3 y §5 |
@@ -63,7 +63,7 @@ Cada una se salía de lo planificado, así que **no la decidió una persona sola
 | # | Proceso PRINCE2 | Qué pide | Qué hicimos en Induplac |
 |---|---|---|---|
 | 1 | **Puesta en marcha** (*Starting up*) | Un mandato con la necesidad y un resumen del proyecto. ¿Vale la pena empezar? | La **pauta del profe** fue el mandato. Con ella escribimos el contexto y el problema de Induplac. |
-| 2 | **Dirigir el proyecto** (*Directing*) | La junta autoriza el inicio, cada etapa y el cierre, y da dirección cuando hace falta. | El **profe** revisa en cada evaluación y entrega pautas nuevas. El **equipo** aprueba los cambios grandes en el grupo (por ejemplo, los bocetos del dashboard, aprobados el 01/11). |
+| 2 | **Dirigir el proyecto** (*Directing*) | La junta autoriza el inicio, cada etapa y el cierre, y da dirección cuando hace falta. | La **gerencia de Induplac** (ejecutivo) aprueba el inicio, cada etapa y el cierre. En el ramo, esa revisión es la presentación de cada Nota, que evalúa el profe. El **equipo** aprueba los cambios grandes en el grupo (por ejemplo, los bocetos del dashboard, aprobados el 01/11). |
 | 3 | **Iniciar el proyecto** (*Initiating*) | Planificar: enfoques de riesgo, cambios, calidad y comunicación, más el **PID** (documentación de inicio). | Nuestro **PID** es el conjunto [`CONTEXTO.md`](../CONTEXTO.md) + [`arquitectura.md`](../arquitectura.md) + [`decisiones-tecnicas.md`](../decisiones-tecnicas.md) + [`roles-raci-gantt.md`](../roles-raci-gantt.md). El enfoque de cambios es rama + PR, y el de comunicación, el grupo del equipo y el README. |
 | 4 | **Controlar una etapa** (*Controlling a Stage*) | Repartir **paquetes de trabajo**, revisar el avance, registrar problemas y riesgos, y escalar lo que se sale de los límites. | Cada **tarea de [`EN-CURSO.md`](../EN-CURSO.md)** es un paquete de trabajo, con dueño, fecha y estado. La bitácora es el informe de avance. Una tarea sin avance por más de 7 días se conversa en el grupo. |
 | 5 | **Gestionar la entrega de productos** (*Managing Product Delivery*) | Aceptar, hacer y entregar un paquete de trabajo. | **Reservar** la tarea (🟡) → trabajar en una **rama** → abrir un **PR** (🔵) → pasar el **CI** y la **revisión** → **merge** (✅). |
@@ -87,9 +87,11 @@ Cada una se salía de lo planificado, así que **no la decidió una persona sola
 
 ## 5. Roles PRINCE2 ↔ nuestro equipo
 
+> ✅ **Confirmado por el equipo (24/11, WhatsApp):** todos están de acuerdo con su rol, y el **ejecutivo es la gerencia de Induplac**, que aprueba las etapas del proyecto.
+
 | Rol PRINCE2 | Qué hace | En Induplac |
 |---|---|---|
-| **Junta del proyecto: ejecutivo** | Dueño del proyecto. Decide si se sigue y responde por la justificación. | **Profesor Marco Perelli** (evalúa y autoriza cada etapa). |
+| **Junta del proyecto: ejecutivo** | Dueño del proyecto. Decide si se sigue y responde por la justificación. | **Gerencia de Induplac** (aprueba cada etapa del proyecto). En el ramo, cada etapa se le presenta en la Nota correspondiente. |
 | **Junta: usuario principal** | Representa a quienes van a usar el resultado. | **Induplac**, con usuarios ficticios: jefes de planta y operarios. Lo representan las historias de usuario. |
 | **Junta: proveedor principal** | Representa a quienes construyen. | **El equipo**, con AWS, EMQX y GitHub como plataformas. |
 | **Director del proyecto** | Planifica, supervisa y lleva el día a día dentro de los límites. | **Abraham Castro** (Product Owner: prioriza y decide qué entra al MVP). |
@@ -123,7 +125,7 @@ Este es el corazón para el **criterio 8**. PRINCE2 ordena la calidad en **dos p
 | **Registro de calidad** | Dónde queda anotado **qué se revisó, cuándo y con qué resultado**. | La **matriz requisito → pruebas → resultado** ([`plan-de-pruebas.md`](plan-de-pruebas.md) §4), el **historial de checks de cada PR** en GitHub y los reportes de ZAP en [`evidencias/`](evidencias/). |
 | **Análisis de causas** | Cuando algo puede fallar, buscar por qué. | **Ishikawa**: 18 causas en 6M sobre "las alertas no llegan a tiempo", cada una con su control ([`ishikawa.md`](ishikawa.md)). |
 | **Seguimiento en el tiempo** | Ver si el proceso se mantiene estable. | **Gráfico de control** con los datos simulados de consumo (tarea 42). |
-| **Aceptación** | El cliente acepta el producto. | **Merge a `main`** (aceptación de cada paquete) y la **evaluación del profe** (aceptación de cada etapa). |
+| **Aceptación** | El cliente acepta el producto. | **Merge a `main`** (aceptación de cada paquete) y la **aprobación de la gerencia** al cierre de cada etapa (la Nota). |
 
 **Por qué importa:** sin PRINCE2, el Ishikawa, el plan de pruebas y el gráfico de control parecen herramientas sueltas. Con PRINCE2 se ve que forman **un solo sistema de calidad**: primero definimos qué es "bien hecho", después lo controlamos en cada cambio y dejamos registro.
 
@@ -135,7 +137,7 @@ PRINCE2 pide adaptarse al proyecto (principio 7), así que lo decimos con honest
 
 - **No hay actas ni informes formales.** Los reemplazan los PR, la bitácora y el tablero, que quedan en el repo con fecha y autor.
 - **El caso de negocio no tiene números reales de Induplac**, porque los datos son ficticios (Ley 19.628). Se justifica con el problema y con el costo de las tecnologías.
-- **La junta no es una junta de verdad.** El profe evalúa, pero no aprueba presupuesto. En una implementación real, la junta sería la gerencia de Induplac (ver el [roadmap de transferencia](transferencia-tecnologica.md)).
+- **La junta es simulada.** El ejecutivo es la gerencia de Induplac, pero como el proyecto es académico no hay una gerencia real aprobando presupuesto: cada etapa se presenta como si fuera ante ella. En la implementación real, sí lo sería (ver el [roadmap de transferencia](transferencia-tecnologica.md)).
 
 ---
 
@@ -145,7 +147,7 @@ PRINCE2 pide adaptarse al proyecto (principio 7), así que lo decimos con honest
 
 - **PRINCE2** = proyectos en entornos controlados: **por etapas**, con **roles claros** y la **calidad revisada** en cada entrega.
 - Lo usamos junto con Scrum (**PRINCE2 Agile**): Scrum para **construir**, PRINCE2 para **controlar**.
-- **Etapas** que cierran con la evaluación del profe (demo 21/10 → Nota 3 25/11 → examen 16/12).
+- **Etapas** que cierran con la aprobación de la gerencia de Induplac (demo 21/10 → Nota 3 25/11 → examen 16/12).
 - **Gestión por excepción:** el broker, RDS y el Edge en EC2 se decidieron como excepciones del plan.
 
 **Diapositiva 2: el sistema de calidad**
@@ -154,6 +156,9 @@ PRINCE2 pide adaptarse al proyecto (principio 7), así que lo decimos con honest
 - Las herramientas en su lugar: **Ishikawa** (causas), **plan de pruebas** (control y registro) y **gráfico de control** (seguimiento).
 
 ### Preguntas probables
+
+**¿Quién es el ejecutivo de la junta?**
+> La gerencia de Induplac: es la dueña del proyecto y la que aprueba cada etapa. Como el proyecto es académico, cada etapa se la presentamos en la Nota correspondiente.
 
 **¿Por qué PRINCE2 si ya usan Scrum?**
 > Scrum organiza el trabajo semana a semana, pero no dice cómo se controla el proyecto completo ni quién autoriza cada etapa. PRINCE2 agrega eso: etapas con revisión, roles de decisión y un sistema de calidad. Se complementan; eso es PRINCE2 Agile.
