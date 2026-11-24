@@ -1,9 +1,9 @@
 # 🧩 Ágil y Lean: Product Backlog y tablero Kanban — Nota 3
 
 > **Autora:** Bárbara Saavedra (`barbaraantoniaa`), Scrum Master. Tarea 37 de [`EN-CURSO.md`](../EN-CURSO.md) · criterio 5 de la pauta ([`nota-3.md`](../nota-3.md), IL 4.1, 15 %).
-> **Product Owner:** Abraham Castro. Estado al **14/11/2026**. La evidencia de cada historia es una tarea del tablero y sus Pull Requests en GitHub.
+> **Product Owner:** Abraham Castro. Estado al **24/11/2026** (la foto del tablero de más abajo es del 14/11). La evidencia de cada historia es una tarea del tablero y sus Pull Requests en GitHub.
 
-**En resumen:** el MVP se construyó con **Scrum** (sprints de una semana desde el 05/10) y se gestionó con un tablero **Kanban** en el repositorio. De las 21 historias de usuario del backlog, **13 están listas**, 6 en curso o pendientes y 2 quedan fuera de esta etapa.
+**En resumen:** el MVP se construyó con **Scrum** (sprints de una semana desde el 05/10) y se gestionó con un tablero **Kanban** en el repositorio. De las 21 historias de usuario del backlog, **16 están listas**, 3 en curso y 2 quedan fuera de esta etapa (al 24/11; el 14/11 eran 13 listas y 6 en curso o pendientes).
 
 ---
 
@@ -38,7 +38,7 @@ Las historias están escritas desde quien usa el sistema en Induplac y ordenadas
 | HU-05 | Como **jefe de planta**, quiero seguir viendo los datos y las alertas aunque se corte internet, para no quedar a ciegas. | E2 | Must | Al cortar la conexión a AWS, el dashboard de planta sigue con datos y alertas (OFFLINE). | ✅ Listo | Tareas 4 y 22 · PR #18, #30 |
 | HU-06 | Como **gerente**, quiero que al volver internet se suba todo lo pendiente sin perder ni duplicar datos, para confiar en los reportes. | E2, E3 | Must | Tras reconectar: SINCRONIZANDO → ONLINE y la misma cantidad de intervalos en la nube. | ✅ Listo | Tareas 4 y 8 · PR #16, #18 |
 | HU-07 | Como **administrador**, quiero crear cuentas con clave temporal y MFA, para que solo entre personal autorizado. | E5 | Must | Un usuario nuevo debe cambiar la clave y registrar MFA en su primer ingreso. | ✅ Listo | Tareas 6 y 28 · PR #20 |
-| HU-08 | Como **equipo de TI**, quiero que la API solo responda a quien tenga una sesión válida, para que nadie consulte datos sin permiso. | E5 | Must | Una consulta sin token válido es rechazada. | 🟡 En curso | Tarea 20 |
+| HU-08 | Como **equipo de TI**, quiero que la API solo responda a quien tenga una sesión válida, para que nadie consulte datos sin permiso. | E5 | Must | Una consulta sin token válido es rechazada. | ✅ Listo | Tarea 20 (authorizer JWT, 02/11) |
 | HU-09 | Como **equipo**, quiero que cada cambio pase pruebas automáticas y un escaneo de seguridad antes de unirse, para no romper lo que funciona. | E6 | Must | Un Pull Request con pruebas fallidas no se puede unir a `main`. | ✅ Listo | Tareas 12 y 32 · PR #59 · regla `proteger-main` |
 | HU-10 | Como **administrador de sede**, quiero que cada usuario vea solo su sede y lo que su rol permite, para dar el acceso mínimo necesario. | E5 | Should | Un usuario de Planta no ve los datos de Oficinas. | ✅ Listo | Tarea 26 · PR #33 |
 | HU-11 | Como **administrador**, quiero cambiar los umbrales de alerta desde el dashboard, sin tocar código. | E3, E4 | Should | Un umbral cambiado se aplica a las alertas siguientes en la nube. | ✅ Listo | Tareas 21 y 28 · PR #42 |
@@ -47,8 +47,8 @@ Las historias están escritas desde quien usa el sistema en Induplac y ordenadas
 | HU-14 | Como **administrador general**, quiero un registro que nadie pueda borrar de quién cambió qué, para auditar los cambios. | E5 | Should | Cada cambio queda en la auditoría y no existe opción para borrarlo. | 🟡 En curso | Tarea 27 lista (nube) · tarea 29 en curso (Edge) |
 | HU-15 | Como **jefe de planta**, quiero que las alertas sin internet usen los mismos umbrales que la nube, para que no haya dos reglas distintas. | E2 | Should | El Edge descarga los umbrales al sincronizar y los usa offline. | 🟡 En curso | Tarea 44 |
 | HU-16 | Como **jefe de mantenimiento**, quiero que la oficina también envíe sus datos, para comparar las dos sedes reales. | E1 | Should | El Local 2 aparece con datos propios en el dashboard. | 🟡 En curso | Tarea 23 |
-| HU-17 | Como **equipo de TI de Induplac**, quiero configurar el Edge con Ansible, para instalarlo igual en cada sede sin errores manuales. | E6 | Should | El playbook deja el Edge listo y, al correrlo dos veces, no cambia nada. | 🟢 Pendiente | Tarea 33 |
-| HU-18 | Como **jefe**, quiero que el MFA sea obligatorio para jefes y administradores y opcional para operarios, para equilibrar seguridad y facilidad. | E5 | Could | Un jefe sin MFA no puede entrar; un operario sí. | 🟡 En curso | Tarea 31 · PR #35 |
+| HU-17 | Como **equipo de TI de Induplac**, quiero configurar el Edge con Ansible, para instalarlo igual en cada sede sin errores manuales. | E6 | Should | El playbook deja el Edge listo y, al correrlo dos veces, no cambia nada. | ✅ Listo | Tarea 33 · PR #64 · capturas en `nota-3/img/ansible-*` |
+| HU-18 | Como **jefe**, quiero que el MFA sea obligatorio para jefes y administradores y opcional para operarios, para equilibrar seguridad y facilidad. | E5 | Could | Un jefe sin MFA no puede entrar; un operario sí. | ✅ Listo | Tarea 31 · PR #35 |
 | HU-19 | Como **jefe de planta**, quiero ver de un vistazo si una sede está al día, con datos antiguos o sin datos, para saber si confiar en lo que veo. | E4 | Could | Cada tarjeta muestra su estado y el aviso distingue servidor caído, sede sin datos y Edge sin nube. | ✅ Listo | Tarea 30 (parte 6) · PR #27 |
 | HU-20 | Como **jefe de planta**, quiero recibir las alertas en el celular, para enterarme aunque no esté frente al computador. | E4 | Won't | — | Fuera de esta etapa | Decisión del 04/11: PWA después del rediseño |
 | HU-21 | Como **gerente**, quiero comparar estaciones del año (esta primavera contra la anterior). | E4 | Won't | — | Fuera de esta etapa | Idea estacionada (notas de avance) |

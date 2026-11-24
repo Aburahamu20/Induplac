@@ -1229,3 +1229,20 @@ Abraham (con Claude). Rama `docs/tarea-51-prince2-junta`, [PR #90](https://githu
 - **Decidido (equipo, WhatsApp 24/11):** todos están de acuerdo con su rol PRINCE2 (§5 de [`nota-3/prince2.md`](nota-3/prince2.md)), y el **ejecutivo de la junta es la gerencia de Induplac**, que aprueba las etapas del proyecto. En el ramo, cada etapa se le presenta en la Nota correspondiente.
 - **Hecho:** `prince2.md` (§1, §2, §3, §5, §6, §7, §8 y una pregunta nueva) y la [guía del equipo](GUIA-EQUIPO.md) §14 al día. En el PPT de Canva, la lámina 12 quedó igual al documento (jefes de equipo y junta).
 - **Pendiente:** la revisión de PRs. El documento dice que cada PR lo revisa otro integrante, pero los PRs recientes (#74, #85, #86, #88, #89) no tienen una aprobación registrada en GitHub, y la regla `proteger-main` solo exige los 6 checks del CI. Propuesta: que otro integrante apruebe en GitHub antes de cada merge, empezando por este PR.
+
+---
+
+## 2026-11-24 — PPT de la Nota 3 revisado y backlog al día (tarea 17)
+
+Bárbara (con Claude). Rama `docs/tarea-17-ppt-canva`, [PR #92](https://github.com/Aburahamu20/Induplac/pull/92).
+
+- **Revisado:** el PPT del equipo en Canva ("Induplac IoT Nota 3", 19 láminas). Cubre los 8 criterios, la demo y el cierre. Cada lámina trae notas con quién presenta y cuánto tiempo. Reemplaza al borrador de Claude Slides, que solo tenía la portada.
+- **Hecho:**
+  - **Lámina 10** (Ágil): el backlog pasó de 13 listas y 6 en curso o pendientes a **16 listas y 3 en curso**, con las notas al día. HU-08 (token en la API, tarea 20), HU-17 (Ansible, tarea 33) y HU-18 (MFA por rol, tarea 31) quedaron listas.
+  - [`nota-3/backlog.md`](nota-3/backlog.md) con el mismo estado al 24/11.
+  - La tarea 17 del tablero apunta al PPT de Canva.
+  - La [guía del equipo](GUIA-EQUIPO.md) §16 tiene al día lo que falta.
+- **Para el ensayo de hoy:**
+  - Según las notas, la presentación dura unos **25 min** (el mínimo es 15): cronometrarla.
+  - **Orden:** la transferencia (criterio 6) está en la lámina 18, después de calidad (criterio 8). La pauta pide los criterios en orden. Queda como decisión del equipo, porque moverla cambia quién habla después de quién.
+- **Pendiente:** el ensayo y la grabación (tareas 18 y 43). Después, la tarea 17 pasa a ✅.
