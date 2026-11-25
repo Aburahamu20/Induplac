@@ -1246,3 +1246,12 @@ Bárbara (con Claude). Rama `docs/tarea-17-ppt-canva`, [PR #92](https://github.c
   - Según las notas, la presentación dura unos **25 min** (el mínimo es 15): cronometrarla.
   - **Orden:** la transferencia (criterio 6) está en la lámina 18, después de calidad (criterio 8). La pauta pide los criterios en orden. Queda como decisión del equipo, porque moverla cambia quién habla después de quién.
 - **Pendiente:** el ensayo y la grabación (tareas 18 y 43). Después, la tarea 17 pasa a ✅.
+
+## 2026-11-25 — PPT acortado a 14 láminas y reparto parejo (tarea 17)
+
+Abraham (con Claude). Mismo PR #92.
+
+- **Pedido:** Bárbara dijo que 19 láminas era mucho y el profe pidió no arrastrar contenido de la Nota 2.
+- **Hecho en Canva:** quedan 14 láminas (~19 min con la demo de 5 min). Pasan al anexo, después del "¡Gracias!": arquitectura, versiones del MVP, anuncio de la demo, Scrum + PRINCE2 y plan de pruebas (sus cifras quedan en la lámina de sistema de calidad).
+- **Reparto:** Lisandra 1, 2, 11 y 13 · Abraham 3, 9 y 14 · Felipe 4 y 5 · Seba abre la demo y la 12 · Bárbara 7, 8 y 10 (si no puede, Lisandra y Abraham). Notas del orador al día con quién habla y a quién le pasa la palabra.
+
