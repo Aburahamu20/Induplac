@@ -45,6 +45,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH110X.h>
 #include <time.h>
+#include <esp_sntp.h>   // resincroniza la hora seguido: si Wokwi corre lento, el reloj simulado se atrasa
 
 // ─────────────────────────────────────────────
 //  CONFIGURACIÓN — editar antes de usar
@@ -121,7 +122,7 @@ uint8_t energyIdx = 0;
 unsigned long lastPublish   = 0;
 unsigned long lastOLED      = 0;
 const unsigned long PUBLISH_INTERVAL = 5000;
-const unsigned long OLED_INTERVAL    = 1000;
+const unsigned long OLED_INTERVAL    = 3000;   // pantalla cada 3 s: alivia la simulación
 
 // Debounce botones — detección por flanco
 unsigned long lastPressProd = 0;
@@ -264,6 +265,7 @@ void connectWiFi() {
 // ═════════════════════════════════════════════
 void syncNTP() {
   Serial.print("[NTP] Sincronizando hora...");
+  sntp_set_sync_interval(15000);   // cada 15 s (mínimo permitido): la hora de cada lectura no se atrasa
   configTime(GMT_OFFSET, DST_OFFSET, NTP_SERVER);
   struct tm timeinfo;
   int intentos = 0;
