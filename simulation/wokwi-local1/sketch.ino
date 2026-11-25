@@ -197,6 +197,7 @@ void setup() {
 
   wifiClient.setInsecure();
   mqttClient.setServer(MQTT_HOST, MQTT_PORT);
+  mqttClient.setKeepAlive(90);   // Wokwi lento: con 15 s el broker cortaba la conexión entre envíos
   mqttClient.setBufferSize(512);
   connectMQTT();
 
