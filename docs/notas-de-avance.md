@@ -1239,3 +1239,28 @@ Abraham (con Claude). Rama `docs/tarea-51-cierre`, [PR #91](https://github.com/A
 - **`nota-3.md`:** el criterio 8 ya no dice que falta el gráfico de control (está listo desde el PR #88).
 - **Ensayo (tarea 18):** no hubo tiempo de juntarse el 24/11. Cada uno ensaya su parte solo y avisa cuánto dura; Abraham graba la demo como respaldo; pasada corta 30 min antes de la clase.
 
+---
+
+## 2026-11-24 — PPT de la Nota 3 revisado y backlog al día (tarea 17)
+
+Bárbara (con Claude). Rama `docs/tarea-17-ppt-canva`, [PR #92](https://github.com/Aburahamu20/Induplac/pull/92).
+
+- **Revisado:** el PPT del equipo en Canva ("Induplac IoT Nota 3", 19 láminas). Cubre los 8 criterios, la demo y el cierre. Cada lámina trae notas con quién presenta y cuánto tiempo. Reemplaza al borrador de Claude Slides, que solo tenía la portada.
+- **Hecho:**
+  - **Lámina 10** (Ágil): el backlog pasó de 13 listas y 6 en curso o pendientes a **16 listas y 3 en curso**, con las notas al día. HU-08 (token en la API, tarea 20), HU-17 (Ansible, tarea 33) y HU-18 (MFA por rol, tarea 31) quedaron listas.
+  - [`nota-3/backlog.md`](nota-3/backlog.md) con el mismo estado al 24/11.
+  - La tarea 17 del tablero apunta al PPT de Canva.
+  - La [guía del equipo](GUIA-EQUIPO.md) §16 tiene al día lo que falta.
+- **Para el ensayo de hoy:**
+  - Según las notas, la presentación dura unos **25 min** (el mínimo es 15): cronometrarla.
+  - **Orden:** la transferencia (criterio 6) está en la lámina 18, después de calidad (criterio 8). La pauta pide los criterios en orden. Queda como decisión del equipo, porque moverla cambia quién habla después de quién.
+- **Pendiente:** el ensayo y la grabación (tareas 18 y 43). Después, la tarea 17 pasa a ✅.
+
+## 2026-11-25 — PPT acortado a 14 láminas y reparto parejo (tarea 17)
+
+Abraham (con Claude). Mismo PR #92.
+
+- **Pedido:** Bárbara dijo que 19 láminas era mucho y el profe pidió no arrastrar contenido de la Nota 2.
+- **Hecho en Canva:** quedan 14 láminas (~19 min con la demo de 5 min). Pasan al anexo, después del "¡Gracias!": arquitectura, versiones del MVP, anuncio de la demo, Scrum + PRINCE2 y plan de pruebas (sus cifras quedan en la lámina de sistema de calidad).
+- **Reparto:** Lisandra 1, 2, 11 y 13 · Abraham 3, 9 y 14 · Felipe 4 y 5 · Seba abre la demo y la 12 · Bárbara 7, 8 y 10 (si no puede, Lisandra y Abraham). Notas del orador al día con quién habla y a quién le pasa la palabra.
+
